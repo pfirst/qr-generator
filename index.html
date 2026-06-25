@@ -156,6 +156,7 @@
           <button class="tab active" data-type="url">URL</button>
           <button class="tab" data-type="text">ข้อความ</button>
           <button class="tab" data-type="promptpay">PromptPay</button>
+          <button class="tab" data-type="billpay">ชำระบิล</button>
           <button class="tab" data-type="wifi">Wi-Fi</button>
           <button class="tab" data-type="vcard">vCard</button>
           <button class="tab" data-type="email">Email</button>
@@ -618,7 +619,7 @@ function crc16(str){
   return crc.toString(16).toUpperCase().padStart(4,'0');
 }
 function tlv(tag,val){return tag+val.length.toString().padStart(2,'0')+val;}
-function buildPromptPayPayload(target,amount){
+function buildPromptPayPayload(target,amount,storeId){
   if(!target)return '';
   var proxy=target.replace(/[-\s]/g,'');
   // Phone: 10 digits starting 0 → convert to 0066XXXXXXXXX
@@ -633,6 +634,30 @@ function buildPromptPayPayload(target,amount){
     tlv('53','764');
   if(hasAmt)payload+=tlv('54',parseFloat(amount).toFixed(2));
   payload+=tlv('58','TH');
+  // Store/reference code → Tag 62 (Additional Data Field), sub-tag 03 (Store Label)
+  var store=(storeId||'').trim().slice(0,25);
+  if(store)payload+=tlv('62',tlv('03',store));
+  payload+='6304';
+  payload+=crc16(payload);
+  return payload;
+}
+// Bill Payment / Biller QR (Tag 30, AID A000000677010112)
+function buildBillPaymentPayload(billerId,ref1,ref2,amount){
+  var biller=(billerId||'').replace(/[-\s]/g,'');
+  if(!biller)return '';
+  var r1=(ref1||'').trim();
+  var r2=(ref2||'').trim();
+  var hasAmt=amount&&parseFloat(amount)>0;
+  var acct=tlv('00','A000000677010112')+tlv('01',biller);
+  if(r1)acct+=tlv('02',r1);
+  if(r2)acct+=tlv('03',r2);
+  var payload=
+    tlv('00','01')+
+    tlv('01',hasAmt?'12':'11')+
+    tlv('30',acct)+
+    tlv('53','764');
+  if(hasAmt)payload+=tlv('54',parseFloat(amount).toFixed(2));
+  payload+=tlv('58','TH');
   payload+='6304';
   payload+=crc16(payload);
   return payload;
@@ -642,7 +667,8 @@ function buildPromptPayPayload(target,amount){
 var typeFields={
   url:'<label class="label">URL</label><input type="url" id="f0" placeholder="https://example.com" value="https://">',
   text:'<label class="label">ข้อความ</label><textarea id="f0" placeholder="พิมพ์ข้อความ..."></textarea>',
-  promptpay:'<div class="form-grid"><div class="full"><label class="label">หมายเลขโทรศัพท์ หรือ เลขบัตรประชาชน / Tax ID</label><input type="text" id="f0" placeholder="0812345678 หรือ 1234567890123"></div><div class="full"><label class="label">จำนวนเงิน (บาท)</label><input type="text" id="f1" placeholder="เว้นว่างเพื่อไม่ระบุ"></div><div class="full" id="ppPreview" style="margin-top:4px;padding:8px;background:var(--surface2);border-radius:6px;font-size:10px;color:var(--text3);word-break:break-all;display:none"></div></div>',
+  promptpay:'<div class="form-grid"><div class="full"><label class="label">หมายเลขโทรศัพท์ หรือ เลขบัตรประชาชน / Tax ID</label><input type="text" id="f0" placeholder="0812345678 หรือ 1234567890123"></div><div class="full"><label class="label">จำนวนเงิน (บาท)</label><input type="text" id="f1" placeholder="เว้นว่างเพื่อไม่ระบุ"></div><div class="full"><label class="label">รหัสร้านค้า / อ้างอิง (ไม่บังคับ)</label><input type="text" id="f2" maxlength="25" placeholder="เช่น 223620406Y0858478ZM"></div><div class="full" id="ppPreview" style="margin-top:4px;padding:8px;background:var(--surface2);border-radius:6px;font-size:10px;color:var(--text3);word-break:break-all;display:none"></div></div>',
+  billpay:'<div class="form-grid"><div class="full"><label class="label">Biller ID (เลขผู้รับชำระเงิน)</label><input type="text" id="f0" placeholder="เช่น 010753700088205"></div><div class="full"><label class="label">Reference 1 / อ้างอิง 1 (ไม่บังคับ)</label><input type="text" id="f1" maxlength="25" placeholder="เช่น 223620406Y0858478ZM"></div><div class="full"><label class="label">Reference 2 / อ้างอิง 2 (ไม่บังคับ)</label><input type="text" id="f2" maxlength="25" placeholder="เช่น เลขที่บิล / ชื่อ"></div><div class="full"><label class="label">จำนวนเงิน (บาท)</label><input type="text" id="f3" placeholder="เว้นว่างเพื่อไม่ระบุ"></div><div class="full" id="bpPreview" style="margin-top:4px;padding:8px;background:var(--surface2);border-radius:6px;font-size:10px;color:var(--text3);word-break:break-all;display:none"></div></div>',
   wifi:'<div class="form-grid"><div class="full"><label class="label">ชื่อ Wi-Fi (SSID)</label><input type="text" id="f0" placeholder="MyNetwork"></div><div class="full"><label class="label">รหัสผ่าน</label><input type="text" id="f1" placeholder="password"></div><div><label class="label">Encryption</label><select id="f2"><option>WPA</option><option>WEP</option><option value="nopass">ไม่มี</option></select></div><div><label class="label">Hidden</label><select id="f3"><option value="false">ไม่</option><option value="true">ใช่</option></select></div></div>',
   vcard:'<div class="form-grid"><div><label class="label">ชื่อ</label><input type="text" id="f0" placeholder="สมชาย"></div><div><label class="label">นามสกุล</label><input type="text" id="f1" placeholder="ใจดี"></div><div class="full"><label class="label">บริษัท</label><input type="text" id="f2"></div><div><label class="label">โทรศัพท์</label><input type="tel" id="f3" placeholder="0812345678"></div><div><label class="label">Email</label><input type="email" id="f4"></div><div class="full"><label class="label">เว็บไซต์</label><input type="url" id="f5" placeholder="https://"></div><div class="full"><label class="label">ที่อยู่</label><input type="text" id="f6"></div></div>',
   email:'<div class="form-grid"><div class="full"><label class="label">To</label><input type="email" id="f0" placeholder="to@example.com"></div><div class="full"><label class="label">Subject</label><input type="text" id="f1"></div><div class="full"><label class="label">Body</label><textarea id="f2" style="min-height:60px" placeholder="เนื้อหา..."></textarea></div></div>',
@@ -657,10 +683,16 @@ function buildData(){
   if(t==='url')return gv('f0')||'https://';
   if(t==='text')return gv('f0');
   if(t==='promptpay'){
-    var pp=buildPromptPayPayload(gv('f0'),gv('f1'));
+    var pp=buildPromptPayPayload(gv('f0'),gv('f1'),gv('f2'));
     var prev=document.getElementById('ppPreview');
     if(prev){prev.style.display=pp?'':'none';prev.textContent=pp||'';}
     return pp;
+  }
+  if(t==='billpay'){
+    var bp=buildBillPaymentPayload(gv('f0'),gv('f1'),gv('f2'),gv('f3'));
+    var prevB=document.getElementById('bpPreview');
+    if(prevB){prevB.style.display=bp?'':'none';prevB.textContent=bp||'';}
+    return bp;
   }
   if(t==='wifi')return 'WIFI:T:'+gv('f2')+';S:'+gv('f0')+';P:'+gv('f1')+';H:'+gv('f3')+';;';
   if(t==='vcard')return 'BEGIN:VCARD\nVERSION:3.0\nN:'+gv('f1')+';'+gv('f0')+'\nFN:'+gv('f0')+' '+gv('f1')+'\nORG:'+gv('f2')+'\nTEL:'+gv('f3')+'\nEMAIL:'+gv('f4')+'\nURL:'+gv('f5')+'\nADR:;;'+gv('f6')+';;;;\nEND:VCARD';
