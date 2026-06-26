@@ -99,13 +99,16 @@ export function renderSVG(matrix: QRMatrix, style: StyleSettings, sizePx: number
         logoMarkup += `<rect x="${bx}" y="${by}" width="${bSize}" height="${bSize}" rx="${rx}" fill="${bg}"/>`
       }
     }
-    logoMarkup += `<image href="${esc(
+    // Use xlink:href (not bare SVG2 href): Adobe Illustrator and some design
+    // tools won't load an embedded <image> unless it's xlink:href. Browsers
+    // still honour it, so every consumer (preview, raster, download) is covered.
+    logoMarkup += `<image xlink:href="${esc(
       style.logo,
     )}" x="${lx}" y="${ly}" width="${lUnits}" height="${lUnits}" preserveAspectRatio="xMidYMid meet"/>`
   }
 
   const svg =
-    `<svg xmlns="http://www.w3.org/2000/svg" width="${sizePx}" height="${sizePx}" viewBox="0 0 ${total} ${total}">` +
+    `<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="${sizePx}" height="${sizePx}" viewBox="0 0 ${total} ${total}">` +
     `<defs>${defs}</defs>` +
     `<rect width="${total}" height="${total}" fill="${bg}"/>` +
     (bodyD ? `<path d="${bodyD}" fill="${fgFill}"/>` : '') +
