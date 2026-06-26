@@ -1,0 +1,183 @@
+@import 'tailwindcss';
+
+/* ── LINE Seed Sans TH (self-hosted, Thai + Latin) ─────────────────────────
+   Weights available: 400 / 700 / 800 / 900. No 500/600 — never fake them. */
+@font-face {
+  font-family: 'LINE Seed Sans TH';
+  src: url('/fonts/LINESeedSansTH-Regular.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'LINE Seed Sans TH';
+  src: url('/fonts/LINESeedSansTH-Bold.woff2') format('woff2');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'LINE Seed Sans TH';
+  src: url('/fonts/LINESeedSansTH-ExtraBold.woff2') format('woff2');
+  font-weight: 800;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'LINE Seed Sans TH';
+  src: url('/fonts/LINESeedSansTH-Black.woff2') format('woff2');
+  font-weight: 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* ── Design tokens — light glassmorphism, violet→indigo accent ───────────── */
+@theme {
+  --font-sans: 'LINE Seed Sans TH', system-ui, -apple-system, sans-serif;
+  --font-mono: 'SF Mono', ui-monospace, 'JetBrains Mono', monospace;
+
+  --color-ink: #111827; /* primary text */
+  --color-ink-2: #6b7280; /* secondary text */
+  --color-ink-3: #9ca3af; /* muted text */
+
+  --color-accent: #7c3aed; /* violet-600 */
+  --color-accent-2: #6366f1; /* indigo-500 */
+  --color-accent-soft: #ede9fe; /* selected fill */
+  --color-ring: #c4b5fd; /* focus ring */
+
+  --color-ok: #22c55e;
+  --color-warn: #f59e0b;
+  --color-risk: #ef4444;
+
+  --color-line: #eaecf2; /* hairline border */
+}
+
+:root {
+  /* blue-violet → purple → lavender → light blue (pixel-matched to reference button #11) */
+  --grad-brand: linear-gradient(100deg, #6c4af9 0%, #744ff8 15%, #8559f8 30%, #9d65fc 50%, #ae71fc 70%, #a089fc 85%, #8ea0fc 96%, #7eaefd 100%);
+  --grad-brand-soft: linear-gradient(100deg, rgba(108, 74, 249, 0.12), rgba(126, 174, 253, 0.12));
+
+  --card: rgba(255, 255, 255, 0.72);
+  --card-solid: #ffffff;
+  --card-border: rgba(255, 255, 255, 0.9);
+  --hairline: #eaecf2;
+
+  --shadow-sm: 0 1px 2px rgba(17, 24, 39, 0.04);
+  --shadow-card: 0 8px 30px rgba(17, 24, 39, 0.06), 0 1px 0 rgba(255, 255, 255, 0.7) inset;
+  --shadow-pop: 0 16px 44px rgba(17, 24, 39, 0.14), 0 2px 8px rgba(17, 24, 39, 0.06);
+  --shadow-qr: 0 16px 40px rgba(84, 94, 168, 0.18);
+  --shadow-accent: 0 8px 22px rgba(124, 58, 237, 0.32);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  font-family: var(--font-sans);
+  color: var(--color-ink);
+  /* light base + a soft pastel aurora wash anchored to the top */
+  background:
+    radial-gradient(48% 38% at 12% -4%, rgba(124, 58, 237, 0.1), transparent 72%),
+    radial-gradient(42% 34% at 50% -8%, rgba(236, 72, 153, 0.07), transparent 70%),
+    radial-gradient(50% 40% at 88% -4%, rgba(99, 102, 241, 0.11), transparent 72%),
+    radial-gradient(60% 50% at 50% 110%, rgba(99, 102, 241, 0.05), transparent 70%),
+    #f6f7fb;
+  background-attachment: fixed;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+/* ── Motion ──────────────────────────────────────────────────────────────── */
+@keyframes qrpop {
+  from {
+    opacity: 0.4;
+    transform: scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+@keyframes toastIn {
+  from {
+    opacity: 0;
+    transform: translate(-50%, 14px) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, 0) scale(1);
+  }
+}
+@keyframes popIn {
+  from {
+    opacity: 0;
+    transform: translateY(6px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.rise {
+  animation: rise 0.5s cubic-bezier(0.22, 0.9, 0.3, 1) both;
+}
+
+/* ── Form controls (light) ──────────────────────────────────────────────── */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(17, 24, 39, 0.14);
+  border-radius: 10px;
+  border: 3px solid transparent;
+  background-clip: padding-box;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(17, 24, 39, 0.24);
+  background-clip: padding-box;
+}
+
+input[type='color']::-webkit-color-swatch-wrapper {
+  padding: 0;
+}
+input[type='color']::-webkit-color-swatch {
+  border: none;
+  border-radius: 8px;
+}
+input[type='range'] {
+  -webkit-appearance: none;
+  appearance: none;
+  height: 6px;
+  border-radius: 6px;
+  background: #e9eaf1;
+  outline: none;
+}
+input[type='range']::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #fff;
+  cursor: pointer;
+  border: 1px solid rgba(124, 58, 237, 0.25);
+  box-shadow: 0 0 0 4px rgba(124, 58, 237, 0.16), 0 2px 6px rgba(17, 24, 39, 0.18);
+}
+input::placeholder,
+textarea::placeholder {
+  color: var(--color-ink-3);
+}

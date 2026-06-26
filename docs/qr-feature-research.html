@@ -1,0 +1,769 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>QR Generator — Feature & Customization Research</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Noto+Sans+Thai:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0f131c; --bg2:#141a26; --panel:#1a2030; --panel2:#1f2636;
+    --line:rgba(255,255,255,.08); --line2:rgba(255,255,255,.14);
+    --tx:#e7eaf2; --mut:#94a0b6; --mut2:#6c7790;
+    --acc:#7c3aed; --pink:#ff2db8; --blue:#3b82f6;
+    --green:#34d399; --amber:#fbbf24; --red:#f87171; --cyan:#22d3ee;
+    --r:16px; --rs:10px;
+    --fg:#e7eaf2; --qbg:#0f131c;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{
+    margin:0; background:
+      radial-gradient(1200px 600px at 15% -8%, rgba(124,58,237,.18), transparent 60%),
+      radial-gradient(1000px 600px at 100% 0%, rgba(59,130,246,.12), transparent 55%),
+      var(--bg);
+    color:var(--tx); font-family:"Inter","Noto Sans Thai",system-ui,sans-serif;
+    line-height:1.6; -webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:1180px;margin:0 auto;padding:0 22px}
+  .th{font-family:"Noto Sans Thai","Inter",sans-serif}
+  code,.mono{font-family:"JetBrains Mono",monospace;font-size:.86em}
+  a{color:var(--cyan);text-decoration:none}
+  a:hover{text-decoration:underline}
+
+  /* ---------- HERO ---------- */
+  header.hero{padding:62px 0 38px;border-bottom:1px solid var(--line)}
+  .kicker{display:inline-flex;align-items:center;gap:8px;font-size:12.5px;font-weight:600;
+    letter-spacing:.14em;text-transform:uppercase;color:var(--mut);
+    background:var(--panel);border:1px solid var(--line);padding:6px 13px;border-radius:999px}
+  .kicker .dot{width:7px;height:7px;border-radius:50%;background:var(--green);box-shadow:0 0 10px var(--green)}
+  h1{font-size:clamp(30px,4.6vw,50px);line-height:1.08;margin:20px 0 12px;font-weight:800;letter-spacing:-.02em}
+  h1 .g{background:linear-gradient(95deg,var(--pink),var(--acc) 55%,var(--blue));-webkit-background-clip:text;background-clip:text;color:transparent}
+  .lede{font-size:18.5px;color:var(--mut);max-width:760px;margin:0}
+  .summary{margin-top:26px;display:flex;gap:14px;flex-wrap:wrap}
+  .summary .chip{flex:1;min-width:210px;background:var(--panel);border:1px solid var(--line);
+    border-radius:var(--r);padding:16px 18px}
+  .summary .chip b{display:block;font-size:13px;color:var(--mut);font-weight:600;margin-bottom:4px}
+  .summary .chip span{font-size:17px;font-weight:700}
+
+  /* ---------- SECTIONS ---------- */
+  section{padding:50px 0}
+  .sec-h{display:flex;align-items:baseline;gap:14px;flex-wrap:wrap;margin-bottom:6px}
+  .sec-n{font-family:"JetBrains Mono",monospace;font-size:13px;color:var(--acc);font-weight:500}
+  h2{font-size:clamp(23px,3vw,31px);margin:0;font-weight:750;letter-spacing:-.01em}
+  .sec-sub{color:var(--mut);font-size:16px;margin:8px 0 30px;max-width:780px}
+
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:24px}
+  .grid{display:grid;gap:16px}
+
+  /* ---------- TWO FAMILIES ---------- */
+  .families{grid-template-columns:1fr auto 1fr;align-items:stretch;gap:0}
+  .fam{padding:26px;border-radius:var(--r);border:1px solid var(--line);background:var(--panel)}
+  .fam.a{border-color:rgba(52,211,153,.32);background:linear-gradient(180deg,rgba(52,211,153,.07),transparent 70%)}
+  .fam.b{border-color:rgba(59,130,246,.32);background:linear-gradient(180deg,rgba(59,130,246,.08),transparent 70%)}
+  .fam h3{margin:0 0 4px;font-size:19px}
+  .fam .tag{font-size:12.5px;font-weight:600;color:var(--mut);text-transform:uppercase;letter-spacing:.08em}
+  .fam ul{margin:14px 0 0;padding-left:0;list-style:none}
+  .fam li{padding:6px 0 6px 24px;position:relative;font-size:14.5px;color:#d3d9e6}
+  .fam.a li:before{content:"";position:absolute;left:2px;top:13px;width:8px;height:8px;border-radius:50%;background:var(--green)}
+  .fam.b li:before{content:"";position:absolute;left:2px;top:13px;width:8px;height:8px;border-radius:50%;background:var(--blue)}
+  .fam .ex{margin-top:16px;font-size:12.5px;color:var(--mut2)}
+  .vs{display:flex;align-items:center;justify-content:center;width:60px}
+  .vs span{width:42px;height:42px;border-radius:50%;background:var(--bg);border:1px solid var(--line2);
+    display:grid;place-items:center;font-weight:800;font-size:13px;color:var(--mut);font-family:"JetBrains Mono",monospace}
+  .arch-note{margin-top:18px;display:flex;gap:12px;align-items:flex-start;background:rgba(251,191,36,.08);
+    border:1px solid rgba(251,191,36,.28);border-radius:var(--rs);padding:14px 16px;font-size:14px}
+  .arch-note .i{flex:none;color:var(--amber);font-weight:800}
+
+  /* ---------- ANATOMY ---------- */
+  .anatomy{display:grid;grid-template-columns:minmax(280px,1fr) 1.05fr;gap:30px;align-items:center}
+  .qr-stage{display:grid;place-items:center;padding:18px}
+  .qr-svg{width:100%;max-width:360px;height:auto;border-radius:14px;
+    filter:drop-shadow(0 24px 48px rgba(0,0,0,.45))}
+  .qr-svg .part{transition:opacity .22s, fill .22s}
+  .qr-svg.focusing .part{opacity:.13}
+  .qr-svg.focusing .part.focus{opacity:1}
+  .legend{display:flex;flex-direction:column;gap:9px}
+  .leg{display:flex;gap:13px;align-items:flex-start;padding:11px 13px;border-radius:var(--rs);
+    border:1px solid var(--line);background:var(--panel2);cursor:default;transition:.15s}
+  .leg:hover{border-color:var(--line2);transform:translateX(3px)}
+  .leg .sw{flex:none;width:30px;height:30px;border-radius:8px;border:1px solid var(--line2);margin-top:1px}
+  .leg b{font-size:14.5px;display:block}
+  .leg small{color:var(--mut);font-size:12.8px}
+
+  /* ---------- TABS (customization) ---------- */
+  .tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:20px}
+  .tab{padding:9px 15px;border-radius:999px;border:1px solid var(--line);background:var(--panel);
+    color:var(--mut);font-size:13.5px;font-weight:600;cursor:pointer;font-family:inherit;transition:.15s}
+  .tab:hover{color:var(--tx);border-color:var(--line2)}
+  .tab.on{background:linear-gradient(95deg,var(--acc),var(--blue));color:#fff;border-color:transparent}
+  .panel-body{display:none;animation:fade .3s}
+  .panel-body.on{display:block}
+  @keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+  .opt-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:13px}
+  .opt{background:var(--panel2);border:1px solid var(--line);border-radius:var(--rs);padding:14px}
+  .opt .nm{font-weight:650;font-size:14.5px;margin-bottom:3px}
+  .opt .ds{font-size:12.8px;color:var(--mut)}
+  .opt .yours{display:inline-block;margin-top:8px;font-size:11px;font-weight:700;color:var(--green);
+    background:rgba(52,211,153,.12);border:1px solid rgba(52,211,153,.3);padding:2px 8px;border-radius:999px}
+  .shape-row{display:flex;gap:9px;flex-wrap:wrap;margin-top:6px}
+  .shape-row .sh{width:26px;height:26px;background:var(--fg);display:grid;place-items:center}
+  .sq{border-radius:0}.rnd{border-radius:7px}.cir{border-radius:50%}
+  .dia{border-radius:3px;transform:rotate(45deg);width:19px;height:19px}
+  .swatches{display:flex;gap:7px;margin-top:8px;flex-wrap:wrap}
+  .swatches i{width:24px;height:24px;border-radius:6px;display:block;border:1px solid var(--line2)}
+
+  /* ---------- MATRIX ---------- */
+  .filters{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:18px;align-items:center}
+  .filters .lbl{font-size:12.5px;color:var(--mut);margin-right:4px}
+  .fbtn{padding:7px 13px;border-radius:999px;border:1px solid var(--line);background:var(--panel);
+    color:var(--mut);font-size:12.8px;font-weight:600;cursor:pointer;font-family:inherit;transition:.15s}
+  .fbtn:hover{color:var(--tx)}
+  .fbtn.on{background:var(--acc);color:#fff;border-color:transparent}
+  .matrix-scroll{overflow-x:auto;border:1px solid var(--line);border-radius:var(--r);background:var(--panel)}
+  table.matrix{border-collapse:collapse;width:100%;min-width:720px;font-size:13.5px}
+  table.matrix th,table.matrix td{padding:11px 10px;text-align:center;border-bottom:1px solid var(--line)}
+  table.matrix thead th{position:sticky;top:0;background:var(--panel2);font-size:12.5px;font-weight:700;
+    color:var(--mut);z-index:2;border-bottom:1px solid var(--line2)}
+  table.matrix td.feat,table.matrix th.feat{text-align:left;font-weight:600;color:var(--tx);
+    position:sticky;left:0;background:var(--panel);min-width:210px;z-index:1}
+  table.matrix thead th.feat{z-index:3;background:var(--panel2)}
+  table.matrix .mine{background:rgba(124,58,237,.10)}
+  table.matrix thead th.mine{background:rgba(124,58,237,.22);color:#fff}
+  .cat-head td{background:var(--bg2);font-size:11.5px;letter-spacing:.1em;text-transform:uppercase;
+    color:var(--acc);font-weight:700;text-align:left;padding:9px 12px}
+  .yes{color:var(--green);font-weight:800}
+  .no{color:var(--mut2)}
+  .part-y{color:var(--amber);font-weight:700}
+  .star{color:var(--pink)}
+  .mlegend{display:flex;gap:18px;flex-wrap:wrap;margin-top:12px;font-size:12.8px;color:var(--mut)}
+  .mlegend b{color:var(--tx)}
+
+  /* ---------- CONTENT TYPE GRID ---------- */
+  .types{grid-template-columns:repeat(auto-fill,minmax(168px,1fr))}
+  .type{background:var(--panel);border:1px solid var(--line);border-radius:var(--rs);padding:14px;position:relative}
+  .type.has{border-color:rgba(52,211,153,.34);background:linear-gradient(180deg,rgba(52,211,153,.06),transparent)}
+  .type.dyn{border-color:rgba(59,130,246,.28)}
+  .type .ico{font-size:20px;margin-bottom:6px}
+  .type .nm{font-weight:650;font-size:14px}
+  .type .bd{font-size:11.6px;color:var(--mut);margin-top:2px}
+  .type .flag{position:absolute;top:11px;right:11px;font-size:10px;font-weight:700;padding:2px 7px;border-radius:999px}
+  .type .flag.h{color:var(--green);background:rgba(52,211,153,.13);border:1px solid rgba(52,211,153,.3)}
+  .type .flag.d{color:var(--blue);background:rgba(59,130,246,.13);border:1px solid rgba(59,130,246,.3)}
+
+  /* ---------- RECOMMENDATION ---------- */
+  .position{background:linear-gradient(120deg,rgba(124,58,237,.16),rgba(59,130,246,.10));
+    border:1px solid rgba(124,58,237,.35);border-radius:var(--r);padding:26px 28px;margin-bottom:26px}
+  .position h3{margin:0 0 8px;font-size:21px}
+  .position p{margin:0;font-size:16px;color:#dfe4ee;max-width:820px}
+  .reco{grid-template-columns:repeat(3,1fr)}
+  .col{border-radius:var(--r);border:1px solid var(--line);padding:20px;background:var(--panel)}
+  .col.must{border-top:3px solid var(--green)}
+  .col.nice{border-top:3px solid var(--amber)}
+  .col.skip{border-top:3px solid var(--blue)}
+  .col h4{margin:0 0 3px;font-size:16px}
+  .col .sub{font-size:12.5px;color:var(--mut);margin-bottom:14px}
+  .item{display:flex;gap:10px;align-items:flex-start;padding:9px 0;border-top:1px solid var(--line)}
+  .item:first-of-type{border-top:none}
+  .item input{margin-top:4px;accent-color:var(--acc);width:15px;height:15px;flex:none}
+  .item .t{font-size:13.8px}
+  .item .t b{font-weight:650}
+  .item .t span{color:var(--mut);display:block;font-size:12.2px}
+  .item.done .t b{color:var(--green)}
+  .badge-have{font-size:9.5px;font-weight:700;color:var(--green);background:rgba(52,211,153,.13);
+    border:1px solid rgba(52,211,153,.3);padding:1px 6px;border-radius:999px;margin-left:6px;vertical-align:middle}
+  .skip .item .t b{color:#cdd4e2}
+
+  /* ---------- DIVIDER ---------- */
+  .divider{margin:30px 0;border:none;border-top:1px dashed var(--line2);position:relative;text-align:center}
+  .divider span{position:relative;top:-13px;background:var(--bg);padding:0 18px;font-size:12px;
+    letter-spacing:.18em;text-transform:uppercase;color:var(--mut2);font-family:"JetBrains Mono",monospace}
+
+  /* ---------- TECH LAYER ---------- */
+  .tech{background:var(--bg2);border:1px solid var(--line);border-radius:var(--r);padding:6px 0}
+  .tech section{padding:30px 28px;border-bottom:1px solid var(--line)}
+  .tech section:last-child{border-bottom:none}
+  .tech h3{font-size:17px;margin:0 0 14px;font-family:"JetBrains Mono",monospace;color:var(--cyan)}
+  table.simple{border-collapse:collapse;width:100%;font-size:13px}
+  table.simple th,table.simple td{text-align:left;padding:9px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+  table.simple th{color:var(--mut);font-weight:600;font-size:12px;text-transform:uppercase;letter-spacing:.05em}
+  table.simple td code{color:var(--pink)}
+  .tok{display:inline-block;background:var(--panel);border:1px solid var(--line2);border-radius:6px;
+    padding:2px 8px;margin:3px 4px 3px 0;font-family:"JetBrains Mono",monospace;font-size:12px;color:#cdd4e2}
+  .tech p{font-size:13.5px;color:#c3cad8}
+  .tech .warn{border-left:3px solid var(--amber);padding-left:14px;color:#d8c89a}
+
+  .sources{font-size:13px;color:var(--mut)}
+  .sources li{margin:5px 0}
+  footer{padding:36px 0 60px;color:var(--mut2);font-size:12.5px;text-align:center}
+
+  @media(max-width:860px){
+    .families{grid-template-columns:1fr}.vs{width:auto;padding:8px 0}.vs span{transform:rotate(90deg)}
+    .anatomy{grid-template-columns:1fr}.reco{grid-template-columns:1fr}
+  }
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="wrap">
+    <span class="kicker th"><span class="dot"></span>Research · ป้อนการ redesign qr_generator · มิ.ย. 2026</span>
+    <h1 class="th">เว็บ gen QR เขามี<span class="g">ฟีเจอร์ &amp; การปรับแต่ง</span>อะไรบ้าง<br>แล้ว qr_generator ควรมีอะไร</h1>
+    <p class="lede th">สรุปภาพรวมว่าเว็บสร้าง QR ทั้งวงการทำอะไรได้ — ตั้งแต่ชนิดข้อมูลที่ฝังได้ การแต่งหน้าตา ไปจนถึงระบบหลังบ้าน (dynamic, analytics) — เทียบกับของที่ qr_generator มีอยู่แล้ว และชี้ว่าควรเติมอะไรต่อ</p>
+
+    <div class="summary th">
+      <div class="chip"><b>แก่นของวงการ</b><span>แยกเป็น 2 ตระกูล: สวย-ฟรี-ไม่ต้องล็อกอิน &nbsp;vs&nbsp; แก้ทีหลัง-มีสถิติ</span></div>
+      <div class="chip"><b>การปรับแต่ง</b><span>9 มิติ: สี · gradient · รูปทรง module · ตา (frame/ball) · โลโก้ · frame/CTA · ECC · พื้นหลัง · artistic</span></div>
+      <div class="chip"><b>จุดยืน qr_generator</b><span>Privacy-first · ทำงานในเครื่อง · จุดเด่น PromptPay/Bill ไทย + scan-back verify</span></div>
+    </div>
+  </div>
+</header>
+
+<!-- ===================== BUSINESS LAYER ===================== -->
+
+<section id="families">
+  <div class="wrap">
+    <div class="sec-h"><span class="sec-n">01</span><h2 class="th">ภาพใหญ่ — โลกของเว็บ gen QR แบ่งเป็น 2 ตระกูล</h2></div>
+    <p class="sec-sub th">ก่อนลงรายฟีเจอร์ ต้องเข้าใจเส้นแบ่งนี้ก่อน เพราะมันคือ "ทางแยกของผลิตภัณฑ์" ที่ตัดสินว่าต้องมีหลังบ้าน (server) หรือไม่ — และ qr_generator อยู่ฝั่งซ้าย</p>
+
+    <div class="grid families">
+      <div class="fam a th">
+        <div class="tag">ตระกูล A · ตัวสร้างแบบ Static</div>
+        <h3>สวย · ฟรี · ไม่ต้องล็อกอิน</h3>
+        <p style="color:var(--mut);font-size:13.5px;margin:6px 0 0">ข้อมูลถูกฝังลงในตัว QR โดยตรง สร้างเสร็จในเครื่องผู้ใช้ ไม่มีบัญชี ไม่เก็บข้อมูล แก้ทีหลังไม่ได้ (ต้องสร้างใหม่)</p>
+        <ul>
+          <li>เน้นความสวยและความเร็ว</li>
+          <li>ฝังข้อมูลจริงลงรหัส (URL, WiFi, vCard, PromptPay…)</li>
+          <li>ทำงาน 100% ในเบราว์เซอร์ → เป็นส่วนตัว</li>
+          <li>โหลดไฟล์เป็น PNG / SVG / PDF</li>
+        </ul>
+        <div class="ex">ตัวอย่าง: QRCode Monkey · Canva · <b style="color:var(--green)">qr_generator (ของพี่เฟิส)</b></div>
+      </div>
+
+      <div class="vs"><span>VS</span></div>
+
+      <div class="fam b th">
+        <div class="tag">ตระกูล B · แพลตฟอร์ม Dynamic</div>
+        <h3>แก้ทีหลังได้ · มีสถิติ · เป็นบัญชี</h3>
+        <p style="color:var(--mut);font-size:13.5px;margin:6px 0 0">QR ชี้ไปลิงก์สั้นของผู้ให้บริการ แล้วค่อยเด้งต่อ → เปลี่ยนปลายทางได้โดยไม่ต้องพิมพ์ใหม่ และนับสถิติได้ แต่ต้องมีหลังบ้านตลอดชีพ</p>
+        <ul>
+          <li>แก้ปลายทางได้หลังพิมพ์แล้ว</li>
+          <li>เก็บสถิติ: จำนวนสแกน · ที่ตั้ง · อุปกรณ์ · เวลา</li>
+          <li>สร้างทีละมากผ่าน CSV / API · ทีม · โฟลเดอร์</li>
+          <li>สร้าง landing page · ตั้งรหัส · วันหมดอายุ</li>
+        </ul>
+        <div class="ex">ตัวอย่าง: qr-code-generator.com · QRfy · QR Tiger · Uniqode</div>
+      </div>
+    </div>
+
+    <div class="arch-note th">
+      <span class="i">⚠︎</span>
+      <div><b>นี่คือการตัดสินใจเชิงสถาปัตยกรรม ไม่ใช่แค่ฟีเจอร์.</b> ทุกอย่างฝั่งขวา (dynamic, analytics, landing page, บัญชี) <b>บังคับให้มี backend + ฐานข้อมูล + ลิงก์ที่ต้องอยู่ตลอด</b> ถ้า qr_generator จะข้ามไปฝั่งนี้ = เปลี่ยนจาก "เครื่องมือ" เป็น "บริการ" ที่มีค่าดูแลรายเดือนและความเป็นส่วนตัวเปลี่ยนไป — เก็บประเด็นนี้ไว้คุยตอนท้าย</div>
+    </div>
+  </div>
+</section>
+
+<section id="anatomy" style="background:var(--bg2);border-top:1px solid var(--line);border-bottom:1px solid var(--line)">
+  <div class="wrap">
+    <div class="sec-h"><span class="sec-n">02</span><h2 class="th">กายวิภาคของการปรับแต่ง — ปรับตรงไหนได้บ้าง</h2></div>
+    <p class="sec-sub th">QR หนึ่งตัวมีส่วนที่แต่งได้หลายจุด ลองชี้ที่รายการขวามือเพื่อไฮไลต์ส่วนนั้นบนรหัส — ทุกจุดที่ qr_generator แต่งได้อยู่แล้วจะมีป้าย <b style="color:var(--green)">มีแล้ว</b></p>
+
+    <div class="card anatomy">
+      <div class="qr-stage">
+        <svg id="qrsvg" class="qr-svg" viewBox="0 0 260 260" role="img" aria-label="แผนภาพส่วนประกอบ QR"></svg>
+      </div>
+      <div class="legend" id="legend">
+        <div class="leg" data-key="modules"><span class="sw" style="background:var(--fg)"></span><div><b>Data modules (จุดข้อมูล) <span class="badge-have">มีแล้ว · 10 ทรง</span></b><small class="th">จุดเล็กๆ ที่เก็บข้อมูลจริง — ปรับรูปทรงได้ (เหลี่ยม กลม ข้าวหลามตัด ดาว…)</small></div></div>
+        <div class="leg" data-key="frame"><span class="sw" style="background:transparent;border:5px solid var(--fg)"></span><div><b>Finder — กรอบตา (eye frame) <span class="badge-have">มีแล้ว · 5 ทรง</span></b><small class="th">วงนอกของ 3 มุม ช่วยให้กล้องจับทิศได้ ปรับทรง/สีแยกได้</small></div></div>
+        <div class="leg" data-key="ball"><span class="sw" style="background:var(--acc)"></span><div><b>Finder — ลูกตา (eye ball) <span class="badge-have">มีแล้ว · 5 ทรง</span></b><small class="th">แกนกลางในแต่ละมุม ปรับทรงและสีแยกจากตัวจุดได้</small></div></div>
+        <div class="leg" data-key="logo"><span class="sw" style="background:#fff;display:grid;place-items:center"><b style="color:#111;font-size:13px">◎</b></span><div><b>โลโก้ตรงกลาง <span class="badge-have">มีแล้ว</span></b><small class="th">อัปโหลดรูป + ปรับขนาด + พื้นหลังโลโก้ (เหลี่ยม/กลม) — ต้องเพิ่ม ECC ชดเชย</small></div></div>
+        <div class="leg" data-key="fg"><span class="sw" style="background:linear-gradient(135deg,var(--pink),var(--blue))"></span><div><b>สี &amp; Gradient <span class="badge-have">มีแล้ว</span></b><small class="th">สีจุด · สีพื้น · สีตาแยก · ไล่เฉด linear/radial/diagonal</small></div></div>
+        <div class="leg" data-key="frameCta"><span class="sw" style="background:transparent;border:2px solid var(--green);position:relative">&nbsp;</span><div><b>Frame + Call-to-action <span class="badge-have">มีแล้ว</span></b><small class="th">กรอบรอบรหัส + ข้อความชวนสแกน เช่น "สแกนเลย"</small></div></div>
+        <div class="leg" data-key="quiet"><span class="sw" style="background:repeating-linear-gradient(45deg,var(--line2),var(--line2) 3px,transparent 3px,transparent 6px)"></span><div><b>Quiet zone (ขอบว่าง) <span class="badge-have">มีแล้ว</span></b><small class="th">พื้นที่ว่างรอบรหัส จำเป็นต่อการสแกน ปรับความกว้างได้</small></div></div>
+        <div class="leg" data-key="bgimg"><span class="sw" style="background:linear-gradient(135deg,#2a3550,#3b82f6)"></span><div><b>พื้นหลังภาพ / Artistic / AI <small style="color:var(--amber)">ยังไม่มี</small></b><small class="th">ฝังภาพพื้นหลัง หรือใช้ AI ทำ QR เป็นงานศิลป์ที่ยังสแกนได้</small></div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="customize">
+  <div class="wrap">
+    <div class="sec-h"><span class="sec-n">03</span><h2 class="th">ตัวเลือกการปรับแต่งทั้งหมด แยกตามมิติ</h2></div>
+    <p class="sec-sub th">รวมทุกตัวเลือกที่เจอในวงการ จัดเป็น 7 หมวด กดแท็บเพื่อดูทีละหมวด — ของที่ qr_generator มีแล้วจะติดป้ายเขียว</p>
+
+    <div class="tabs th" id="tabs">
+      <button class="tab on" data-t="color">สี &amp; Gradient</button>
+      <button class="tab" data-t="shape">รูปทรง Module &amp; ตา</button>
+      <button class="tab" data-t="logo">โลโก้</button>
+      <button class="tab" data-t="frame">Frame / CTA</button>
+      <button class="tab" data-t="ecc">ECC &amp; Quiet zone</button>
+      <button class="tab" data-t="export">Export</button>
+      <button class="tab" data-t="art">Artistic / AI</button>
+    </div>
+
+    <div class="card">
+      <div class="panel-body on" data-p="color">
+        <div class="opt-grid th">
+          <div class="opt"><div class="nm">สีจุด (foreground)</div><div class="ds">สีของ module — เลือกอิสระ 16M สี</div><div class="swatches"><i style="background:#0a0a12"></i><i style="background:#7c3aed"></i><i style="background:#ff2db8"></i></div><span class="yours">มีแล้ว</span></div>
+          <div class="opt"><div class="nm">สีพื้นหลัง</div><div class="ds">สีพื้น หรือโปร่งใส</div><div class="swatches"><i style="background:#fff"></i><i style="background:#161b27"></i></div><span class="yours">มีแล้ว</span></div>
+          <div class="opt"><div class="nm">สีตาแยก (eye color)</div><div class="ds">ให้ 3 มุมเป็นสีต่างจากตัวจุด</div><div class="swatches"><i style="background:#7c3aed"></i></div><span class="yours">มีแล้ว</span></div>
+          <div class="opt"><div class="nm">Gradient ไล่เฉด</div><div class="ds">linear · radial · diagonal (2 สี)</div><div class="swatches"><i style="background:linear-gradient(90deg,#ff2db8,#3b82f6)"></i><i style="background:radial-gradient(#ff2db8,#3b82f6)"></i></div><span class="yours">มีแล้ว</span></div>
+          <div class="opt"><div class="nm">Gradient บนตา</div><div class="ds">ไล่เฉดเฉพาะดวงตา — ของแต่งระดับสูง</div><div class="swatches"><i style="background:linear-gradient(135deg,#fbbf24,#ff2db8)"></i></div></div>
+        </div>
+      </div>
+
+      <div class="panel-body" data-p="shape">
+        <div class="opt-grid th">
+          <div class="opt"><div class="nm">รูปทรง Module</div><div class="ds">รูปของจุดข้อมูล</div><div class="shape-row"><span class="sh sq"></span><span class="sh rnd"></span><span class="sh cir"></span><span class="sh dia"></span></div><span class="yours">มีแล้ว · 10 ทรง</span></div>
+          <div class="opt"><div class="nm">กรอบตา (eye frame)</div><div class="ds">วงนอกของ finder pattern</div><div class="shape-row"><span class="sh sq" style="background:transparent;border:4px solid var(--fg)"></span><span class="sh rnd" style="background:transparent;border:4px solid var(--fg)"></span><span class="sh cir" style="background:transparent;border:4px solid var(--fg)"></span></div><span class="yours">มีแล้ว · 5 ทรง</span></div>
+          <div class="opt"><div class="nm">ลูกตา (eye ball)</div><div class="ds">แกนกลางของ finder</div><div class="shape-row"><span class="sh sq"></span><span class="sh rnd"></span><span class="sh cir"></span><span class="sh dia"></span></div><span class="yours">มีแล้ว · 5 ทรง</span></div>
+          <div class="opt"><div class="nm">รูปทรงพิเศษ</div><div class="ds">ดาว · สามเหลี่ยม · ใบไม้ · กากบาท · หกเหลี่ยม</div><div class="shape-row"><span class="sh" style="background:transparent">★</span><span class="sh" style="background:transparent">▲</span><span class="sh" style="background:transparent">⬡</span></div><span class="yours">มีแล้ว</span></div>
+        </div>
+      </div>
+
+      <div class="panel-body" data-p="logo">
+        <div class="opt-grid th">
+          <div class="opt"><div class="nm">อัปโหลดโลโก้</div><div class="ds">PNG / JPG / SVG ใส่กลางรหัส</div><span class="yours">มีแล้ว</span></div>
+          <div class="opt"><div class="nm">ขนาดโลโก้</div><div class="ds">ปรับสัดส่วนเทียบตัวรหัส</div><span class="yours">มีแล้ว</span></div>
+          <div class="opt"><div class="nm">พื้นหลังโลโก้</div><div class="ds">ไม่มี · เหลี่ยม · มน · กลม</div><span class="yours">มีแล้ว</span></div>
+          <div class="opt"><div class="nm">คลังโลโก้สำเร็จรูป</div><div class="ds">ไอคอนโซเชียลพร้อมใช้ (เจ้าใหญ่มักมี)</div></div>
+          <div class="opt"><div class="nm">ลบพื้นหลังหลังโลโก้</div><div class="ds">เคลียร์ module ใต้โลโก้ให้อ่านง่าย</div></div>
+        </div>
+      </div>
+
+      <div class="panel-body" data-p="frame">
+        <div class="opt-grid th">
+          <div class="opt"><div class="nm">เปิด/ปิด Frame</div><div class="ds">กรอบล้อมรอบรหัส</div><span class="yours">มีแล้ว</span></div>
+          <div class="opt"><div class="nm">ข้อความ CTA</div><div class="ds">เช่น "สแกนเลย" "SCAN ME"</div><span class="yours">มีแล้ว</span></div>
+          <div class="opt"><div class="nm">สี Frame</div><div class="ds">สีกรอบ + แถบข้อความ</div><span class="yours">มีแล้ว</span></div>
+          <div class="opt"><div class="nm">คลังแบบ Frame</div><div class="ds">หลายสไตล์สำเร็จรูป (ลูกศร, มุมมน, ป้าย)</div></div>
+        </div>
+      </div>
+
+      <div class="panel-body" data-p="ecc">
+        <div class="opt-grid th">
+          <div class="opt"><div class="nm">Error Correction (ECC)</div><div class="ds">L 7% · M 15% · Q 25% · H 30% — ยิ่งสูงยิ่งทนรอยเปื้อน/ใส่โลโก้ใหญ่ได้</div><span class="yours">มีแล้ว · L/M/Q/H</span></div>
+          <div class="opt"><div class="nm">Quiet zone (margin)</div><div class="ds">ขอบว่างรอบรหัส ปรับเป็นจำนวน module</div><span class="yours">มีแล้ว</span></div>
+          <div class="opt"><div class="nm">ขนาด/ความละเอียด</div><div class="ds">px สำหรับงานพิมพ์</div><span class="yours">มีแล้ว</span></div>
+          <div class="opt"><div class="nm">เตือนความคมชัด/สแกนได้</div><div class="ds">เช็คคอนทราสต์ + แนะ ECC อัตโนมัติ</div></div>
+        </div>
+      </div>
+
+      <div class="panel-body" data-p="export">
+        <div class="opt-grid th">
+          <div class="opt"><div class="nm">PNG</div><div class="ds">ภาพ raster ทั่วไป</div><span class="yours">มีแล้ว</span></div>
+          <div class="opt"><div class="nm">SVG</div><div class="ds">เวกเตอร์ คมทุกขนาด</div><span class="yours">มีแล้ว</span></div>
+          <div class="opt"><div class="nm">PDF</div><div class="ds">พร้อมพิมพ์ (jsPDF)</div><span class="yours">มีแล้ว</span></div>
+          <div class="opt"><div class="nm">EPS</div><div class="ds">เวกเตอร์สำหรับงานพิมพ์มืออาชีพ</div></div>
+          <div class="opt"><div class="nm">พื้นหลังโปร่งใส</div><div class="ds">PNG/SVG ไม่มีพื้น</div></div>
+          <div class="opt"><div class="nm">JPG / WebP</div><div class="ds">ทางเลือกไฟล์ภาพเพิ่ม</div></div>
+        </div>
+      </div>
+
+      <div class="panel-body" data-p="art">
+        <div class="opt-grid th">
+          <div class="opt"><div class="nm">ภาพพื้นหลัง</div><div class="ds">วางรูปใต้รหัส (Canva, Adobe Express)</div></div>
+          <div class="opt"><div class="nm">Halftone QR</div><div class="ds">ฝังภาพขาวดำลงในลายจุด ทำได้ในเครื่อง</div></div>
+          <div class="opt"><div class="nm">AI Art QR</div><div class="ds">สั่งด้วยข้อความ ได้ QR เป็นภาพศิลป์ (ต้องเรียก AI ภายนอก)</div></div>
+          <div class="opt"><div class="nm">Templates / presets</div><div class="ds">สไตล์สำเร็จรูปกดครั้งเดียวสวย</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="matrix" style="background:var(--bg2);border-top:1px solid var(--line);border-bottom:1px solid var(--line)">
+  <div class="wrap">
+    <div class="sec-h"><span class="sec-n">04</span><h2 class="th">ตารางเทียบฟีเจอร์ — qr_generator อยู่ตรงไหน</h2></div>
+    <p class="sec-sub th">เทียบ qr_generator กับเว็บตัวแทน 5 เจ้า กรองตามหมวดได้ คอลัมน์ม่วงคือของพี่เฟิส (เป็นภาพรวมตัวแทน ไม่ใช่ทุก tier ของแต่ละเจ้า)</p>
+
+    <div class="filters th" id="filters">
+      <span class="lbl">กรองหมวด:</span>
+      <button class="fbtn on" data-f="all">ทั้งหมด</button>
+      <button class="fbtn" data-f="content">ชนิดข้อมูล</button>
+      <button class="fbtn" data-f="visual">การแต่งหน้าตา</button>
+      <button class="fbtn" data-f="platform">ระบบ / Dynamic</button>
+      <button class="fbtn" data-f="export">Export</button>
+    </div>
+
+    <div class="matrix-scroll">
+      <table class="matrix th" id="mtable">
+        <thead>
+          <tr>
+            <th class="feat">ฟีเจอร์</th>
+            <th>QRCode<br>Monkey</th>
+            <th>QR Code<br>Generator</th>
+            <th>QRfy</th>
+            <th>Canva</th>
+            <th>AI Art</th>
+            <th class="mine">qr_generator<br>(พี่เฟิส)</th>
+          </tr>
+        </thead>
+        <tbody id="mbody"></tbody>
+      </table>
+    </div>
+    <div class="mlegend th">
+      <span><b class="yes">✓</b> ทำได้</span>
+      <span><b class="part-y">◐</b> ทำได้บางส่วน/จำกัด</span>
+      <span><b class="no">—</b> ไม่มี</span>
+      <span><b class="star">★</b> จุดเด่นเฉพาะตัว</span>
+    </div>
+  </div>
+</section>
+
+<section id="types">
+  <div class="wrap">
+    <div class="sec-h"><span class="sec-n">05</span><h2 class="th">ชนิดข้อมูลที่ฝังได้ — แค็ตตาล็อก</h2></div>
+    <p class="sec-sub th">ทุกชนิดที่เว็บต่างๆ ให้ฝัง — <b style="color:var(--green)">เขียว = qr_generator มีแล้ว</b>, <b style="color:var(--blue)">น้ำเงิน = ต้องมีหลังบ้าน (dynamic)</b> เพราะมันคือการ host เนื้อหาแล้วชี้ลิงก์</p>
+
+    <div class="grid types" id="typegrid"></div>
+  </div>
+</section>
+
+<section id="reco" style="background:var(--bg2);border-top:1px solid var(--line)">
+  <div class="wrap">
+    <div class="sec-h"><span class="sec-n">06</span><h2 class="th">ข้อเสนอสำหรับ redesign — ควรเติมอะไร</h2></div>
+
+    <div class="position th">
+      <h3>📍 จุดยืนที่แนะนำ: อย่าไปแข่งเป็น "แพลตฟอร์มการตลาด" — เป็น <span style="color:var(--pink)">ตัวสร้าง static ที่ดีไซน์ดี เป็นส่วนตัว และเก่งเรื่องไทยที่สุด</span></h3>
+      <p>qr_generator มีของดีที่เจ้าฟรีส่วนใหญ่ไม่มี: ทำงานในเครื่อง 100% (ไม่ส่งข้อมูลออก), PromptPay/Bill Payment ตามมาตรฐาน EMVCo ไทย, และ scan-back verify ที่ยืนยันว่ารหัสสแกนได้จริง. ทางที่คุ้มที่สุดคือ <b>ตอกย้ำจุดแข็งนี้ + อุดช่องว่างที่ทำได้โดยไม่ต้องมี backend</b> ไม่ใช่ไล่ตาม analytics/dynamic ที่ต้องลงทุนหลังบ้านตลอดชีพ</p>
+    </div>
+
+    <div class="grid reco">
+      <div class="col must th">
+        <h4>🟢 Must-have</h4>
+        <div class="sub">อุดช่องว่างได้เลย ไม่ต้องมี server</div>
+        <label class="item done"><input type="checkbox" checked disabled><div class="t"><b>PromptPay / Bill ไทย<span class="badge-have">มีแล้ว</span></b><span>จุดเด่นหลัก — รักษาไว้และทำให้เด่นขึ้น</span></div></label>
+        <label class="item done"><input type="checkbox" checked disabled><div class="t"><b>Scan-back verify<span class="badge-have">มีแล้ว</span></b><span>ยกขึ้นมาเป็น "ตรารับรองว่าสแกนได้" ให้ผู้ใช้เห็น</span></div></label>
+        <label class="item"><input type="checkbox"><div class="t"><b>Templates / presets</b><span>กดครั้งเดียวสวย ลดงานผู้ใช้ — frontend ล้วน</span></div></label>
+        <label class="item"><input type="checkbox"><div class="t"><b>เพิ่มชนิด static: Calendar event, MeCard, LINE/WhatsApp, Crypto</b><span>ฝังตรงได้ ไม่ต้อง host</span></div></label>
+        <label class="item"><input type="checkbox"><div class="t"><b>Batch จากรายการ/CSV → ZIP</b><span>สร้างทีละหลายอันในเครื่องแล้วโหลดเป็น zip — เจ้าฟรีไม่ค่อยมี</span></div></label>
+        <label class="item"><input type="checkbox"><div class="t"><b>พื้นหลังโปร่งใส + เตือนคอนทราสต์</b><span>auto-แนะ ECC เมื่อสีอ่อน/โลโก้ใหญ่</span></div></label>
+      </div>
+
+      <div class="col nice th">
+        <h4>🟡 Nice-to-have</h4>
+        <div class="sub">เพิ่มเสน่ห์ ยังไม่ต้องมี server</div>
+        <label class="item"><input type="checkbox"><div class="t"><b>Gradient บนดวงตา + คลัง Frame/CTA</b><span>ต่อยอดของแต่งที่มีอยู่</span></div></label>
+        <label class="item"><input type="checkbox"><div class="t"><b>Halftone / ฝังภาพพื้นหลัง</b><span>ทำในเครื่องได้ เพิ่มมิติงานดีไซน์</span></div></label>
+        <label class="item"><input type="checkbox"><div class="t"><b>แชร์ค่าตั้งผ่าน URL hash</b><span>ส่งลิงก์ให้เพื่อนเปิดได้ดีไซน์เดิม ไม่ต้องมี DB</span></div></label>
+        <label class="item"><input type="checkbox"><div class="t"><b>PWA / ใช้ออฟไลน์ได้</b><span>ตอกย้ำความเป็นส่วนตัว ติดตั้งเป็นแอป</span></div></label>
+        <label class="item"><input type="checkbox"><div class="t"><b>Export EPS / JPG / WebP</b><span>ครบเครื่องสำหรับงานพิมพ์</span></div></label>
+      </div>
+
+      <div class="col skip th">
+        <h4>🔵 ทางแยกเชิงกลยุทธ์</h4>
+        <div class="sub">ต้องมี backend — ตัดสินใจก่อนทำ</div>
+        <label class="item"><input type="checkbox"><div class="t"><b>Dynamic QR (แก้ปลายทางได้)</b><span>ต้องมี short-link service + DB ที่อยู่ตลอดชีพ</span></div></label>
+        <label class="item"><input type="checkbox"><div class="t"><b>Analytics (สแกน/ที่ตั้ง/อุปกรณ์)</b><span>ต้องมี server เก็บ event + dashboard</span></div></label>
+        <label class="item"><input type="checkbox"><div class="t"><b>Landing page / menu builder</b><span>ต้อง host หน้าเว็บให้ผู้ใช้</span></div></label>
+        <label class="item"><input type="checkbox"><div class="t"><b>บัญชี / ทีม / API</b><span>กลายเป็น "บริการ" มีค่าดูแลรายเดือน</span></div></label>
+        <div class="arch-note th" style="margin-top:16px">
+          <span class="i">💡</span>
+          <div>พี่เฟิสมี stack <b>Next.js + Postgres + Vercel</b> อยู่แล้ว — ถ้าจะทำฝั่งนี้ "ทำได้" แต่มันคือ<b>โปรเจกต์ที่สอง</b> (บริการ) ไม่ใช่ฟีเจอร์ของตัว generator. แนะนำแยกเฟส: เฟส 1 เก่ง static ให้สุดก่อน แล้วค่อยตัดสินใจเรื่อง dynamic ทีหลัง</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card th" style="margin-top:24px;text-align:center;border-color:var(--line2)">
+      <b style="font-size:17px">บรรทัดสุดท้าย:</b>
+      <span style="color:var(--mut);font-size:15px"> qr_generator ไม่ต้องมีครบทุกอย่างเหมือนเจ้าใหญ่ — แค่เก่ง <b style="color:var(--tx)">design + ไทย + privacy</b> ให้ที่สุด แล้วเก็บ dynamic ไว้เป็นทางเลือกเฟสหน้า ก็พอเป็นตัวที่ดีที่สุดในกลุ่มของมันได้แล้ว</span>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== DIVIDER ===================== -->
+<div class="wrap"><div class="divider"><span>Technical reference — สำหรับ dev / Claude</span></div></div>
+
+<!-- ===================== TECHNICAL LAYER ===================== -->
+<div class="wrap">
+<div class="tech">
+
+  <section>
+    <h3>// current qr_generator inventory (จากโค้ดจริง)</h3>
+    <table class="simple">
+      <tr><th>มิติ</th><th>ค่าที่รองรับ (จาก <code>src/core/types.ts</code>)</th></tr>
+      <tr><td><b>QRType</b> (10)</td><td><span class="tok">url</span><span class="tok">text</span><span class="tok">email</span><span class="tok">sms</span><span class="tok">tel</span><span class="tok">wifi</span><span class="tok">vcard</span><span class="tok">geo</span><span class="tok">promptpay</span><span class="tok">bill</span></td></tr>
+      <tr><td><b>BodyShape</b> (10)</td><td><span class="tok">square</span><span class="tok">rounded</span><span class="tok">circle</span><span class="tok">diamond</span><span class="tok">star</span><span class="tok">triangle</span><span class="tok">cross</span><span class="tok">leaf</span><span class="tok">hexagon</span><span class="tok">dot</span></td></tr>
+      <tr><td><b>EyeFrameShape</b> (5)</td><td><span class="tok">square</span><span class="tok">rounded</span><span class="tok">circle</span><span class="tok">thick</span><span class="tok">leaf</span></td></tr>
+      <tr><td><b>EyeballShape</b> (5)</td><td><span class="tok">square</span><span class="tok">rounded</span><span class="tok">circle</span><span class="tok">diamond</span><span class="tok">cross</span></td></tr>
+      <tr><td><b>GradientType</b> (4)</td><td><span class="tok">none</span><span class="tok">linear</span><span class="tok">radial</span><span class="tok">diagonal</span></td></tr>
+      <tr><td><b>Ecc</b> (4)</td><td><span class="tok">L</span><span class="tok">M</span><span class="tok">Q</span><span class="tok">H</span> — default <code>M</code></td></tr>
+      <tr><td><b>LogoBg</b> (4)</td><td><span class="tok">none</span><span class="tok">square</span><span class="tok">rounded</span><span class="tok">circle</span></td></tr>
+      <tr><td><b>StyleSettings อื่น</b></td><td>fg · bg · useEyeColor+eyeColor · gradFrom/gradTo · logo(dataURL)+logoSize · frameOn+frameText+frameColor · size · margin(quiet zone)</td></tr>
+      <tr><td><b>Pipeline</b></td><td>deps: <code>qrcode</code> (encode) · custom <code>renderer.ts</code>/<code>shapes.ts</code> (draw) · <code>jspdf</code> (PDF) · <code>jsqr</code> (<code>verify.ts</code> scan-back) · <code>recent.ts</code> (local history)</td></tr>
+      <tr><td><b>Thai payment</b></td><td><code>payloads.ts</code>: PromptPay (phone/natid/ewallet + amount + storeLabel tag 62) &amp; Bill Payment (billerId + ref1/ref2) — EMVCo TLV + CRC16. <b>นี่คือ moat ที่คู่แข่งสากลไม่มี</b></td></tr>
+    </table>
+  </section>
+
+  <section>
+    <h3>// gap analysis vs competitors</h3>
+    <table class="simple">
+      <tr><th>หมวด</th><th>มีแล้ว</th><th>ช่องว่าง (ทำได้ฝั่ง client)</th><th>ช่องว่าง (ต้องมี backend)</th></tr>
+      <tr><td>Content types</td><td>10 static + ไทย payment</td><td>vEvent, MeCard, LINE/WhatsApp deep-link, crypto (BTC/ETH), PayPal/UPI</td><td>PDF/menu/video/social-bundle/business-page (host เนื้อหา)</td></tr>
+      <tr><td>Visual</td><td>สี/gradient/10 body/eye frame+ball/logo/frame-CTA/ECC/quiet</td><td>eye-gradient, templates, halftone, bg image, transparent export, contrast warning</td><td>— (เป็น client ทั้งหมด)</td></tr>
+      <tr><td>Platform</td><td>verify, recent history, 100% client</td><td>batch→ZIP (client-side, JSZip), share via URL hash, PWA</td><td>dynamic, analytics, bulk-API, accounts, password/expiry, landing builder</td></tr>
+      <tr><td>Export</td><td>PNG, SVG, PDF</td><td>EPS, JPG, WebP, transparent</td><td>—</td></tr>
+    </table>
+  </section>
+
+  <section>
+    <h3>// architecture note — the static/dynamic fork</h3>
+    <p class="warn">Dynamic = QR เก็บ <b>short URL ของเรา</b> (เช่น <code>qr.app/x/AbC</code>) ไม่ใช่ปลายทางจริง. ตอนสแกน server เรา resolve → redirect → log event. ผลที่ตามมา:</p>
+    <p>• ต้องมี <b>persistent backend + DB</b> (Vercel + Postgres ที่พี่เฟิสมี ใช้ได้) — แต่ถ้าบริการล่ม/ปิด <b>QR ที่พิมพ์ไปแล้วตายหมด</b> (ภาระระยะยาว)<br>
+       • <b>ความเป็นส่วนตัวเปลี่ยน</b>: จากเดิม 0 ข้อมูลออกจากเครื่อง → ต้อง track เพื่อให้ analytics ทำงาน (ขัดกับจุดยืนปัจจุบัน)<br>
+       • ต้องมี auth, rate-limit, abuse handling (คนเอาไปทำ phishing redirect)<br>
+       <b>ข้อสรุปทางเทคนิค:</b> แยกเป็น service ใหม่ (เช่น <code>qr-link</code>) อย่ายัดลงตัว generator ฝั่ง client ที่ออกแบบมาให้ไร้สถานะ</p>
+  </section>
+
+  <section>
+    <h3>// implementation pointers (ถ้าทำ must-have)</h3>
+    <table class="simple">
+      <tr><th>ฟีเจอร์</th><th>แนวทาง</th></tr>
+      <tr><td>Batch → ZIP</td><td>วน <code>buildPayload()</code> ต่อแถว → render canvas → <code>JSZip</code> → download. ไม่แตะ backend</td></tr>
+      <tr><td>Templates/presets</td><td>เก็บเป็น array ของ <code>Partial&lt;StyleSettings&gt;</code> ใน <code>constants.ts</code> + grid เลือกใน <code>StylePanel.tsx</code></td></tr>
+      <tr><td>Calendar / MeCard / LINE</td><td>เพิ่ม case ใน <code>payloads.ts</code> + field ใน <code>types.ts</code>/<code>FormFields.tsx</code> (vEvent = <code>BEGIN:VEVENT…</code>)</td></tr>
+      <tr><td>Contrast warning</td><td>คำนวณ WCAG contrast(fg,bg); ถ้า logoSize ใหญ่ → บังคับ/แนะ ECC=H ใน <code>validate.ts</code></td></tr>
+      <tr><td>Transparent export</td><td>ข้ามการวาด bg rect ใน <code>renderer.ts</code> เมื่อ bg=transparent; SVG ปล่อย no-fill</td></tr>
+      <tr><td>Share via URL hash</td><td>serialize {type, fields, style} → base64 → <code>location.hash</code>; อ่านกลับตอน mount</td></tr>
+      <tr><td>Halftone</td><td>3×3 submodule + ภาพ mono → ปรับ submodule ตามความเข้ม; ต้องคุม ECC=H ให้ยัง decode ได้</td></tr>
+    </table>
+  </section>
+
+  <section>
+    <h3>// sources</h3>
+    <ul class="sources">
+      <li><a href="https://www.qrcode-monkey.com/">QRCode Monkey</a> — body/eye shapes, gradient, eye color, logo (2MB), ECC 30%, PNG/SVG/PDF/EPS, content types (URL/text/email/sms/vcard/mecard/wifi/geo/event/social/crypto/file)</li>
+      <li><a href="https://www.qr-code-generator.com/">qr-code-generator.com</a> — static types (URL/vCard/text/email/sms/wifi/twitter/bitcoin), dynamic, analytics (scan/location/device), frames+CTA, custom colors, logo, templates, team, bulk via API</li>
+      <li><a href="https://qrfy.com/features/dynamic-qrs">QRfy</a> — 24 QR types, dynamic, analytics, password, expiry/pause, bulk CSV, custom landing pages</li>
+      <li><a href="https://qr-code.io/create">QR.io</a> — 22 QR types, bulk generation, custom landing pages</li>
+      <li><a href="https://www.canva.com/qr-code-generator/">Canva QR</a> — design-embedded QR, branding, bg image (อยู่ในเครื่องมือออกแบบ)</li>
+      <li><a href="https://qrcode-ai.com/en-US">QR Code AI</a> · <a href="https://huggingface.co/spaces/huggingface-projects/QR-code-AI-art-generator">HF AI Art</a> · <a href="https://nythrox.github.io/halftone-qrcode/">Halftone Generator</a> — artistic/AI/halftone (50+ params, image-in-QR, 3×3 submodule)</li>
+      <li><a href="https://www.uniqode.com/blog/dynamic-qr-code/best-free-dynamic-qr-code-generators">Uniqode</a> · <a href="https://scanova.io/blog/static-vs-dynamic-qr-codes/">Scanova</a> · <a href="https://www.jotform.com/blog/dynamic-qr-code-generators/">Jotform</a> — static vs dynamic, analytics fields, landscape 2025–2026</li>
+    </ul>
+  </section>
+
+</div>
+</div>
+
+<footer class="th">
+  Research compiled สำหรับ redesign ของ qr_generator · ความลึก: เช็คคู่แข่งหลัก + ความรู้โดเมน · มิ.ย. 2026<br>
+  ข้อมูลตารางเป็นภาพรวมตัวแทน อาจต่างตาม tier/แพ็กเกจของแต่ละเจ้า
+</footer>
+
+<script>
+(function(){
+  "use strict";
+
+  /* ---------- ANATOMY QR (built by JS) ---------- */
+  var svg = document.getElementById('qrsvg');
+  var NS = 'http://www.w3.org/2000/svg';
+  var N = 25, cell = 9, pad = 17.5; // 25*9=225 + pad*2(=35) = 260 viewbox
+  function el(t,a){var e=document.createElementNS(NS,t);for(var k in a)e.setAttribute(k,a[k]);return e;}
+
+  // seeded pseudo-random so the pattern is stable
+  var seed = 987654321;
+  function rnd(){ seed=(seed*1103515245+12345)&0x7fffffff; return seed/0x7fffffff; }
+
+  // background
+  svg.appendChild(el('rect',{x:0,y:0,width:260,height:260,rx:14,fill:'var(--qbg)','class':'part',id:'p-bg'}));
+
+  // quiet zone outline
+  var gQuiet = el('g',{'class':'part',id:'p-quiet'});
+  gQuiet.appendChild(el('rect',{x:pad-7,y:pad-7,width:225+14,height:225+14,rx:8,fill:'none',stroke:'var(--line2)','stroke-dasharray':'4 4','stroke-width':1}));
+  svg.appendChild(gQuiet);
+
+  function inFinder(r,c){
+    return (r<8&&c<8)||(r<8&&c>=N-8)||(r>=N-8&&c<8);
+  }
+  // data modules
+  var gMod = el('g',{'class':'part',id:'p-modules'});
+  for(var r=0;r<N;r++){for(var c=0;c<N;c++){
+    if(inFinder(r,c)) continue;
+    // leave center clear for logo
+    if(r>=10&&r<=14&&c>=10&&c<=14) continue;
+    if(rnd()<0.5){
+      gMod.appendChild(el('rect',{x:pad+c*cell+1,y:pad+r*cell+1,width:cell-2,height:cell-2,rx:2.4,fill:'var(--fg)'}));
+    }
+  }}
+  svg.appendChild(gMod);
+
+  // finder eyes: frame + ball, as separate parts
+  var gFrame = el('g',{'class':'part',id:'p-frame'});
+  var gBall  = el('g',{'class':'part',id:'p-ball'});
+  function eye(r,c){
+    var x=pad+c*cell, y=pad+r*cell;
+    gFrame.appendChild(el('rect',{x:x+1,y:y+1,width:cell*7-2,height:cell*7-2,rx:7,fill:'none',stroke:'var(--fg)','stroke-width':cell-2.5}));
+    gBall.appendChild(el('rect',{x:x+cell*2+1,y:y+cell*2+1,width:cell*3-2,height:cell*3-2,rx:5,fill:'var(--acc)'}));
+  }
+  eye(0,0); eye(0,N-7); eye(N-7,0);
+  svg.appendChild(gFrame); svg.appendChild(gBall);
+
+  // logo
+  var gLogo = el('g',{'class':'part',id:'p-logo'});
+  var cx=130, cy=130, lr=20;
+  gLogo.appendChild(el('rect',{x:cx-lr-3,y:cy-lr-3,width:(lr+3)*2,height:(lr+3)*2,rx:10,fill:'#fff'}));
+  gLogo.appendChild(el('circle',{cx:cx,cy:cy,r:lr,fill:'none',stroke:'var(--acc)','stroke-width':4}));
+  gLogo.appendChild(el('circle',{cx:cx,cy:cy,r:8,fill:'var(--pink)'}));
+  svg.appendChild(gLogo);
+
+  // outer CTA frame (hidden-ish part, highlights on hover)
+  var gCta = el('g',{'class':'part',id:'p-cta',opacity:0.0});
+  gCta.appendChild(el('rect',{x:6,y:6,width:248,height:248,rx:16,fill:'none',stroke:'var(--green)','stroke-width':2}));
+  svg.appendChild(gCta);
+
+  /* ---------- legend hover → highlight ---------- */
+  var map = {
+    modules:['p-modules'], frame:['p-frame'], ball:['p-ball'], logo:['p-logo'],
+    fg:['p-modules','p-frame','p-ball'], frameCta:['p-cta'], quiet:['p-quiet'], bgimg:['p-bg']
+  };
+  var legs = document.querySelectorAll('#legend .leg');
+  legs.forEach(function(leg){
+    leg.addEventListener('mouseenter', function(){
+      svg.classList.add('focusing');
+      var keys = map[leg.getAttribute('data-key')]||[];
+      keys.forEach(function(id){ var n=document.getElementById(id); if(n){n.classList.add('focus'); if(id==='p-cta')n.style.opacity=1;} });
+    });
+    leg.addEventListener('mouseleave', function(){
+      svg.classList.remove('focusing');
+      document.querySelectorAll('#qrsvg .focus').forEach(function(n){n.classList.remove('focus'); if(n.id==='p-cta')n.style.opacity=0;});
+    });
+  });
+
+  /* ---------- customization tabs ---------- */
+  var tabs = document.querySelectorAll('#tabs .tab');
+  tabs.forEach(function(t){
+    t.addEventListener('click', function(){
+      tabs.forEach(function(x){x.classList.remove('on');});
+      t.classList.add('on');
+      document.querySelectorAll('.panel-body').forEach(function(p){
+        p.classList.toggle('on', p.getAttribute('data-p')===t.getAttribute('data-t'));
+      });
+    });
+  });
+
+  /* ---------- comparison matrix ---------- */
+  // value codes: 2=yes, 1=partial, 0=no, 3=signature/star
+  var T = ['monkey','qrcg','qrfy','canva','ai','mine'];
+  var rows = [
+    {cat:'content',label:'ชนิดข้อมูลที่ฝังได้',head:true},
+    {cat:'content',f:'URL / Website',v:[2,2,2,2,2,2]},
+    {cat:'content',f:'ข้อความ (Text)',v:[2,2,2,1,1,2]},
+    {cat:'content',f:'Email / SMS / โทร',v:[2,2,2,0,0,2]},
+    {cat:'content',f:'WiFi',v:[2,2,2,0,0,2]},
+    {cat:'content',f:'vCard / นามบัตรดิจิทัล',v:[2,2,2,1,0,2]},
+    {cat:'content',f:'พิกัด / Google Maps',v:[2,1,2,0,0,2]},
+    {cat:'content',f:'Calendar event',v:[2,0,2,0,0,0]},
+    {cat:'content',f:'Social bundle / App store',v:[1,2,2,0,0,0]},
+    {cat:'content',f:'PDF / Video / Menu (host)',v:[1,2,2,0,0,0]},
+    {cat:'content',f:'Crypto payment',v:[2,2,1,0,0,0]},
+    {cat:'content',f:'PromptPay / Bill ไทย (EMVCo)',v:[0,0,0,0,0,3]},
+
+    {cat:'visual',label:'การแต่งหน้าตา',head:true},
+    {cat:'visual',f:'สีจุด / สีพื้น',v:[2,2,2,2,2,2]},
+    {cat:'visual',f:'สีตาแยก (eye color)',v:[2,1,2,0,0,2]},
+    {cat:'visual',f:'Gradient',v:[2,1,2,0,0,2]},
+    {cat:'visual',f:'รูปทรง module',v:[2,1,2,0,1,2]},
+    {cat:'visual',f:'รูปทรงตา frame + ball',v:[2,1,2,0,0,2]},
+    {cat:'visual',f:'อัปโหลดโลโก้',v:[2,2,2,1,2,2]},
+    {cat:'visual',f:'Frame + CTA text',v:[1,2,2,0,0,2]},
+    {cat:'visual',f:'ภาพพื้นหลัง / Artistic / AI',v:[0,0,0,1,2,0]},
+    {cat:'visual',f:'Templates / presets',v:[1,2,2,2,1,0]},
+    {cat:'visual',f:'คุม ECC',v:[2,0,1,0,1,2]},
+    {cat:'visual',f:'Quiet zone / margin',v:[1,0,0,0,0,2]},
+
+    {cat:'platform',label:'ระบบ / Dynamic',head:true},
+    {cat:'platform',f:'Static · ไม่ต้องล็อกอิน',v:[2,1,1,2,2,2]},
+    {cat:'platform',f:'Dynamic (แก้ปลายทาง)',v:[0,2,2,0,0,0]},
+    {cat:'platform',f:'Analytics (สแกน/ที่ตั้ง/อุปกรณ์)',v:[0,2,2,0,0,0]},
+    {cat:'platform',f:'Bulk / CSV',v:[0,2,2,0,0,0]},
+    {cat:'platform',f:'API',v:[0,2,2,0,0,0]},
+    {cat:'platform',f:'Password / หมดอายุ / ตั้งเวลา',v:[0,1,2,0,0,0]},
+    {cat:'platform',f:'ทีม / โฟลเดอร์',v:[0,2,2,2,0,0]},
+    {cat:'platform',f:'Scan-back verify (เช็คสแกนได้)',v:[0,0,0,0,0,3]},
+    {cat:'platform',f:'100% client-side / privacy',v:[1,0,0,0,0,3]},
+    {cat:'platform',f:'ประวัติล่าสุด (local)',v:[0,1,2,2,0,2]},
+
+    {cat:'export',label:'Export',head:true},
+    {cat:'export',f:'PNG',v:[2,2,2,2,2,2]},
+    {cat:'export',f:'SVG (เวกเตอร์)',v:[2,1,2,1,0,2]},
+    {cat:'export',f:'PDF',v:[2,1,2,1,0,2]},
+    {cat:'export',f:'EPS',v:[2,0,1,0,0,0]},
+    {cat:'export',f:'พื้นหลังโปร่งใส',v:[1,0,1,2,0,1]}
+  ];
+
+  function cellHtml(v){
+    if(v===2) return '<span class="yes">✓</span>';
+    if(v===1) return '<span class="part-y">◐</span>';
+    if(v===3) return '<span class="star">★</span>';
+    return '<span class="no">—</span>';
+  }
+  var mbody = document.getElementById('mbody');
+  function render(filter){
+    mbody.innerHTML='';
+    rows.forEach(function(row){
+      if(filter!=='all' && row.cat!==filter) return;
+      var tr=document.createElement('tr');
+      if(row.head){
+        tr.className='cat-head';
+        tr.innerHTML='<td colspan="7">'+row.label+'</td>';
+      } else {
+        var cells='<td class="feat">'+row.f+'</td>';
+        for(var i=0;i<6;i++){
+          cells+='<td'+(T[i]==='mine'?' class="mine"':'')+'>'+cellHtml(row.v[i])+'</td>';
+        }
+        tr.innerHTML=cells;
+      }
+      mbody.appendChild(tr);
+    });
+  }
+  render('all');
+  var fbtns=document.querySelectorAll('#filters .fbtn');
+  fbtns.forEach(function(b){
+    b.addEventListener('click',function(){
+      fbtns.forEach(function(x){x.classList.remove('on');});
+      b.classList.add('on');
+      render(b.getAttribute('data-f'));
+    });
+  });
+
+  /* ---------- content type catalog ---------- */
+  var types = [
+    {i:'🔗',n:'URL / Website',d:'ลิงก์เว็บ',s:'has'},
+    {i:'📝',n:'ข้อความ',d:'plain text',s:'has'},
+    {i:'✉️',n:'Email',d:'mailto + หัวข้อ',s:'has'},
+    {i:'💬',n:'SMS',d:'ส่งข้อความ',s:'has'},
+    {i:'📞',n:'โทรศัพท์',d:'tel:',s:'has'},
+    {i:'📶',n:'WiFi',d:'เชื่อมเน็ตไม่ต้องพิมพ์',s:'has'},
+    {i:'👤',n:'vCard',d:'นามบัตรดิจิทัล',s:'has'},
+    {i:'📍',n:'พิกัด',d:'geo / Maps',s:'has'},
+    {i:'฿',n:'PromptPay',d:'จ่ายเงินไทย EMVCo',s:'has'},
+    {i:'🧾',n:'Bill Payment',d:'บิลเลอร์ไทย',s:'has'},
+    {i:'📅',n:'Calendar event',d:'vEvent — ฝัง static ได้',s:''},
+    {i:'🪪',n:'MeCard',d:'นามบัตรย่อ',s:''},
+    {i:'₿',n:'Crypto',d:'BTC/ETH address',s:''},
+    {i:'💚',n:'LINE / WhatsApp',d:'deep-link แชต',s:''},
+    {i:'📄',n:'PDF',d:'host ไฟล์ → ลิงก์',s:'dyn'},
+    {i:'🎬',n:'Video / รูป / MP3',d:'host สื่อ',s:'dyn'},
+    {i:'🍽️',n:'เมนูร้าน',d:'host หน้าเมนู',s:'dyn'},
+    {i:'🏪',n:'Business page',d:'mini landing',s:'dyn'},
+    {i:'🔀',n:'Social bundle',d:'รวมหลายลิงก์',s:'dyn'},
+    {i:'📲',n:'App store smart',d:'เด้งตาม OS',s:'dyn'},
+    {i:'🎟️',n:'Coupon',d:'คูปอง host',s:'dyn'},
+    {i:'⭐',n:'Feedback / rating',d:'แบบสอบถาม',s:'dyn'}
+  ];
+  var tg=document.getElementById('typegrid');
+  types.forEach(function(t){
+    var d=document.createElement('div');
+    d.className='type'+(t.s==='has'?' has':'')+(t.s==='dyn'?' dyn':'');
+    var flag = t.s==='has'?'<span class="flag h">มีแล้ว</span>':(t.s==='dyn'?'<span class="flag d">dynamic</span>':'');
+    d.innerHTML=flag+'<div class="ico">'+t.i+'</div><div class="nm">'+t.n+'</div><div class="bd">'+t.d+'</div>';
+    tg.appendChild(d);
+  });
+
+})();
+</script>
+</body>
+</html>
