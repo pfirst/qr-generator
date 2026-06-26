@@ -1,6 +1,5 @@
 // Rasterise the QR SVG and export as PNG / JPG / SVG / PDF, copy, or print.
-import { renderSVG } from './renderer'
-import type { QRMatrix } from './qr'
+import { renderQrSvg, type RenderInput } from './render'
 import type { StyleSettings } from './types'
 
 export type ExportFormat = 'png' | 'jpg' | 'webp' | 'svg' | 'pdf'
@@ -34,11 +33,11 @@ function roundRect(ctx: CanvasRenderingContext2D, x: number, y: number, w: numbe
 
 // Render QR to a canvas at `px` resolution, adding the CTA frame when enabled.
 export async function rasterCanvas(
-  matrix: QRMatrix,
+  input: RenderInput,
   style: StyleSettings,
   px: number,
 ): Promise<HTMLCanvasElement> {
-  const { svg } = renderSVG(matrix, style, px)
+  const svg = await renderQrSvg(input.data, input.ecc, style, px, input.count)
   const img = await svgToImage(svg)
   const W = px
 
@@ -105,18 +104,18 @@ function saveBlob(blob: Blob, filename: string) {
 const fname = (type: string, ext: string) => `qr-${type}-${Date.now()}.${ext}`
 
 export async function downloadQR(
-  matrix: QRMatrix,
+  input: RenderInput,
   style: StyleSettings,
   px: number,
   format: ExportFormat,
   typeLabel: string,
 ): Promise<void> {
   if (format === 'svg') {
-    const { svg } = renderSVG(matrix, style, px)
+    const svg = await renderQrSvg(input.data, input.ecc, style, px, input.count)
     saveBlob(new Blob([svg], { type: 'image/svg+xml;charset=utf-8' }), fname(typeLabel, 'svg'))
     return
   }
-  const canvas = await rasterCanvas(matrix, style, px)
+  const canvas = await rasterCanvas(input, style, px)
   if (format === 'pdf') {
     const dataUrl = canvas.toDataURL('image/png')
     const { jsPDF } = await import('jspdf') // lazy: keeps jspdf out of the initial bundle
@@ -137,14 +136,14 @@ export async function downloadQR(
   saveBlob(blob, fname(typeLabel, format))
 }
 
-export async function copyQRToClipboard(matrix: QRMatrix, style: StyleSettings, px: number): Promise<void> {
-  const canvas = await rasterCanvas(matrix, style, px)
+export async function copyQRToClipboard(input: RenderInput, style: StyleSettings, px: number): Promise<void> {
+  const canvas = await rasterCanvas(input, style, px)
   const blob = await canvasToBlob(canvas, 'image/png')
   await navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })])
 }
 
-export async function printQR(matrix: QRMatrix, style: StyleSettings, px: number): Promise<void> {
-  const canvas = await rasterCanvas(matrix, style, px)
+export async function printQR(input: RenderInput, style: StyleSettings, px: number): Promise<void> {
+  const canvas = await rasterCanvas(input, style, px)
   const dataUrl = canvas.toDataURL('image/png')
   const w = window.open('', '_blank')
   if (!w) throw new Error('popup blocked')

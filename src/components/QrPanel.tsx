@@ -2,28 +2,34 @@ import { useState, type ComponentType, type CSSProperties } from 'react'
 import { BODY_SHAPES, BG_PRESETS, ECC_LEVELS, EYE_FRAMES, EYEBALLS, FG_PRESETS } from '../constants'
 import type { GradientType, StyleSettings } from '../core/types'
 import { Card, SectionHead } from '../ui/surfaces'
-import { ColorRow, SectionLabel, SegGroup, ShapeMenu, Toggle } from '../ui/controls'
+import { ACCENT_GRAD, ColorRow, SectionLabel, SegGroup, ShapeMenu, Toggle } from '../ui/controls'
 import {
-  DotsGridIcon,
-  EyeIcon,
+  CellsIcon,
   FrameIcon,
   GradDiagonalIcon,
   GradLinearIcon,
   GradNoneIcon,
   GradRadialIcon,
+  MarkerBorderIcon,
+  MarkerCenterIcon,
   PaletteIcon,
   SlidersIcon,
   WarnIcon,
 } from '../ui/icons'
 
-type TabId = 'color' | 'eyes' | 'dots' | 'frames' | 'adv'
+// Three separate shape pickers (กรอบตา / จุดตา / จุด) like Figma, plus colour,
+// the CTA frame, and advanced settings.
+type TabId = 'color' | 'border' | 'center' | 'cells' | 'cta' | 'adv'
 const TABS: { id: TabId; label: string; Icon: ComponentType<{ size?: number }> }[] = [
   { id: 'color', label: 'สี', Icon: PaletteIcon },
-  { id: 'eyes', label: 'ตา', Icon: EyeIcon },
-  { id: 'dots', label: 'จุด', Icon: DotsGridIcon },
-  { id: 'frames', label: 'เฟรม', Icon: FrameIcon },
+  { id: 'border', label: 'กรอบตา', Icon: MarkerBorderIcon },
+  { id: 'center', label: 'จุดตา', Icon: MarkerCenterIcon },
+  { id: 'cells', label: 'จุด', Icon: CellsIcon },
+  { id: 'cta', label: 'เฟรม', Icon: FrameIcon },
   { id: 'adv', label: 'ขั้นสูง', Icon: SlidersIcon },
 ]
+// Shape pickers get Figma's anchored dropdown; the rest use a centred popup.
+const SHAPE_TABS: TabId[] = ['border', 'center', 'cells']
 const GRADIENTS: { id: GradientType; label: string; Icon: ComponentType<{ size?: number }> }[] = [
   { id: 'none', label: 'ไม่มี', Icon: GradNoneIcon },
   { id: 'linear', label: 'เส้นตรง', Icon: GradLinearIcon },
@@ -109,26 +115,19 @@ function PopBody({ tab, style, patch }: { tab: TabId; style: StyleSettings; patc
     )
   }
 
-  if (tab === 'eyes') {
-    return (
-      <div className="flex flex-col gap-4">
-        <div>
-          <SectionLabel>กรอบดวงตา (Corner frame)</SectionLabel>
-          <ShapeMenu kind="frame" options={EYE_FRAMES} value={style.eyeFrameShape} onChange={(v) => patch({ eyeFrameShape: v })} />
-        </div>
-        <div>
-          <SectionLabel>ลูกตา (Corner dot)</SectionLabel>
-          <ShapeMenu kind="ball" options={EYEBALLS} value={style.eyeballShape} onChange={(v) => patch({ eyeballShape: v })} />
-        </div>
-      </div>
-    )
+  if (tab === 'border') {
+    return <ShapeMenu kind="frame" options={EYE_FRAMES} value={style.eyeFrameShape} onChange={(v) => patch({ eyeFrameShape: v })} />
   }
 
-  if (tab === 'dots') {
+  if (tab === 'center') {
+    return <ShapeMenu kind="ball" options={EYEBALLS} value={style.eyeballShape} onChange={(v) => patch({ eyeballShape: v })} />
+  }
+
+  if (tab === 'cells') {
     return <ShapeMenu kind="body" options={BODY_SHAPES} value={style.bodyShape} onChange={(v) => patch({ bodyShape: v })} />
   }
 
-  if (tab === 'frames') {
+  if (tab === 'cta') {
     return (
       <div className="w-[286px]">
         <label className="flex cursor-pointer items-center justify-between">
@@ -250,38 +249,50 @@ export function QrPanel({ svg, hasData, style, patchStyle }: { svg: string | nul
 
         {/* toolbar — floating icon pill */}
         <div className="relative mt-5 flex justify-center">
-          <div className="inline-flex items-center gap-1.5 rounded-[18px] border border-[#eef0f5] bg-white p-1.5 shadow-[0_8px_24px_rgba(17,24,39,0.09)]">
+          <div className="relative z-50 inline-flex items-center gap-1.5 rounded-[18px] border border-[#eef0f5] bg-white p-1.5 shadow-[0_8px_24px_rgba(17,24,39,0.09)]">
             {TABS.map((t) => {
               const on = open === t.id
+              const isShape = SHAPE_TABS.includes(t.id)
               return (
-                <button
-                  key={t.id}
-                  title={t.label}
-                  onClick={() => setOpen(on ? null : t.id)}
-                  className={
-                    'grid h-11 w-11 cursor-pointer place-items-center rounded-[13px] transition ' +
-                    (on ? 'bg-[#15161c] text-white shadow-[0_4px_12px_rgba(17,24,39,0.25)]' : 'text-[#6b7280] hover:bg-[#f3f4f8] hover:text-[#15161c]')
-                  }
-                >
-                  <t.Icon size={19} />
-                </button>
+                <div key={t.id} className="relative">
+                  <button
+                    title={t.label}
+                    onClick={() => setOpen(on ? null : t.id)}
+                    className={
+                      'grid h-11 w-11 cursor-pointer place-items-center rounded-[13px] transition ' +
+                      (on ? 'border border-transparent text-white shadow-[0_4px_14px_rgba(124,58,237,0.32)]' : 'text-[#6b7280] hover:bg-[#f3f4f8] hover:text-[#15161c]')
+                    }
+                    style={on ? { backgroundImage: ACCENT_GRAD } : undefined}
+                  >
+                    <t.Icon size={19} />
+                  </button>
+                  {/* shape pickers: dropdown anchored to the icon, Figma-style */}
+                  {on && isShape && (
+                    <div
+                      className="absolute bottom-full left-1/2 z-50 mb-3 -translate-x-1/2 rounded-[18px] bg-white p-1.5 shadow-[0_20px_56px_rgba(17,24,39,0.22)]"
+                      style={{ animation: 'popIn .18s cubic-bezier(.2,.9,.3,1.2)' }}
+                    >
+                      <PopBody tab={t.id} style={style} patch={patchStyle} />
+                    </div>
+                  )}
+                </div>
               )
             })}
           </div>
 
-          {open && (
-            <>
-              <div className="fixed inset-0 z-40" onClick={() => setOpen(null)} />
-              <div className="absolute bottom-full left-0 right-0 z-50 mb-3 flex justify-center">
-                <div
-                  className="max-h-[64vh] w-max max-w-[340px] overflow-y-auto rounded-[22px] bg-white p-2.5 shadow-[0_20px_56px_rgba(17,24,39,0.22)]"
-                  style={{ animation: 'popIn .18s cubic-bezier(.2,.9,.3,1.2)' }}
-                >
-                  {open && <PopBody tab={open} style={style} patch={patchStyle} />}
-                </div>
+          {/* settings popups (สี / เฟรม / ขั้นสูง) — centred above the toolbar */}
+          {open && !SHAPE_TABS.includes(open) && (
+            <div className="absolute bottom-full left-0 right-0 z-50 mb-3 flex justify-center">
+              <div
+                className="max-h-[64vh] w-max max-w-[340px] overflow-y-auto rounded-[22px] bg-white p-2.5 shadow-[0_20px_56px_rgba(17,24,39,0.22)]"
+                style={{ animation: 'popIn .18s cubic-bezier(.2,.9,.3,1.2)' }}
+              >
+                <PopBody tab={open} style={style} patch={patchStyle} />
               </div>
-            </>
+            </div>
           )}
+
+          {open && <div className="fixed inset-0 z-40" onClick={() => setOpen(null)} />}
         </div>
       </Card>
   )

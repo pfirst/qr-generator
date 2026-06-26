@@ -25,33 +25,32 @@ export const TYPE_LABEL: Record<QRType, string> = Object.fromEntries(
   TYPES.map((t) => [t.id, t.label]),
 ) as Record<QRType, string>
 
+// Shape options mirror Figma's QR generator (rendered via qr-code-styling),
+// with Thai labels. Figma's squircle / cornerflow → มนนุ่ม / ลื่นไหล.
 export const BODY_SHAPES: { id: BodyShape; label: string }[] = [
   { id: 'square', label: 'เหลี่ยม' },
+  { id: 'circle', label: 'กลม' },
   { id: 'rounded', label: 'มน' },
-  { id: 'circle', label: 'วงกลม' },
-  { id: 'dot', label: 'จุด' },
-  { id: 'diamond', label: 'ข้าวหลามตัด' },
-  { id: 'hexagon', label: 'หกเหลี่ยม' },
-  { id: 'triangle', label: 'สามเหลี่ยม' },
-  { id: 'star', label: 'ดาว' },
-  { id: 'cross', label: 'กากบาท' },
-  { id: 'leaf', label: 'ใบไม้' },
+  { id: 'squircle', label: 'มนนุ่ม' },
+  { id: 'cornerflow', label: 'ลื่นไหล' },
 ]
 
 export const EYE_FRAMES: { id: EyeFrameShape; label: string }[] = [
   { id: 'square', label: 'เหลี่ยม' },
-  { id: 'rounded', label: 'มน' },
   { id: 'circle', label: 'กลม' },
-  { id: 'thick', label: 'หนา' },
-  { id: 'leaf', label: 'ใบไม้' },
+  { id: 'dots', label: 'จุด' },
+  { id: 'rounded', label: 'มน' },
+  { id: 'squircle', label: 'มนนุ่ม' },
+  { id: 'cornerflow', label: 'ลื่นไหล' },
 ]
 
 export const EYEBALLS: { id: EyeballShape; label: string }[] = [
   { id: 'square', label: 'เหลี่ยม' },
-  { id: 'rounded', label: 'มน' },
   { id: 'circle', label: 'กลม' },
-  { id: 'diamond', label: 'ข้าวหลามตัด' },
-  { id: 'cross', label: 'กากบาท' },
+  { id: 'dots', label: 'จุด' },
+  { id: 'rounded', label: 'มน' },
+  { id: 'squircle', label: 'มนนุ่ม' },
+  { id: 'cornerflow', label: 'ลื่นไหล' },
 ]
 
 export const ECC_LEVELS = [

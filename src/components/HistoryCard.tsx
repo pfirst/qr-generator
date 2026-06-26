@@ -1,7 +1,7 @@
-import { useMemo, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { createMatrix } from '../core/qr'
 import { buildPayload } from '../core/payloads'
-import { renderSVG } from '../core/renderer'
+import { renderQrSvg } from '../core/render'
 import { defaultStyle } from '../core/types'
 import type { RecentItem } from '../recent'
 import { Card, SectionHead } from '../ui/surfaces'
@@ -9,12 +9,12 @@ import { ChevronLeftIcon, ChevronRightIcon } from '../ui/icons'
 
 const THUMB = { ...defaultStyle(), fg: '#111827', bg: '#ffffff', gradient: 'none' as const, bodyShape: 'square' as const, eyeFrameShape: 'square' as const, eyeballShape: 'square' as const, logo: null, frameOn: false, margin: 2 }
 
-function thumbSvg(item: RecentItem): string | null {
+async function thumbSvg(item: RecentItem): Promise<string | null> {
   try {
     const payload = buildPayload(item.type, item.data)
     if (!payload) return null
     const matrix = createMatrix(payload, 'M')
-    return renderSVG(matrix, THUMB, 116).svg
+    return await renderQrSvg(payload, 'M', THUMB, 116, matrix.size)
   } catch {
     return null
   }
@@ -29,7 +29,14 @@ function fmtDate(ts: number): string {
 
 export function HistoryCard({ recent, onLoad, onClear }: { recent: RecentItem[]; onLoad: (r: RecentItem) => void; onClear: () => void }) {
   const scroller = useRef<HTMLDivElement>(null)
-  const thumbs = useMemo(() => recent.map(thumbSvg), [recent])
+  const [thumbs, setThumbs] = useState<(string | null)[]>([])
+  useEffect(() => {
+    let cancelled = false
+    Promise.all(recent.map(thumbSvg)).then((t) => !cancelled && setThumbs(t))
+    return () => {
+      cancelled = true
+    }
+  }, [recent])
   const scroll = (dir: -1 | 1) => scroller.current?.scrollBy({ left: dir * 280, behavior: 'smooth' })
 
   return (

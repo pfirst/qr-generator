@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { createMatrix } from './core/qr'
 import { buildPayload } from './core/payloads'
-import { renderSVG } from './core/renderer'
+import { renderQrSvg, type RenderInput } from './core/render'
 import { contrastScan, decodeRendered } from './core/verify'
 import { copyQRToClipboard, downloadQR, printQR, type ExportFormat } from './core/export'
 import { defaultFieldData, defaultStyle, type Ecc, type FieldData, type QRType } from './core/types'
@@ -64,19 +64,40 @@ export default function App() {
     }
   }, [payload, effEcc])
 
-  const svg = useMemo(() => (matrix ? renderSVG(matrix, style, style.size).svg : null), [matrix, style])
+  // Everything the renderer/export/verify need, derived once per matrix.
+  const renderInput = useMemo<RenderInput | null>(
+    () => (matrix ? { data: payload, ecc: effEcc, count: matrix.size } : null),
+    [matrix, payload, effEcc],
+  )
+
+  // SVG render is async now (qr-code-styling), so it lives in state.
+  const [svg, setSvg] = useState<string | null>(null)
+  useEffect(() => {
+    if (!renderInput) {
+      setSvg(null)
+      return
+    }
+    let cancelled = false
+    renderQrSvg(renderInput.data, renderInput.ecc, style, style.size, renderInput.count)
+      .then((s) => !cancelled && setSvg(s))
+      .catch(() => !cancelled && setSvg(null))
+    return () => {
+      cancelled = true
+    }
+  }, [renderInput, style])
+
   const contrast = useMemo(() => contrastScan(style), [style])
-  const ready = !!matrix
+  const ready = !!renderInput
 
   // --- real decode check (debounced) ---
   useEffect(() => {
-    if (!matrix) {
+    if (!renderInput) {
       setDecodeOk(null)
       return
     }
     let cancelled = false
     const t = window.setTimeout(() => {
-      decodeRendered(matrix, style)
+      decodeRendered(renderInput, style)
         .then((res) => !cancelled && setDecodeOk(res !== null))
         .catch(() => !cancelled && setDecodeOk(null))
     }, 300)
@@ -84,7 +105,7 @@ export default function App() {
       cancelled = true
       clearTimeout(t)
     }
-  }, [matrix, style])
+  }, [renderInput, style])
 
   // --- combined warning message for the check card ---
   const warn = useMemo<string | null>(() => {
@@ -98,48 +119,48 @@ export default function App() {
 
   const runExport = useCallback(
     async (fmt: ExportFormat) => {
-      if (!matrix) return showToast('กรุณากรอกข้อมูลให้ครบก่อน')
+      if (!renderInput) return showToast('กรุณากรอกข้อมูลให้ครบก่อน')
       try {
-        await downloadQR(matrix, style, exportSize, fmt, type)
+        await downloadQR(renderInput, style, exportSize, fmt, type)
         recordRecent()
         showToast('ดาวน์โหลด ' + fmt.toUpperCase() + ' แล้ว')
       } catch {
         showToast('เกิดข้อผิดพลาดในการส่งออก')
       }
     },
-    [matrix, style, exportSize, type, recordRecent, showToast],
+    [renderInput, style, exportSize, type, recordRecent, showToast],
   )
 
   const onCopy = useCallback(async () => {
-    if (!matrix) return showToast('กรุณากรอกข้อมูลให้ครบก่อน')
+    if (!renderInput) return showToast('กรุณากรอกข้อมูลให้ครบก่อน')
     try {
-      await copyQRToClipboard(matrix, style, exportSize)
+      await copyQRToClipboard(renderInput, style, exportSize)
       recordRecent()
       showToast('คัดลอกรูปไปคลิปบอร์ดแล้ว')
     } catch {
       showToast('เบราว์เซอร์ไม่รองรับการคัดลอกรูป')
     }
-  }, [matrix, style, exportSize, recordRecent, showToast])
+  }, [renderInput, style, exportSize, recordRecent, showToast])
 
   const onPrint = useCallback(async () => {
-    if (!matrix) return showToast('กรุณากรอกข้อมูลให้ครบก่อน')
+    if (!renderInput) return showToast('กรุณากรอกข้อมูลให้ครบก่อน')
     try {
-      await printQR(matrix, style, exportSize)
+      await printQR(renderInput, style, exportSize)
     } catch {
       showToast('เปิดหน้าต่างพิมพ์ไม่ได้ (อาจถูกบล็อก popup)')
     }
-  }, [matrix, style, exportSize, showToast])
+  }, [renderInput, style, exportSize, showToast])
 
   const onTestScan = useCallback(async () => {
-    if (!matrix) return showToast('กรุณากรอกข้อมูลให้ครบก่อน')
+    if (!renderInput) return showToast('กรุณากรอกข้อมูลให้ครบก่อน')
     try {
-      const res = await decodeRendered(matrix, style)
+      const res = await decodeRendered(renderInput, style)
       setDecodeOk(res !== null)
       showToast(res !== null ? 'ทดสอบแล้ว · สแกนติด ✓' : 'ทดสอบแล้ว · สแกนไม่ติด')
     } catch {
       showToast('ทดสอบสแกนไม่สำเร็จ')
     }
-  }, [matrix, style, showToast])
+  }, [renderInput, style, showToast])
 
   const onLoadRecent = useCallback(
     (r: RecentItem) => {

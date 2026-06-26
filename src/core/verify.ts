@@ -3,7 +3,7 @@
 // confirm that shapes/logo/gradient didn't break readability.
 import jsQR from 'jsqr'
 import { rasterCanvas } from './export'
-import type { QRMatrix } from './qr'
+import type { RenderInput } from './render'
 import type { StyleSettings } from './types'
 
 export type ScanLevel = 'ok' | 'warn' | 'risk'
@@ -67,9 +67,9 @@ export function contrastScan(style: StyleSettings): ContrastResult {
 }
 
 // Decode the actual rendered QR. Returns the decoded text, or null if unreadable.
-export async function decodeRendered(matrix: QRMatrix, style: StyleSettings): Promise<string | null> {
+export async function decodeRendered(input: RenderInput, style: StyleSettings): Promise<string | null> {
   // render without the CTA frame so the decoder sees just the code
-  const canvas = await rasterCanvas(matrix, { ...style, frameOn: false }, 380)
+  const canvas = await rasterCanvas(input, { ...style, frameOn: false }, 380)
 
   if ('BarcodeDetector' in window) {
     try {

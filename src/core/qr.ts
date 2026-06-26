@@ -1,5 +1,6 @@
 // QR matrix generation. Encoding/Reed-Solomon/masking handled by the `qrcode`
-// library (we never reinvent that); everything visual is rendered by renderer.ts.
+// library (we never reinvent that). The matrix is used for validation and the
+// quiet-zone module count only — the visual QR is drawn by render.ts.
 import QRCode from 'qrcode'
 import type { Ecc } from './types'
 

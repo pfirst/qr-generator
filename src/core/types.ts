@@ -12,24 +12,15 @@ export type QRType =
   | 'promptpay'
   | 'bill'
 
-// 10 body/module shapes (matches the original generator).
-export type BodyShape =
-  | 'square'
-  | 'rounded'
-  | 'circle'
-  | 'diamond'
-  | 'star'
-  | 'triangle'
-  | 'cross'
-  | 'leaf'
-  | 'hexagon'
-  | 'dot'
+// Shape sets mirror Figma's QR generator (which renders via qr-code-styling).
+// Cells (body modules): no "dots" option — 5 choices.
+export type BodyShape = 'square' | 'circle' | 'rounded' | 'squircle' | 'cornerflow'
 
-// 5 finder-frame (the outer ring of each corner eye).
-export type EyeFrameShape = 'square' | 'rounded' | 'circle' | 'thick' | 'leaf'
+// Marker border (the outer ring of each corner eye) — 6 choices.
+export type EyeFrameShape = 'square' | 'circle' | 'dots' | 'rounded' | 'squircle' | 'cornerflow'
 
-// 5 finder-center (the eyeball inside each corner).
-export type EyeballShape = 'square' | 'rounded' | 'circle' | 'diamond' | 'cross'
+// Marker center (the eyeball inside each corner) — 6 choices.
+export type EyeballShape = 'square' | 'circle' | 'dots' | 'rounded' | 'squircle' | 'cornerflow'
 
 export type GradientType = 'none' | 'linear' | 'radial' | 'diagonal'
 export type Ecc = 'L' | 'M' | 'Q' | 'H'

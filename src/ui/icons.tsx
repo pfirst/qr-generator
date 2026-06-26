@@ -170,6 +170,27 @@ export const FrameIcon = (p: IconProps) => (
     <rect x="8" y="15" width="8" height="3" rx="1" fill="currentColor" stroke="none" />
   </Svg>
 )
+// Marker-border (กรอบตา) and marker-center (จุดตา) keep the app's rounded
+// style. Only the cells icon (จุด) is lifted from Figma, per request.
+export const MarkerBorderIcon = (p: IconProps) => (
+  <Svg {...p}>
+    <rect x="4" y="4" width="16" height="16" rx="3" />
+  </Svg>
+)
+export const MarkerCenterIcon = (p: IconProps) => (
+  <Svg {...p}>
+    <rect x="5" y="5" width="14" height="14" rx="3" fill="currentColor" stroke="none" />
+  </Svg>
+)
+// Cells (จุด): Figma's exact pixel-grid glyph.
+export const CellsIcon = ({ size = 18, className }: IconProps) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" className={className}>
+    <path
+      fill="currentColor"
+      d="M9 3h3v3H9zM9 6h3v3H9zM6 6h3v3H6zM6 9h3v3H6zM3 3h3v3H3zM15 18h3v3h-3zM18 15h3v3h-3zM9 18h3v3H9zM9 15h3v3H9zM6 15h3v3H6zM3 18h3v3H3zM3 12h3v3H3zM9 9h3v3H9zM12 9h3v3h-3zM15 9h3v3h-3zM15 12h3v3h-3zM18 9h3v3h-3zM12 3h3v3h-3zM18 3h3v3h-3zM15 6h3v3h-3z"
+    />
+  </svg>
+)
 export const SlidersIcon = (p: IconProps) => (
   <Svg {...p}>
     <path d="M4 21v-7M4 10V3M12 21v-9M12 8V3M20 21v-5M20 12V3M1 14h6M9 8h6M17 16h6" />
