@@ -1,6 +1,7 @@
 import type { FieldData, QRType, StyleSettings } from '../core/types'
 import type { FieldErrors } from '../core/validate'
 import { Card, SectionHead } from '../ui/surfaces'
+import { GridIcon } from '../ui/icons'
 import { TypeChips } from './TypeChips'
 import { FormFields } from './FormFields'
 import { LogoUploader } from './LogoUploader'
@@ -28,7 +29,7 @@ export function DataCard({
 }) {
   return (
     <Card className="p-5 sm:p-6">
-      <SectionHead n={1} title="เลือกประเภทข้อมูล" />
+      <SectionHead icon={<GridIcon size={20} />} title="เลือกประเภทข้อมูล" />
       <TypeChips type={type} onPick={onPickType} />
 
       <div className="my-5 h-px bg-[#eef0f5]" />

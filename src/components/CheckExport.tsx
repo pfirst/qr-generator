@@ -71,7 +71,7 @@ export function CheckExport({
 
   return (
     <Card className="p-5 sm:p-6">
-      <SectionHead n={3} title="ตรวจสอบ & ส่งออก" />
+      <SectionHead icon={<ScanIcon size={20} />} title="ตรวจสอบ / ส่งออก" />
 
       {/* check */}
       <div className="rounded-[16px] border border-[#eef0f5] bg-[#fafbfd] p-4">

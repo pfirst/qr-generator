@@ -1,7 +1,6 @@
 import { extractLatLng } from '../core/payloads'
 import type { FieldData, ProxyType, QRType, WifiEnc } from '../core/types'
 import type { FieldErrors } from '../core/validate'
-import { CheckIcon } from '../ui/icons'
 import { Field, Label, SegGroup, TextArea, Toggle } from '../ui/controls'
 
 const WIFI_ENC: { id: WifiEnc; label: string }[] = [
@@ -121,10 +120,6 @@ export function FormFields({ type, data, errors, setData, setIn }: Props) {
           <Field label={plabel} value={data.promptpay.proxyValue} onChange={(v) => setIn('promptpay', { ...data.promptpay, proxyValue: v })} placeholder={pplaceholder} mono error={errors.ppProxy} />
           <Field label="จำนวนเงิน (บาท) — เว้นว่างได้ = จ่ายปลายเปิด" value={data.promptpay.amount} onChange={(v) => setIn('promptpay', { ...data.promptpay, amount: v })} placeholder="0.00" mono inputMode="decimal" error={errors.ppAmount} />
           <Field label="รหัสร้านค้า / อ้างอิง (ไม่บังคับ)" value={data.promptpay.storeLabel} onChange={(v) => setIn('promptpay', { ...data.promptpay, storeLabel: v })} placeholder="เช่น 223620406Y0858478ZM" mono />
-          <div className="flex items-start gap-2.5 rounded-[12px] border border-[#5ee6a8]/20 bg-[#5ee6a8]/[0.07] px-3 py-[11px]">
-            <CheckIcon size={15} className="mt-px shrink-0 text-[#5ee6a8]" />
-            <span className="text-[12px] leading-[1.55] text-white/60">สร้างตามมาตรฐาน EMVCo (PromptPay) พร้อม checksum CRC16 — สแกนได้ในแอปธนาคารไทยทุกแอป</span>
-          </div>
         </div>
       )
     }

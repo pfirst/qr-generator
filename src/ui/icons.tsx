@@ -202,6 +202,23 @@ export const ScanIcon = (p: IconProps) => (
     <path d="M3 12h18" />
   </Svg>
 )
+// 2×2 grid — "เลือกประเภทข้อมูล" section heading.
+export const GridIcon = (p: IconProps) => (
+  <Svg {...p}>
+    <rect x="3" y="3" width="7" height="7" rx="1.5" />
+    <rect x="14" y="3" width="7" height="7" rx="1.5" />
+    <rect x="3" y="14" width="7" height="7" rx="1.5" />
+    <rect x="14" y="14" width="7" height="7" rx="1.5" />
+  </Svg>
+)
+// Clock + rewind arrow — "ประวัติ QR" section heading.
+export const HistoryIcon = (p: IconProps) => (
+  <Svg {...p}>
+    <path d="M3 12a9 9 0 1 0 3-6.7L3 8" />
+    <path d="M3 3v5h5" />
+    <path d="M12 7v5l3 2" />
+  </Svg>
+)
 export const ChevronLeftIcon = (p: IconProps) => (
   <Svg {...p}>
     <path d="m15 18-6-6 6-6" />

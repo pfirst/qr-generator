@@ -193,7 +193,7 @@ export function QrPanel({ svg, hasData, style, patchStyle }: { svg: string | nul
 
   return (
     <Card className="relative p-5 sm:p-6">
-        <SectionHead n={2} title="ปรับแต่ง QR" sub="แสดงผลแบบเรียลไทม์" />
+        <SectionHead icon={<SlidersIcon size={20} />} title="ปรับแต่ง QR" sub="แสดงผลแบบเรียลไทม์" />
 
         {/* preview stage */}
         <div
