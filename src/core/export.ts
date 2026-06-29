@@ -1,6 +1,7 @@
 // Rasterise the QR SVG and export as PNG / JPG / SVG / PDF, copy, or print.
 import { renderQrSvg, type RenderInput } from './render'
 import type { StyleSettings } from './types'
+import { composeFramedSvg } from './frames'
 
 export type ExportFormat = 'png' | 'jpg' | 'webp' | 'svg' | 'pdf'
 
@@ -21,66 +22,23 @@ function svgToImage(svg: string): Promise<HTMLImageElement> {
   })
 }
 
-function roundRect(ctx: CanvasRenderingContext2D, x: number, y: number, w: number, h: number, r: number) {
-  ctx.beginPath()
-  ctx.moveTo(x + r, y)
-  ctx.arcTo(x + w, y, x + w, y + h, r)
-  ctx.arcTo(x + w, y + h, x, y + h, r)
-  ctx.arcTo(x, y + h, x, y, r)
-  ctx.arcTo(x, y, x + w, y, r)
-  ctx.closePath()
-}
-
-// Render QR to a canvas at `px` resolution, adding the CTA frame when enabled.
 export async function rasterCanvas(
   input: RenderInput,
   style: StyleSettings,
   px: number,
 ): Promise<HTMLCanvasElement> {
-  const svg = await renderQrSvg(input.data, input.ecc, style, px, input.count)
-  const img = await svgToImage(svg)
-  const W = px
-
-  let cw = W
-  let ch = W
-  let qx = 0
-  let qy = 0
-  let labelH = 0
-  let pad = 0
-  if (style.frameStyle !== 'none') {
-    pad = Math.round(W * 0.05)
-    labelH = Math.round(W * 0.15)
-    cw = W + pad * 2
-    ch = W + pad * 2 + labelH
-    qx = pad
-    qy = pad
-  }
-
+  const inner = await renderQrSvg(input.data, input.ecc, style, px, input.count)
+  const framed = composeFramedSvg(inner, px, style)
+  const img = await svgToImage(framed)
+  const w = img.naturalWidth || px
+  const h = img.naturalHeight || px
   const c = document.createElement('canvas')
-  c.width = cw
-  c.height = ch
+  c.width = w
+  c.height = h
   const ctx = c.getContext('2d')!
-  ctx.fillStyle = style.bg
-  ctx.fillRect(0, 0, cw, ch)
-
-  if (style.frameStyle !== 'none') {
-    const lw = Math.max(6, Math.round(W * 0.018))
-    const radius = Math.round(W * 0.05)
-    ctx.strokeStyle = style.frameColor
-    ctx.lineWidth = lw
-    roundRect(ctx, lw / 2, lw / 2, cw - lw, ch - lw, radius)
-    ctx.stroke()
-    ctx.fillStyle = style.frameColor
-    roundRect(ctx, lw / 2, W + pad * 2 - radius, cw - lw, labelH + radius - lw / 2, radius)
-    ctx.fill()
-    ctx.fillStyle = '#ffffff'
-    ctx.textAlign = 'center'
-    ctx.textBaseline = 'middle'
-    ctx.font = `800 ${Math.round(labelH * 0.42)}px 'LINE Seed Sans TH', sans-serif`
-    ctx.fillText(style.frameText || 'SCAN ME', cw / 2, W + pad * 2 + labelH / 2)
-  }
-
-  ctx.drawImage(img, qx, qy, W, W)
+  ctx.fillStyle = style.bg // fill first so rounded-corner gaps aren't black on JPG
+  ctx.fillRect(0, 0, w, h)
+  ctx.drawImage(img, 0, 0, w, h)
   return c
 }
 
@@ -111,8 +69,8 @@ export async function downloadQR(
   typeLabel: string,
 ): Promise<void> {
   if (format === 'svg') {
-    const svg = await renderQrSvg(input.data, input.ecc, style, px, input.count)
-    saveBlob(new Blob([svg], { type: 'image/svg+xml;charset=utf-8' }), fname(typeLabel, 'svg'))
+    const inner = await renderQrSvg(input.data, input.ecc, style, px, input.count)
+    saveBlob(new Blob([composeFramedSvg(inner, px, style)], { type: 'image/svg+xml;charset=utf-8' }), fname(typeLabel, 'svg'))
     return
   }
   const canvas = await rasterCanvas(input, style, px)

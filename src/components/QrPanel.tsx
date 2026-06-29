@@ -1,6 +1,7 @@
-import { useState, type ComponentType, type CSSProperties } from 'react'
+import { useState, type ComponentType } from 'react'
 import { BODY_SHAPES, BG_PRESETS, ECC_LEVELS, EYE_FRAMES, EYEBALLS, FG_PRESETS } from '../constants'
 import type { GradientType, StyleSettings } from '../core/types'
+import { composeFramedSvg } from '../core/frames'
 import { Card, SectionHead } from '../ui/surfaces'
 import { ACCENT_GRAD, ColorRow, SectionLabel, SegGroup, ShapeMenu, Toggle } from '../ui/controls'
 import {
@@ -178,19 +179,6 @@ function PopBody({ tab, style, patch }: { tab: TabId; style: StyleSettings; patc
 export function QrPanel({ svg, hasData, style, patchStyle }: { svg: string | null; hasData: boolean; style: StyleSettings; patchStyle: (p: Partial<StyleSettings>) => void }) {
   const [open, setOpen] = useState<TabId | null>(null)
 
-  const frameWrap: CSSProperties = style.frameStyle !== 'none'
-    ? {
-        display: 'inline-flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        gap: 10,
-        padding: 16,
-        background: style.bg,
-        border: `${Math.max(4, Math.round(style.size * 0.016))}px solid ${style.frameColor}`,
-        borderRadius: 20,
-      }
-    : { display: 'inline-flex', flexDirection: 'column', alignItems: 'center' }
-
   return (
     <Card className="relative p-5 sm:p-6">
         <SectionHead icon={<SlidersIcon size={20} />} title="ปรับแต่ง QR" sub="แสดงผลแบบเรียลไทม์" />
@@ -225,14 +213,12 @@ export function QrPanel({ svg, hasData, style, patchStyle }: { svg: string | nul
           />
           {hasData && svg ? (
             <div className="relative rounded-[26px] border border-[#eef1f8] bg-white p-4" style={{ boxShadow: 'var(--shadow-qr)' }}>
-              <div style={frameWrap}>
-                <div key={svg.length} className="overflow-hidden rounded-[10px] leading-[0]" style={{ animation: 'qrpop .26s cubic-bezier(.2,.9,.3,1.3)' }} dangerouslySetInnerHTML={{ __html: svg }} />
-                {style.frameStyle !== 'none' && (
-                  <div className="rounded-[10px] px-5 py-1.5 text-[16px] font-extrabold tracking-[0.2px] text-white" style={{ background: style.frameColor }}>
-                    {style.frameText || 'SCAN ME'}
-                  </div>
-                )}
-              </div>
+              <div
+                key={svg.length}
+                className="overflow-hidden rounded-[10px] leading-[0]"
+                style={{ animation: 'qrpop .26s cubic-bezier(.2,.9,.3,1.3)' }}
+                dangerouslySetInnerHTML={{ __html: composeFramedSvg(svg, style.size, style) }}
+              />
             </div>
           ) : (
             <div className="relative flex flex-col items-center gap-3 rounded-[16px] border-[1.5px] border-dashed border-[#dcdee8] bg-white/60 px-10 py-12 text-center">
