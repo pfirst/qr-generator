@@ -11,7 +11,6 @@ import { Header } from './components/Header'
 import { DataCard } from './components/DataCard'
 import { QrPanel } from './components/QrPanel'
 import { CheckExport } from './components/CheckExport'
-import { HistoryCard } from './components/HistoryCard'
 import { Toast } from './components/Toast'
 
 export default function App() {
@@ -179,7 +178,7 @@ export default function App() {
   return (
     <div className="min-h-screen w-full overflow-x-hidden">
       <div className="mx-auto max-w-[1340px] px-4 py-6 sm:px-6 sm:py-8">
-        <Header />
+        <Header recent={recent} onLoad={onLoadRecent} onClear={onClearRecent} />
 
         <div className="grid grid-cols-1 gap-5 lg:grid-cols-2 lg:gap-6">
           <div className="order-1 lg:col-start-1 lg:row-start-1">
@@ -213,10 +212,6 @@ export default function App() {
               onPrint={onPrint}
               onTestScan={onTestScan}
             />
-          </div>
-
-          <div className="order-4 lg:col-start-1 lg:row-start-2">
-            <HistoryCard recent={recent} onLoad={onLoadRecent} onClear={onClearRecent} />
           </div>
         </div>
       </div>

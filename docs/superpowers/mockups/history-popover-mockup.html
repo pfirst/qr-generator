@@ -1,0 +1,279 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Mockup — ประวัติ QR เป็น popover บน header</title>
+<style>
+  /* ── Self-hosted font (matches the app; absolute file:// path so it loads when opened directly) ── */
+  @font-face { font-family:'LINE Seed Sans TH'; src:url('file:///Users/pfirst/AI/qr_generator/public/fonts/LINESeedSansTH-Regular.woff2') format('woff2'); font-weight:400; font-display:swap; }
+  @font-face { font-family:'LINE Seed Sans TH'; src:url('file:///Users/pfirst/AI/qr_generator/public/fonts/LINESeedSansTH-Bold.woff2') format('woff2'); font-weight:700; font-display:swap; }
+  @font-face { font-family:'LINE Seed Sans TH'; src:url('file:///Users/pfirst/AI/qr_generator/public/fonts/LINESeedSansTH-ExtraBold.woff2') format('woff2'); font-weight:800; font-display:swap; }
+  @font-face { font-family:'LINE Seed Sans TH'; src:url('file:///Users/pfirst/AI/qr_generator/public/fonts/LINESeedSansTH-Black.woff2') format('woff2'); font-weight:900; font-display:swap; }
+
+  :root{
+    --ink:#111827; --ink2:#6b7280; --ink3:#9ca3af;
+    --accent:#7c3aed; --accent-soft:#ede9fe; --ring:#c4b5fd;
+    --line:#eaecf2; --hairline:#eef0f5;
+    --grad-brand:linear-gradient(100deg,#6c4af9 0%,#744ff8 15%,#8559f8 30%,#9d65fc 50%,#ae71fc 70%,#a089fc 85%,#8ea0fc 96%,#7eaefd 100%);
+    --shadow-card:0 8px 30px rgba(17,24,39,.06),0 1px 0 rgba(255,255,255,.7) inset;
+    --shadow-pop:0 16px 44px rgba(17,24,39,.14),0 2px 8px rgba(17,24,39,.06);
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0;font-family:'LINE Seed Sans TH',system-ui,-apple-system,sans-serif;color:var(--ink);
+    background:
+      radial-gradient(48% 38% at 12% -4%, rgba(124,58,237,.10), transparent 72%),
+      radial-gradient(42% 34% at 50% -8%, rgba(236,72,153,.07), transparent 70%),
+      radial-gradient(50% 40% at 88% -4%, rgba(99,102,241,.11), transparent 72%),
+      radial-gradient(60% 50% at 50% 110%, rgba(99,102,241,.05), transparent 70%),
+      #f6f7fb;
+    background-attachment:fixed; -webkit-font-smoothing:antialiased; min-height:100vh;}
+
+  /* ── Mockup control bar (not part of the app) ── */
+  .mock-toolbar{display:flex;align-items:center;gap:12px;flex-wrap:wrap;max-width:1340px;margin:0 auto;padding:18px 24px 4px;}
+  .mock-toolbar .tag{font-size:11px;font-weight:800;letter-spacing:.04em;text-transform:uppercase;color:#fff;background-image:var(--grad-brand);padding:4px 9px;border-radius:7px;}
+  .mock-toolbar .hint{font-size:12.5px;color:var(--ink3);}
+  .seg{display:inline-flex;background:#fff;border:1px solid var(--line);border-radius:999px;padding:3px;gap:2px;}
+  .seg button{border:0;background:transparent;font:inherit;font-size:12.5px;font-weight:800;color:var(--ink2);padding:6px 14px;border-radius:999px;cursor:pointer;transition:.15s;}
+  .seg button.on{background-image:var(--grad-brand);color:#fff;box-shadow:0 4px 12px rgba(124,58,237,.28);}
+
+  .container{max-width:1340px;margin:0 auto;padding:14px 24px 40px;}
+
+  /* ── App header (Header.tsx) ── */
+  .appheader{display:flex;align-items:center;gap:14px;margin-bottom:26px;position:relative;}
+  .appheader h1{font-size:25px;font-weight:800;letter-spacing:-.02em;line-height:1;color:var(--ink);margin:0;}
+  .appheader p{margin:8px 0 0;font-size:13.5px;color:var(--ink2);}
+  .logo{width:50px;height:50px;flex:none;}
+
+  /* ── NEW: history trigger (replaces the privacy pill) ── */
+  .pop-wrap{margin-left:auto;position:relative;}
+  .trigger{display:inline-flex;align-items:center;gap:8px;border:1px solid var(--line);background:rgba(255,255,255,.7);
+    backdrop-filter:blur(8px);padding:8px 12px;border-radius:999px;cursor:pointer;font:inherit;transition:.16s;}
+  .trigger:hover{border-color:var(--ring);box-shadow:0 4px 14px rgba(124,58,237,.10);}
+  .trigger.open{border-color:var(--accent);background:var(--accent-soft);}
+  .trigger .ic{color:var(--accent);display:grid;place-items:center;}
+  .badge{min-width:20px;height:20px;padding:0 6px;border-radius:999px;background-image:var(--grad-brand);color:#fff;
+    font-size:11px;font-weight:800;display:grid;place-items:center;line-height:1;}
+
+  /* ── Popover panel ── */
+  .pop{position:absolute;top:calc(100% + 10px);right:0;width:328px;max-width:calc(100vw - 2rem);
+    background:#fff;border:1px solid var(--hairline);border-radius:20px;box-shadow:var(--shadow-pop);
+    overflow:hidden;transform-origin:top right;display:none;z-index:50;}
+  .pop.open{display:block;animation:popIn .16s cubic-bezier(.22,.9,.3,1) both;}
+  @keyframes popIn{from{opacity:0;transform:translateY(6px) scale(.98)}to{opacity:1;transform:translateY(0) scale(1)}}
+
+  /* head = icons only */
+  .pop-head{display:flex;align-items:center;justify-content:space-between;padding:12px 14px;border-bottom:1px solid var(--hairline);}
+  .pop-head .left{display:flex;align-items:center;gap:9px;}
+  .pop-head .hist{color:var(--accent);display:grid;place-items:center;}
+  .pop-title{font-size:14px;font-weight:800;letter-spacing:-.01em;color:var(--ink);}
+  .iconbtn{display:grid;place-items:center;width:30px;height:30px;border-radius:9px;border:1px solid transparent;background:transparent;color:var(--ink3);cursor:pointer;transition:.15s;}
+  .iconbtn:hover{background:#fdecec;color:#ef4444;}
+
+  .pop-list{max-height:344px;overflow-y:auto;padding:7px;display:flex;flex-direction:column;gap:3px;}
+  .row{display:flex;gap:11px;align-items:center;width:100%;text-align:left;border:1px solid transparent;background:transparent;
+    border-radius:14px;padding:8px;cursor:pointer;font:inherit;transition:.14s;}
+  .row:hover{background:#f7f7fb;border-color:#eef0f5;}
+  .thumb{width:46px;height:46px;flex:none;border:1px solid #f0f1f6;border-radius:11px;background:#fff;padding:5px;line-height:0;}
+  .row .meta{min-width:0;flex:1;}
+  .typebadge{display:inline-block;font-size:9.5px;font-weight:800;color:#fff;background-image:var(--grad-brand);padding:2px 7px;border-radius:6px;letter-spacing:.02em;}
+  .preview{margin-top:5px;font-size:12.5px;font-weight:700;color:#374151;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .date{margin-top:2px;font-size:10.5px;color:var(--ink3);}
+
+  .empty{padding:30px 22px;text-align:center;font-size:13px;line-height:1.6;color:var(--ink3);
+    border:1px dashed #dcdee8;border-radius:16px;margin:9px;background:#fafbfd;}
+
+  /* ── Faded page skeleton (shows the old card is gone) ── */
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:24px;}
+  .sk{border:1.5px dashed #d7dae5;border-radius:24px;background:rgba(255,255,255,.45);
+    display:flex;align-items:center;justify-content:center;color:#aab0c0;font-weight:800;font-size:14px;text-align:center;padding:18px;}
+  .sk small{display:block;font-weight:700;font-size:11.5px;color:#bcc2d1;margin-top:4px;}
+  .sk.tall{min-height:420px;}
+  .sk.mid{min-height:300px;}
+  .sk.removed{border-color:#e6c7c7;background:rgba(255,237,237,.4);color:#d89a9a;min-height:90px;}
+  @media (max-width:760px){ .grid{grid-template-columns:1fr;} .appheader h1{font-size:21px;} .appheader p{font-size:12.5px;} }
+
+  /* ── Technical layer ── */
+  .tech-sep{max-width:1340px;margin:8px auto 0;padding:0 24px;}
+  .tech-sep div{border-top:2px dashed #d7dae5;position:relative;}
+  .tech-sep span{position:absolute;top:-11px;left:50%;transform:translateX(-50%);background:#f6f7fb;padding:0 14px;font-size:11px;font-weight:800;letter-spacing:.08em;color:#aab0c0;text-transform:uppercase;}
+  .tech{max-width:1340px;margin:0 auto;padding:26px 24px 48px;}
+  .tech h2{font-size:14px;font-weight:800;color:#374151;margin:22px 0 8px;}
+  .tech h2:first-child{margin-top:0;}
+  .tech p,.tech li{font-size:13px;line-height:1.7;color:#4b5563;}
+  .tech ul{margin:0;padding-left:18px;}
+  .tech code{font-family:'SF Mono',ui-monospace,monospace;font-size:12px;background:#f1f0f9;color:#6d28d9;padding:1px 6px;border-radius:5px;}
+  .tech .cols{display:grid;grid-template-columns:1fr 1fr;gap:22px;}
+  @media (max-width:760px){ .tech .cols{grid-template-columns:1fr;} }
+  .toast{position:fixed;left:50%;bottom:30px;transform:translateX(-50%) translateY(14px);background:#111827;color:#fff;
+    font-size:13px;font-weight:700;padding:11px 18px;border-radius:12px;box-shadow:0 12px 30px rgba(17,24,39,.3);opacity:0;pointer-events:none;transition:.25s;}
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+</style>
+</head>
+<body>
+
+  <div class="mock-toolbar">
+    <span class="tag">Mockup</span>
+    <span class="hint">ประวัติ QR → ปุ่ม + popover บน header · กดปุ่ม "ประวัติ" มุมขวาบนเพื่อเปิด</span>
+    <div class="seg" style="margin-left:auto">
+      <button id="t-filled" class="on">มีประวัติ</button>
+      <button id="t-empty">ว่าง</button>
+    </div>
+  </div>
+
+  <div class="container">
+    <!-- ░░ Header.tsx ░░ -->
+    <header class="appheader">
+      <svg class="logo" viewBox="0 0 64 64" fill="none" aria-hidden>
+        <defs>
+          <linearGradient id="lg-base" x1="0" y1="0" x2="19.2" y2="64" gradientUnits="userSpaceOnUse"><stop stop-color="#8085fb"/><stop offset=".5" stop-color="#7b62f3"/><stop offset="1" stop-color="#8a5cf1"/></linearGradient>
+          <radialGradient id="lg-blue" cx="28.8" cy="2.56" r="38.4" gradientUnits="userSpaceOnUse"><stop stop-color="#666cfd" stop-opacity=".66"/><stop offset="1" stop-color="#666cfd" stop-opacity="0"/></radialGradient>
+          <radialGradient id="lg-sheen" cx="11.52" cy="6.4" r="25.6" gradientUnits="userSpaceOnUse"><stop stop-color="#aab9fa" stop-opacity=".55"/><stop offset="1" stop-color="#aab9fa" stop-opacity="0"/></radialGradient>
+          <radialGradient id="lg-peri" cx="63.36" cy="30.08" r="23.68" gradientUnits="userSpaceOnUse"><stop stop-color="#8498f8" stop-opacity=".88"/><stop offset="1" stop-color="#8498f8" stop-opacity="0"/></radialGradient>
+          <radialGradient id="lg-magenta" cx="32" cy="63.36" r="20.48" gradientUnits="userSpaceOnUse"><stop stop-color="#ea67e8" stop-opacity=".98"/><stop offset="1" stop-color="#ea67e8" stop-opacity="0"/></radialGradient>
+          <radialGradient id="lg-mauve" cx="54.4" cy="55.04" r="28.16" gradientUnits="userSpaceOnUse"><stop stop-color="#eacecb" stop-opacity=".92"/><stop offset="1" stop-color="#eacecb" stop-opacity="0"/></radialGradient>
+        </defs>
+        <rect x="2" y="2" width="60" height="60" rx="17" fill="url(#lg-base)"/><rect x="2" y="2" width="60" height="60" rx="17" fill="url(#lg-blue)"/><rect x="2" y="2" width="60" height="60" rx="17" fill="url(#lg-sheen)"/><rect x="2" y="2" width="60" height="60" rx="17" fill="url(#lg-peri)"/><rect x="2" y="2" width="60" height="60" rx="17" fill="url(#lg-magenta)"/><rect x="2" y="2" width="60" height="60" rx="17" fill="url(#lg-mauve)"/>
+        <rect x="2.5" y="2.5" width="59" height="59" rx="16.5" fill="none" stroke="rgba(255,255,255,.5)"/>
+        <g fill="none" stroke="#fff" stroke-width="3.4"><rect x="15" y="15" width="13" height="13" rx="3.5"/><rect x="36" y="15" width="13" height="13" rx="3.5"/><rect x="15" y="36" width="13" height="13" rx="3.5"/></g>
+        <g fill="#fff"><rect x="19.5" y="19.5" width="4" height="4" rx="1.2"/><rect x="40.5" y="19.5" width="4" height="4" rx="1.2"/><rect x="19.5" y="40.5" width="4" height="4" rx="1.2"/><rect x="36" y="36" width="4.6" height="4.6" rx="1.4"/><rect x="44.4" y="36" width="4.6" height="4.6" rx="1.4"/><rect x="36" y="44.4" width="4.6" height="4.6" rx="1.4"/><rect x="44.4" y="44.4" width="4.6" height="4.6" rx="1.4"/></g>
+      </svg>
+      <div style="min-width:0">
+        <h1>QR Code Generator</h1>
+        <p>สร้าง QR Code สวย ๆ ปรับแต่งได้ครบ ใช้งานฟรี — ทุกอย่างทำในเครื่องคุณ</p>
+      </div>
+
+      <!-- NEW trigger + popover -->
+      <div class="pop-wrap">
+        <button class="trigger" id="trigger" aria-haspopup="true" aria-expanded="false">
+          <span class="ic">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/><path d="M12 7v5l3 2"/></svg>
+          </span>
+          <span class="badge" id="count">6</span>
+        </button>
+
+        <div class="pop" id="pop" role="menu">
+          <div class="pop-head">
+            <span class="left">
+              <span class="hist">
+                <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/><path d="M12 7v5l3 2"/></svg>
+              </span>
+              <span class="pop-title">ประวัติ</span>
+            </span>
+            <button class="iconbtn" id="clear" title="ล้างประวัติ">
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+            </button>
+          </div>
+          <div class="pop-list" id="list"></div>
+        </div>
+      </div>
+    </header>
+
+    <!-- ░░ Faded skeleton of the rest of the page (shows the history card is gone) ░░ -->
+    <div class="grid">
+      <div style="display:flex;flex-direction:column;gap:24px">
+        <div class="sk tall">DataCard<small>ฟอร์มกรอกข้อมูล + ปรับแต่งสไตล์</small></div>
+        <div class="sk removed">⌫ การ์ด "ประวัติ QR" เดิม — ถูกย้ายขึ้นไปเป็นปุ่ม popover บน header แล้ว</div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:24px">
+        <div class="sk mid">QR Preview<small>ตัวอย่าง QR + สไตล์</small></div>
+        <div class="sk mid">CheckExport<small>ตรวจสแกน + ส่งออก</small></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════════ TECHNICAL LAYER ════════ -->
+  <div class="tech-sep"><div><span>technical · implementation notes</span></div></div>
+  <section class="tech">
+    <div class="cols">
+      <div>
+        <h2>ไฟล์ที่แตะ</h2>
+        <ul>
+          <li>ลบ <code>src/components/HistoryCard.tsx</code> → สร้าง <code>src/components/HistoryPopover.tsx</code></li>
+          <li><code>Header.tsx</code> รับ props <code>recent / onLoad / onClear</code> แล้ว render <code>&lt;HistoryPopover&gt;</code> แทน privacy pill เดิม</li>
+          <li><code>App.tsx</code> ส่ง props ลง <code>&lt;Header&gt;</code>, ลบ <code>&lt;HistoryCard&gt;</code> ออกจาก grid (cell order-4)</li>
+        </ul>
+        <h2>component API</h2>
+        <ul>
+          <li><code>HistoryPopover({ recent, onLoad, onClear })</code> — props เดิมของ HistoryCard เป๊ะ</li>
+          <li>thumbnail ใช้ <code>thumbSvg()</code> เดิม (qrcode + renderQrSvg, async, THUMB style) — ยกมาทั้งก้อน</li>
+          <li>โหลด thumbnails เฉพาะตอน popover เปิด (lazy) เพื่อไม่ render ตอนปิด</li>
+        </ul>
+      </div>
+      <div>
+        <h2>behavior</h2>
+        <ul>
+          <li>trigger: icon + "ประวัติ" + count badge · โชว์ทุกขนาดจอ (เอา <code>hidden md:flex</code> ออก)</li>
+          <li>หัว panel = icon อย่างเดียว: history icon (ซ้าย) + trash icon button (ขวา = ล้าง)</li>
+          <li>list แนวตั้ง · max-height ~344px แล้ว scroll · กดแถว → <code>onLoad(r)</code> + ปิด</li>
+          <li>ปิดเมื่อ: คลิกนอก popover (<code>mousedown</code> listener) หรือกด <code>Escape</code></li>
+          <li>count = 0 → แสดง empty state, badge ซ่อน</li>
+        </ul>
+        <h2>grid reflow</h2>
+        <p>เอา <code>&lt;HistoryCard&gt;</code> (col-1 / row-2) ออก → คอลซ้ายเหลือ <code>DataCard</code> อย่างเดียว, คอลขวา = <code>QrPanel</code> + <code>CheckExport</code> flow ตามความสูงปกติ ลบ class <code>lg:row-start-2</code> ของ CheckExport ให้ไหลขึ้นเอง</p>
+      </div>
+    </div>
+  </section>
+
+  <div class="toast" id="toast"></div>
+
+<script>
+  // ── pseudo-QR thumbnail (deterministic per seed) ──
+  function lcg(seed){let s=seed%2147483647;if(s<=0)s+=2147483646;return()=>(s=s*16807%2147483647)/2147483647;}
+  function genQR(seed,n=23){
+    const rnd=lcg(seed);const g=Array.from({length:n},()=>Array(n).fill(0));
+    function finder(r,c){for(let i=0;i<7;i++)for(let j=0;j<7;j++){const ring=(i===0||i===6||j===0||j===6);const ctr=(i>=2&&i<=4&&j>=2&&j<=4);g[r+i][c+j]=(ring||ctr)?1:2;}
+      for(let i=-1;i<=7;i++){if(r+i<0||r+i>=n)continue;if(c-1>=0)g[r+i][c-1]=2;if(c+7<n)g[r+i][c+7]=2;}
+      for(let j=-1;j<=7;j++){if(c+j<0||c+j>=n)continue;if(r-1>=0)g[r-1][c+j]=2;if(r+7<n)g[r+7][c+j]=2;}}
+    finder(0,0);finder(0,n-7);finder(n-7,0);
+    for(let i=0;i<n;i++)for(let j=0;j<n;j++){if(g[i][j]===0)g[i][j]=rnd()>0.52?1:2;}
+    let r='';for(let i=0;i<n;i++)for(let j=0;j<n;j++){if(g[i][j]===1)r+='<rect x="'+j+'" y="'+i+'" width="1" height="1"/>';}
+    return '<svg viewBox="-1 -1 '+(n+2)+' '+(n+2)+'" width="100%" height="100%" shape-rendering="crispEdges"><g fill="#111827">'+r+'</g></svg>';
+  }
+
+  const ITEMS=[
+    {label:'URL',preview:'https://line.me/ti/p/~puggy',date:'29 มิ.ย. · 14:32',seed:7},
+    {label:'PromptPay',preview:'089-123-4567 · ฿100',date:'29 มิ.ย. · 11:08',seed:13},
+    {label:'Wi-Fi',preview:'HomeWiFi_2.4G',date:'28 มิ.ย. · 20:15',seed:21},
+    {label:'vCard',preview:'สมชาย ใจดี · ฝ่ายออกแบบ',date:'28 มิ.ย. · 09:51',seed:34},
+    {label:'ข้อความ',preview:'สวัสดีครับ ยินดีต้อนรับ',date:'27 มิ.ย. · 16:40',seed:55},
+    {label:'อีเมล',preview:'hello@example.com',date:'27 มิ.ย. · 08:22',seed:89},
+  ];
+
+  const pop=document.getElementById('pop'), trigger=document.getElementById('trigger'),
+        list=document.getElementById('list'), count=document.getElementById('count'),
+        clearBtn=document.getElementById('clear'), toast=document.getElementById('toast');
+  let data=ITEMS.slice();
+
+  function render(){
+    count.textContent=data.length; count.style.display=data.length?'grid':'none';
+    if(!data.length){ list.innerHTML='<div class="empty">ยังไม่มีประวัติ — QR ที่ดาวน์โหลดหรือคัดลอกจะมาเก็บไว้ที่นี่</div>'; return; }
+    list.innerHTML=data.map(it=>(
+      '<button class="row">'+
+        '<span class="thumb">'+genQR(it.seed)+'</span>'+
+        '<span class="meta">'+
+          '<span class="typebadge">'+it.label+'</span>'+
+          '<div class="preview">'+it.preview+'</div>'+
+          '<div class="date">'+it.date+'</div>'+
+        '</span>'+
+      '</button>'
+    )).join('');
+    list.querySelectorAll('.row').forEach(r=>r.addEventListener('click',()=>{ closePop(); flash('โหลดค่าจากประวัติแล้ว'); }));
+  }
+  function openPop(){ pop.classList.add('open'); trigger.classList.add('open'); trigger.setAttribute('aria-expanded','true'); }
+  function closePop(){ pop.classList.remove('open'); trigger.classList.remove('open'); trigger.setAttribute('aria-expanded','false'); }
+  function flash(msg){ toast.textContent=msg; toast.classList.add('show'); clearTimeout(flash._t); flash._t=setTimeout(()=>toast.classList.remove('show'),1800); }
+
+  trigger.addEventListener('click',e=>{ e.stopPropagation(); pop.classList.contains('open')?closePop():openPop(); });
+  clearBtn.addEventListener('click',e=>{ e.stopPropagation(); data=[]; render(); flash('ล้างประวัติแล้ว'); });
+  document.addEventListener('mousedown',e=>{ if(pop.classList.contains('open')&&!pop.contains(e.target)&&!trigger.contains(e.target)) closePop(); });
+  document.addEventListener('keydown',e=>{ if(e.key==='Escape') closePop(); });
+
+  document.getElementById('t-filled').addEventListener('click',function(){ data=ITEMS.slice(); render(); this.classList.add('on'); document.getElementById('t-empty').classList.remove('on'); openPop(); });
+  document.getElementById('t-empty').addEventListener('click',function(){ data=[]; render(); this.classList.add('on'); document.getElementById('t-filled').classList.remove('on'); openPop(); });
+
+  render();
+  openPop(); // start with popover open so the design is visible immediately
+</script>
+</body>
+</html>
