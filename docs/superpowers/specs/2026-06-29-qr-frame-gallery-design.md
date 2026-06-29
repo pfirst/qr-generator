@@ -127,6 +127,7 @@ Toolbar icon for the tab stays `FrameIcon`; label stays "เฟรม".
 - **Long `frameText`** → label `<text>` is centred; cap displayed width (e.g. `textLength`/auto-shrink or truncate) so it never overflows the banner. Spec: shrink font to fit banner width, min size floor.
 - **Scannability** (`verify.ts`) → decode-check renders `frameStyle:'none'`; the frame never blocks the decoder. Still run `decodeRendered` per style during build to confirm the quiet zone is preserved (banner/border must not crowd the QR's quiet zone — references keep QR margin ≥ quiet zone).
 - **Light `frameColor`** → label auto-contrast keeps it readable (§6).
+- **Untrusted style values** → the framed SVG is injected via `dangerouslySetInnerHTML`, so user-controlled values interpolated into it must be sanitised. `frameColor` is validated to a hex literal (`safeColor()`, fallback `#000000`) before going into any SVG attribute; `frameText` is text content only and escaped via `esc()` (`& < >`). Low real-world risk (client-only, single-user) but a real hardening — flagged by automated security review.
 
 ## 9. Verification & the copy-exact loop
 
