@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
+	 viewBox="0 0 281.1 475.8" style="enable-background:new 0 0 281.1 475.8;"><style type="text/css">
+	.frame-color{fill:#000000;}
+	.background-color{fill:#FFFFFF;}
+	.text-color{fill:#000000;}
+	.outline{fill:#E6E6E6;}
+	.shadow-35{opacity:0.35;fill:#FFFFFF;}
+</style><path id="FrameBody" class="frame-color" d="M0,405.9h281.1v34c0,19.9-16.1,36-36,36H36c-19.9,0-36-16.1-36-36V405.9z M245.1,0H36C16.1,0,0,16.1,0,36
+	v33.9h281.1V36C281.1,16.1,265,0,245.1,0z"/><path id="ShadowDarker" class="shadow-35" d="M140.6,466.1c-13.1,0-23.7-10.6-23.7-23.7s10.6-23.7,23.7-23.7s23.7,10.6,23.7,23.7
+	S153.6,466.1,140.6,466.1z M140.6,424.8c-9.7,0-17.7,7.9-17.7,17.7c0,9.7,7.9,17.7,17.7,17.7s17.7-7.9,17.7-17.7
+	C158.2,432.7,150.3,424.8,140.6,424.8z M170.5,36.4c0-1.7-1.3-3-3-3h-53.9c-1.7,0-3,1.3-3,3s1.3,3,3,3h53.9
+	C169.2,39.4,170.5,38.1,170.5,36.4z M99.7,36.4c0-2.2-1.8-4-4-4s-4,1.8-4,4s1.8,4,4,4S99.7,38.6,99.7,36.4z"/><rect id="WhiteBackground" x="1.1" y="69.9" class="background-color" width="278.9" height="336"/><path id="Outline" class="outline" d="M2,405.9H0v-336h2V405.9z M279.1,405.9h2v-336h-2V405.9z"/></svg>

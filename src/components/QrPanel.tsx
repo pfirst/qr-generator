@@ -34,9 +34,7 @@ const TABS: { id: TabId; label: string; Icon: ComponentType<{ size?: number }> }
 const SHAPE_TABS: TabId[] = ['border', 'center', 'cells']
 const FRAME_CHOICES: { id: FrameStyle; label: string }[] = [
   { id: 'none', label: 'ไม่มี' },
-  { id: 'classic', label: FRAME_TEMPLATES.classic.label },
-  { id: 'coffee', label: FRAME_TEMPLATES.coffee.label },
-  { id: 'chef', label: FRAME_TEMPLATES.chef.label },
+  ...(Object.keys(FRAME_TEMPLATES) as Exclude<FrameStyle, 'none'>[]).map((id) => ({ id, label: FRAME_TEMPLATES[id].label })),
 ]
 const GRADIENTS: { id: GradientType; label: string; Icon: ComponentType<{ size?: number }> }[] = [
   { id: 'none', label: 'ไม่มี', Icon: GradNoneIcon },

@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
+	 viewBox="0 0 344 422.3" style="enable-background:new 0 0 344 422.3;"><style type="text/css">
+	.frame-color{fill:#000000;}
+	.background-color{fill:#FFFFFF;}
+	.text-color{fill:#FFFFFF;}
+	.outline{fill:#E6E6E6;}
+</style><path id="WhiteBackground" class="background-color" d="M297.8,1H46.1c-7.6,0-13.7,6.2-13.7,13.7v251.7c0,7.6,6.2,13.7,13.7,13.7h251.6
+	c7.6,0,13.7-6.2,13.8-13.7V14.7C311.5,7.1,305.3,1,297.8,1z"/><path id="Outline" class="outline" d="M297.7,281.1H46.1c-8.1,0-14.7-6.6-14.7-14.7V14.7C31.4,6.6,38,0,46.1,0h251.7
+	c8.1,0,14.7,6.6,14.7,14.7v251.7C312.4,274.5,305.8,281.1,297.7,281.1z M46.1,2c-7,0-12.7,5.7-12.7,12.7v251.7
+	c0,7,5.7,12.7,12.7,12.7h251.6c7,0,12.7-5.7,12.8-12.7V14.7c0-7-5.7-12.7-12.7-12.7H46.1z"/></svg>

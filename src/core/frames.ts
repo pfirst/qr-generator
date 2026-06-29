@@ -3,8 +3,19 @@ import type { FrameStyle, StyleSettings } from './types'
 // the example QR and the outlined "SCAN ME" stripped out. We inject our own QR into the
 // QR slot and overlay our own editable label (LINE Seed). `?raw` gives the file as a string.
 import classicTpl from '../assets/frames/classic.svg?raw'
+import bubbleTpl from '../assets/frames/bubble.svg?raw'
+import basicTpl from '../assets/frames/basic.svg?raw'
+import bannerTpl from '../assets/frames/banner.svg?raw'
+import tooltipTpl from '../assets/frames/tooltip.svg?raw'
+import letterTpl from '../assets/frames/letter.svg?raw'
+import arrowTpl from '../assets/frames/arrow.svg?raw'
+import ribbonTpl from '../assets/frames/ribbon.svg?raw'
+import bagTpl from '../assets/frames/bag.svg?raw'
 import coffeeTpl from '../assets/frames/coffee.svg?raw'
+import giftTpl from '../assets/frames/gift.svg?raw'
 import chefTpl from '../assets/frames/chef.svg?raw'
+import phoneTpl from '../assets/frames/phone.svg?raw'
+import scriptTpl from '../assets/frames/script.svg?raw'
 
 export type FrameTemplate = {
   label: string // UI label
@@ -16,10 +27,23 @@ export type FrameTemplate = {
 }
 
 // Metadata measured from the reference SVGs via getBBox() + nested-svg attributes.
+// labelOnFill = the original label was the dark themeable colour on a light area
+// (→ our label uses frameColor); false = it sat white on the coloured chrome (→ contrast).
 export const FRAME_TEMPLATES: Record<Exclude<FrameStyle, 'none'>, FrameTemplate> = {
-  classic: { label: 'Classic', svg: classicTpl, vb: { w: 279.1, h: 346.6 }, slot: { x: 9.7, y: 9.6, w: 259.9 }, labelSlot: { x: 41.1, y: 289.3, w: 196.9, h: 36.3 }, labelOnFill: false },
-  coffee: { label: 'Coffee', svg: coffeeTpl, vb: { w: 406.2, h: 514.3 }, slot: { x: 46.8, y: 108.6, w: 259.8 }, labelSlot: { x: 30.2, y: 461, w: 293.2, h: 54 }, labelOnFill: true },
-  chef: { label: 'Chef', svg: chefTpl, vb: { w: 279.1, h: 538.4 }, slot: { x: 9.7, y: 201.4, w: 259.9 }, labelSlot: { x: 41.1, y: 481.1, w: 196.9, h: 36.3 }, labelOnFill: false },
+  classic: { label: 'คลาสสิก', svg: classicTpl, vb: { w: 279.1, h: 346.6 }, slot: { x: 9.7, y: 9.6, w: 259.9 }, labelSlot: { x: 41.1, y: 289.3, w: 196.9, h: 36.3 }, labelOnFill: false },
+  bubble: { label: 'ป้ายบน', svg: bubbleTpl, vb: { w: 279, h: 401.2 }, slot: { x: 9.6, y: 131.7, w: 259.9 }, labelSlot: { x: 40.6, y: 20.8, w: 197, h: 36.3 }, labelOnFill: false },
+  basic: { label: 'ขอบบาง', svg: basicTpl, vb: { w: 279.1, h: 355.1 }, slot: { x: 9.7, y: 9.6, w: 259.8 }, labelSlot: { x: 0.1, y: 303.8, w: 279, h: 51.4 }, labelOnFill: true },
+  banner: { label: 'แถบล่าง', svg: bannerTpl, vb: { w: 281.1, h: 368.6 }, slot: { x: 6.8, y: 6.1, w: 267.7 }, labelSlot: { x: 42.1, y: 312.6, w: 196.9, h: 36.3 }, labelOnFill: false },
+  tooltip: { label: 'ทูลทิป', svg: tooltipTpl, vb: { w: 279, h: 401.3 }, slot: { x: 9.7, y: 9.6, w: 259.9 }, labelSlot: { x: 41.5, y: 345.1, w: 197, h: 36.3 }, labelOnFill: false },
+  letter: { label: 'ซองจดหมาย', svg: letterTpl, vb: { w: 337.1, h: 437.9 }, slot: { x: 35, y: 7.7, w: 267.1 }, labelSlot: { x: 70.1, y: 375.2, w: 196.9, h: 36.4 }, labelOnFill: false },
+  arrow: { label: 'ลูกศร', svg: arrowTpl, vb: { w: 343.1, h: 395.1 }, slot: { x: 68, y: 6.1, w: 268 }, labelSlot: { x: 41.8, y: 305.9, w: 301.3, h: 90.2 }, labelOnFill: true },
+  ribbon: { label: 'ริบบิ้น', svg: ribbonTpl, vb: { w: 405.2, h: 362.7 }, slot: { x: 68.9, y: 7.7, w: 267.7 }, labelSlot: { x: 104.2, y: 304, w: 197, h: 36.3 }, labelOnFill: false },
+  bag: { label: 'ถุงช้อป', svg: bagTpl, vb: { w: 312.6, h: 448.8 }, slot: { x: 26.4, y: 95.7, w: 259.8 }, labelSlot: { x: 57.4, y: 378.4, w: 197, h: 36.3 }, labelOnFill: false },
+  coffee: { label: 'กาแฟ', svg: coffeeTpl, vb: { w: 406.2, h: 514.3 }, slot: { x: 46.8, y: 108.6, w: 259.8 }, labelSlot: { x: 30.2, y: 461, w: 293.2, h: 54 }, labelOnFill: true },
+  gift: { label: 'ของขวัญ', svg: giftTpl, vb: { w: 324.6, h: 467.9 }, slot: { x: 32.4, y: 198.5, w: 259.8 }, labelSlot: { x: 63.3, y: 117.2, w: 197.1, h: 36.3 }, labelOnFill: false },
+  chef: { label: 'เชฟ', svg: chefTpl, vb: { w: 279.1, h: 538.4 }, slot: { x: 9.7, y: 201.4, w: 259.9 }, labelSlot: { x: 41.1, y: 481.1, w: 196.9, h: 36.3 }, labelOnFill: false },
+  phone: { label: 'มือถือ', svg: phoneTpl, vb: { w: 281.1, h: 475.8 }, slot: { x: 6.7, y: 74.3, w: 267.7 }, labelSlot: { x: 41.9, y: 357.9, w: 197.1, h: 36.3 }, labelOnFill: false },
+  script: { label: 'ลายมือ', svg: scriptTpl, vb: { w: 344, h: 422.3 }, slot: { x: 38.2, y: 6.7, w: 267.7 }, labelSlot: { x: -0.2, y: 297.5, w: 344.1, h: 124.8 }, labelOnFill: true },
 }
 
 let uid = 0 // unique root id per render so each framed SVG's <style> stays scoped to itself

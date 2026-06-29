@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
+	 viewBox="0 0 312.6 448.8" style="enable-background:new 0 0 312.6 448.8;"><style type="text/css">
+	.frame-color{fill:#000000;}
+	.background-color{fill:#FFFFFF;}
+	.text-color{fill:#FFFFFF;}
+	.shadow-35{opacity:0.35;fill:#FFFFFF;}
+</style><path id="FrameBody" class="frame-color" d="M303.4,96.6c-0.2-8.8-7.5-15.9-16.3-15.9h-58V36.1c0-3.8-1.5-7.5-4.2-10.1L208.7,9.6
+	C202.5,3.5,194.1,0,185.4,0h-58.2c-8.7,0-17.1,3.5-23.3,9.6L87.6,25.9c-2.7,2.7-4.2,6.3-4.2,10.1v44.7h-58c-8.8,0-16.1,7-16.3,15.9
+	L0,432c-0.2,9.2,7.1,16.8,16.3,16.8h279.9c9.2,0,16.6-7.6,16.3-16.8L303.4,96.6z M113.5,30.1H199v50.6h-85.5V30.1z M285.3,347.3
+	c0,4.1-3.3,7.4-7.4,7.4H34.7c-4.1,0-7.4-3.3-7.4-7.4V104c0-4.1,3.3-7.4,7.4-7.4h243.2c4.1,0,7.4,3.3,7.4,7.4V347.3z"/><path id="ShadowDarker" class="shadow-35" d="M199,30.1V16.9C199,7.6,191.5,0,182.1,0h-52.4c-8.9,0-16.2,7.3-16.2,16.2v13.9H199z"/></svg>
