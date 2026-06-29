@@ -180,8 +180,8 @@ export default function App() {
       <div className="mx-auto max-w-[1340px] px-4 py-6 sm:px-6 sm:py-8">
         <Header recent={recent} onLoad={onLoadRecent} onClear={onClearRecent} />
 
-        <div className="grid grid-cols-1 gap-5 lg:grid-cols-2 lg:gap-6">
-          <div className="order-1 lg:col-start-1 lg:row-start-1">
+        <div className="grid grid-cols-1 gap-5 lg:grid-cols-2 lg:items-start lg:gap-6">
+          <div className="order-1">
             <DataCard
               type={type}
               onPickType={setType}
@@ -195,11 +195,10 @@ export default function App() {
             />
           </div>
 
-          <div className="relative z-20 order-2 lg:col-start-2 lg:row-start-1 lg:sticky lg:top-6 lg:self-start">
-            <QrPanel svg={svg} hasData={ready} style={style} patchStyle={patchStyle} />
-          </div>
-
-          <div className="order-3 lg:col-start-2 lg:row-start-2">
+          <div className="order-2 flex flex-col gap-5 lg:sticky lg:top-6 lg:gap-6 lg:self-start">
+            <div className="relative z-20">
+              <QrPanel svg={svg} hasData={ready} style={style} patchStyle={patchStyle} />
+            </div>
             <CheckExport
               ready={ready}
               contrastLevel={contrast.level}

@@ -113,7 +113,11 @@ export function HistoryPopover({ recent, onLoad, onClear }: { recent: RecentItem
                   className="flex w-full items-center gap-3 rounded-[14px] border border-transparent p-2 text-left transition hover:border-[#eef0f5] hover:bg-[#f7f7fb]"
                 >
                   <div className="h-[46px] w-[46px] shrink-0 overflow-hidden rounded-[11px] border border-[#f0f1f6] bg-white p-[5px] leading-[0]">
-                    {thumbs[i] ? <div dangerouslySetInnerHTML={{ __html: thumbs[i]! }} /> : <div className="h-full w-full rounded bg-[#f3f4f8]" />}
+                    {thumbs[i] ? (
+                      <div className="h-full w-full [&>svg]:block [&>svg]:h-full [&>svg]:w-full" dangerouslySetInnerHTML={{ __html: thumbs[i]! }} />
+                    ) : (
+                      <div className="h-full w-full rounded bg-[#f3f4f8]" />
+                    )}
                   </div>
                   <div className="min-w-0 flex-1">
                     <span className="inline-block rounded-[6px] px-1.5 py-0.5 text-[9.5px] font-extrabold text-white" style={{ backgroundImage: 'var(--grad-brand)' }}>
