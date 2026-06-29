@@ -47,19 +47,19 @@ export function FormFields({ type, data, errors, setData, setIn }: Props) {
     case 'sms':
       return (
         <div className="flex flex-col gap-3.5">
-          <Field label="เบอร์ปลายทาง" value={data.sms.phone} onChange={(v) => setIn('sms', { ...data.sms, phone: v })} placeholder="0812345678" mono error={errors.smsPhone} />
+          <Field label="เบอร์ปลายทาง" value={data.sms.phone} onChange={(v) => setIn('sms', { ...data.sms, phone: v })} placeholder="0812345678" error={errors.smsPhone} />
           <TextArea label="ข้อความ" value={data.sms.message} onChange={(v) => setIn('sms', { ...data.sms, message: v })} rows={3} placeholder="ข้อความ SMS…" />
         </div>
       )
 
     case 'tel':
-      return <Field label="เบอร์โทรศัพท์" value={data.tel} onChange={(v) => setData({ tel: v })} placeholder="0812345678" mono error={errors.tel} />
+      return <Field label="เบอร์โทรศัพท์" value={data.tel} onChange={(v) => setData({ tel: v })} placeholder="0812345678" error={errors.tel} />
 
     case 'wifi':
       return (
         <div className="flex flex-col gap-3.5">
           <Field label="ชื่อเครือข่าย (SSID)" value={data.wifi.ssid} onChange={(v) => setIn('wifi', { ...data.wifi, ssid: v })} placeholder="MyWiFi" />
-          <Field label="รหัสผ่าน" value={data.wifi.password} onChange={(v) => setIn('wifi', { ...data.wifi, password: v })} placeholder="รหัส Wi-Fi" mono />
+          <Field label="รหัสผ่าน" value={data.wifi.password} onChange={(v) => setIn('wifi', { ...data.wifi, password: v })} placeholder="รหัส Wi-Fi" />
           <div>
             <Label>ประเภทการเข้ารหัส</Label>
             <SegGroup options={WIFI_ENC} value={data.wifi.encryption} onChange={(v) => setIn('wifi', { ...data.wifi, encryption: v })} />
@@ -77,7 +77,7 @@ export function FormFields({ type, data, errors, setData, setIn }: Props) {
           <div className="grid grid-cols-2 gap-3">
             <Field label="ชื่อ" value={data.vcard.first} onChange={(v) => setIn('vcard', { ...data.vcard, first: v })} />
             <Field label="นามสกุล" value={data.vcard.last} onChange={(v) => setIn('vcard', { ...data.vcard, last: v })} />
-            <Field label="เบอร์โทร" value={data.vcard.phone} onChange={(v) => setIn('vcard', { ...data.vcard, phone: v })} mono />
+            <Field label="เบอร์โทร" value={data.vcard.phone} onChange={(v) => setIn('vcard', { ...data.vcard, phone: v })} />
             <Field label="อีเมล" value={data.vcard.email} onChange={(v) => setIn('vcard', { ...data.vcard, email: v })} />
             <Field label="บริษัท" value={data.vcard.org} onChange={(v) => setIn('vcard', { ...data.vcard, org: v })} />
             <Field label="ตำแหน่ง" value={data.vcard.title} onChange={(v) => setIn('vcard', { ...data.vcard, title: v })} />
@@ -102,8 +102,8 @@ export function FormFields({ type, data, errors, setData, setIn }: Props) {
             placeholder="https://maps.google.com/…"
           />
           <div className="grid grid-cols-2 gap-3">
-            <Field label="ละติจูด" value={data.geo.lat} onChange={(v) => setIn('geo', { ...data.geo, lat: v })} placeholder="13.7563" mono />
-            <Field label="ลองจิจูด" value={data.geo.lng} onChange={(v) => setIn('geo', { ...data.geo, lng: v })} placeholder="100.5018" mono />
+            <Field label="ละติจูด" value={data.geo.lat} onChange={(v) => setIn('geo', { ...data.geo, lat: v })} placeholder="13.7563" />
+            <Field label="ลองจิจูด" value={data.geo.lng} onChange={(v) => setIn('geo', { ...data.geo, lng: v })} placeholder="100.5018" />
           </div>
           {errors.geo && <div className="text-[12px] text-[#ff8aae]">{errors.geo}</div>}
         </div>
@@ -117,9 +117,9 @@ export function FormFields({ type, data, errors, setData, setIn }: Props) {
             <Label>ชนิดพร็อกซี</Label>
             <SegGroup options={PROXY} value={data.promptpay.proxyType} onChange={(v) => setIn('promptpay', { ...data.promptpay, proxyType: v })} />
           </div>
-          <Field label={plabel} value={data.promptpay.proxyValue} onChange={(v) => setIn('promptpay', { ...data.promptpay, proxyValue: v })} placeholder={pplaceholder} mono error={errors.ppProxy} />
-          <Field label="จำนวนเงิน (บาท) — เว้นว่างได้ = จ่ายปลายเปิด" value={data.promptpay.amount} onChange={(v) => setIn('promptpay', { ...data.promptpay, amount: v })} placeholder="0.00" mono inputMode="decimal" error={errors.ppAmount} />
-          <Field label="รหัสร้านค้า / อ้างอิง (ไม่บังคับ)" value={data.promptpay.storeLabel} onChange={(v) => setIn('promptpay', { ...data.promptpay, storeLabel: v })} placeholder="เช่น 223620406Y0858478ZM" mono />
+          <Field label={plabel} value={data.promptpay.proxyValue} onChange={(v) => setIn('promptpay', { ...data.promptpay, proxyValue: v })} placeholder={pplaceholder} error={errors.ppProxy} />
+          <Field label="จำนวนเงิน (บาท) — เว้นว่างได้ = จ่ายปลายเปิด" value={data.promptpay.amount} onChange={(v) => setIn('promptpay', { ...data.promptpay, amount: v })} placeholder="0.00" inputMode="decimal" error={errors.ppAmount} />
+          <Field label="รหัสร้านค้า / อ้างอิง (ไม่บังคับ)" value={data.promptpay.storeLabel} onChange={(v) => setIn('promptpay', { ...data.promptpay, storeLabel: v })} placeholder="เช่น 223620406Y0858478ZM" />
         </div>
       )
     }
@@ -127,12 +127,12 @@ export function FormFields({ type, data, errors, setData, setIn }: Props) {
     case 'bill':
       return (
         <div className="flex flex-col gap-3.5">
-          <Field label="Biller ID (เลขประจำตัวผู้รับชำระ)" value={data.bill.billerId} onChange={(v) => setIn('bill', { ...data.bill, billerId: v })} placeholder="เช่น 010556012345601" mono error={errors.billId} />
+          <Field label="Biller ID (เลขประจำตัวผู้รับชำระ)" value={data.bill.billerId} onChange={(v) => setIn('bill', { ...data.bill, billerId: v })} placeholder="เช่น 010556012345601" error={errors.billId} />
           <div className="grid grid-cols-2 gap-3">
-            <Field label="Ref 1" value={data.bill.ref1} onChange={(v) => setIn('bill', { ...data.bill, ref1: v })} mono />
-            <Field label="Ref 2 (ออปชัน)" value={data.bill.ref2} onChange={(v) => setIn('bill', { ...data.bill, ref2: v })} mono />
+            <Field label="Ref 1" value={data.bill.ref1} onChange={(v) => setIn('bill', { ...data.bill, ref1: v })} />
+            <Field label="Ref 2 (ออปชัน)" value={data.bill.ref2} onChange={(v) => setIn('bill', { ...data.bill, ref2: v })} />
           </div>
-          <Field label="จำนวนเงิน (บาท) — เว้นว่างได้" value={data.bill.amount} onChange={(v) => setIn('bill', { ...data.bill, amount: v })} placeholder="0.00" mono inputMode="decimal" error={errors.billAmount} />
+          <Field label="จำนวนเงิน (บาท) — เว้นว่างได้" value={data.bill.amount} onChange={(v) => setIn('bill', { ...data.bill, amount: v })} placeholder="0.00" inputMode="decimal" error={errors.billAmount} />
         </div>
       )
   }

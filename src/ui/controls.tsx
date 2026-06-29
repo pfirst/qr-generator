@@ -25,13 +25,12 @@ interface FieldProps {
   value: string
   onChange: (v: string) => void
   placeholder?: string
-  mono?: boolean
   type?: string
   error?: string
   inputMode?: 'text' | 'decimal' | 'numeric'
 }
 
-export function Field({ label, value, onChange, placeholder, mono, type, error, inputMode }: FieldProps) {
+export function Field({ label, value, onChange, placeholder, type, error, inputMode }: FieldProps) {
   return (
     <div>
       <Label>{label}</Label>
@@ -41,7 +40,7 @@ export function Field({ label, value, onChange, placeholder, mono, type, error, 
         inputMode={inputMode}
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
-        className={inputCls + (mono ? ' font-mono tracking-[0.3px]' : '')}
+        className={inputCls}
       />
       {error && <ErrorText>{error}</ErrorText>}
     </div>
