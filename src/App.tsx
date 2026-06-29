@@ -150,17 +150,6 @@ export default function App() {
     }
   }, [renderInput, style, exportSize, showToast])
 
-  const onTestScan = useCallback(async () => {
-    if (!renderInput) return showToast('กรุณากรอกข้อมูลให้ครบก่อน')
-    try {
-      const res = await decodeRendered(renderInput, style)
-      setDecodeOk(res !== null)
-      showToast(res !== null ? 'ทดสอบแล้ว · สแกนติด ✓' : 'ทดสอบแล้ว · สแกนไม่ติด')
-    } catch {
-      showToast('ทดสอบสแกนไม่สำเร็จ')
-    }
-  }, [renderInput, style, showToast])
-
   const onLoadRecent = useCallback(
     (r: RecentItem) => {
       setType(r.type)
@@ -209,7 +198,6 @@ export default function App() {
               onDownload={runExport}
               onCopy={onCopy}
               onPrint={onPrint}
-              onTestScan={onTestScan}
             />
           </div>
         </div>

@@ -49,7 +49,6 @@ export function CheckExport({
   onDownload,
   onCopy,
   onPrint,
-  onTestScan,
 }: {
   ready: boolean
   contrastLevel: ScanLevel
@@ -60,7 +59,6 @@ export function CheckExport({
   onDownload: (fmt: ExportFormat) => void
   onCopy: () => void
   onPrint: () => void
-  onTestScan: () => void
 }) {
   const [fmt, setFmt] = useState<ExportFormat>('png')
 
@@ -75,17 +73,7 @@ export function CheckExport({
 
       {/* check */}
       <div className="rounded-[16px] border border-[#eef0f5] bg-[#fafbfd] p-4">
-        <div className="mb-3 flex items-center justify-between">
-          <div className="text-[12.5px] font-extrabold uppercase tracking-[0.06em] text-[#9ca3af]">ตรวจสอบความพร้อม</div>
-          <button
-            onClick={onTestScan}
-            disabled={!ready}
-            className="flex items-center gap-1.5 rounded-[10px] border border-[#e6e7ee] bg-white px-3 py-1.5 text-[12px] font-bold text-[#6b7280] transition enabled:hover:border-[#c4b5fd] enabled:hover:text-[#7c3aed] disabled:opacity-50"
-          >
-            <ScanIcon size={14} />
-            ทดสอบสแกน
-          </button>
-        </div>
+        <div className="mb-3 text-[12.5px] font-extrabold uppercase tracking-[0.06em] text-[#9ca3af]">ตรวจสอบความพร้อม</div>
         <div className="grid gap-3.5 sm:grid-cols-2">
           <StatusRow tone={contrastTone} label="ความเปรียบต่างสี" sub={contrastSub} />
           <StatusRow tone={scanTone} label="สแกนได้จริง" sub={scanSub} />
