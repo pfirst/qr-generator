@@ -125,6 +125,18 @@ export function composeFramedSvg(innerSvg: string, _qrPx: number, style: StyleSe
     .replace(/\sclass="frame-color"/g, ` fill="${fc}"`)
   out = scopeStyle(out, id)
 
+  // 1b) give the white card a soft drop-shadow. Stripping qrcg's hard #E6E6E6 outline (it
+  //     rendered as a crisp grey hairline on hi-DPI) left the card flat; this restores the
+  //     grey definition as gentle depth instead of a sharp line. Scoped filter id, applied
+  //     to the card (`class="background-color"`); frames without a white card are untouched.
+  const shId = `sh${id}`
+  out = out
+    .replace(
+      /(<svg\b[^>]*>)/,
+      `$1<defs><filter id="${shId}" x="-25%" y="-25%" width="150%" height="150%"><feDropShadow dx="0" dy="1.4" stdDeviation="2.3" flood-color="#1f2330" flood-opacity="0.22"/></filter></defs>`,
+    )
+    .replace(/(<(?:path|rect)\b[^>]*\bclass="background-color")/, `$1 filter="url(#${shId})"`)
+
   // 2) inject our QR into the slot. Unwrap the QR's outer <svg> (drop the xml prolog and
   //    the <svg>/</svg> wrapper) and place its content with a <g transform>. A nested
   //    <svg> would establish a viewport that clips at the fractional slot scale, and some
