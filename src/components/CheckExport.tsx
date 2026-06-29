@@ -88,22 +88,23 @@ export function CheckExport({
 
       {/* export */}
       <div className="mt-5">
-        <div className="mb-2.5 flex flex-wrap items-center gap-3">
-          <span className="text-[12.5px] font-bold text-[#6b7280]">ขนาดไฟล์</span>
-          <div className="relative">
-            <select
-              value={exportSize}
-              onChange={(e) => setExportSize(+e.target.value)}
-              className="cursor-pointer appearance-none rounded-[11px] border border-[#e6e7ee] bg-white py-2 pl-3.5 pr-9 text-[13px] font-bold text-[#111827] outline-none focus:border-[#7c3aed]"
-            >
-              {EXPORT_SIZES.map((s) => (
-                <option key={s} value={s}>
-                  {s} × {s} px
-                </option>
-              ))}
-            </select>
-            <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-[#9ca3af]">▾</span>
-          </div>
+        <div className="mb-2.5 text-[12.5px] font-bold text-[#6b7280]">ขนาดไฟล์</div>
+        <div className="mb-3 grid grid-cols-4 gap-2">
+          {EXPORT_SIZES.map((s) => {
+            const on = exportSize === s
+            return (
+              <button
+                key={s}
+                onClick={() => setExportSize(s)}
+                className={
+                  'cursor-pointer rounded-[11px] border py-2.5 text-[12.5px] font-bold transition ' +
+                  (on ? 'border-[#7c3aed] bg-[#ede9fe] text-[#7c3aed]' : 'border-[#e6e7ee] bg-white text-[#6b7280] hover:border-[#c4b5fd]')
+                }
+              >
+                {s} px
+              </button>
+            )
+          })}
         </div>
 
         <div className="mb-3 grid grid-cols-5 gap-2">
