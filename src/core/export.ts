@@ -140,29 +140,33 @@ export async function copyQRToClipboard(input: RenderInput, style: StyleSettings
   // Safari only allows clipboard.write() while the click's user-activation is still
   // live, so we must call it synchronously and hand it a Promise<Blob> — awaiting the
   // raster before the write would expire the gesture and throw NotAllowedError.
-  const blob = (async () => {
-    const canvas = await rasterCanvas(input, style, px)
-    return canvasToBlob(canvas, 'image/png')
-  })()
+  const blob = rasterCanvas(input, style, px).then((canvas) => canvasToBlob(canvas, 'image/png'))
   await navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })])
 }
 
 export async function printQR(input: RenderInput, style: StyleSettings, px: number): Promise<void> {
-  const canvas = await rasterCanvas(input, style, px)
-  const dataUrl = canvas.toDataURL('image/png')
+  // Open the window synchronously while the click's user-activation is still live —
+  // Safari blocks window.open() if we await the raster first (same gesture expiry that
+  // affects clipboard.write above). Render after the window exists, closing it on error.
   const w = window.open('', '_blank')
   if (!w) throw new Error('popup blocked')
-  const doc = w.document
-  doc.title = 'QR Code'
-  const styleEl = doc.createElement('style')
-  styleEl.textContent =
-    '*{margin:0;padding:0}body{display:flex;align-items:center;justify-content:center;min-height:100vh;background:#fff}img{width:80vmin;height:auto}'
-  doc.head.appendChild(styleEl)
-  const img = doc.createElement('img')
-  img.src = dataUrl // canvas-generated base64 PNG — no external/user HTML
-  img.onload = () => {
-    w.print()
-    setTimeout(() => w.close(), 500)
+  try {
+    const canvas = await rasterCanvas(input, style, px)
+    const doc = w.document
+    doc.title = 'QR Code'
+    const styleEl = doc.createElement('style')
+    styleEl.textContent =
+      '*{margin:0;padding:0}body{display:flex;align-items:center;justify-content:center;min-height:100vh;background:#fff}img{width:80vmin;height:auto}'
+    doc.head.appendChild(styleEl)
+    const img = doc.createElement('img')
+    img.src = canvas.toDataURL('image/png') // canvas-generated base64 PNG — no external/user HTML
+    img.onload = () => {
+      w.print()
+      setTimeout(() => w.close(), 500)
+    }
+    doc.body.appendChild(img)
+  } catch (e) {
+    w.close()
+    throw e
   }
-  doc.body.appendChild(img)
 }
