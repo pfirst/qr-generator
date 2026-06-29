@@ -1,7 +1,7 @@
 import { useState, type ComponentType } from 'react'
 import { BODY_SHAPES, BG_PRESETS, ECC_LEVELS, EYE_FRAMES, EYEBALLS, FG_PRESETS } from '../constants'
 import type { GradientType, FrameStyle, StyleSettings } from '../core/types'
-import { composeFramedSvg, FRAME_PRESETS } from '../core/frames'
+import { composeFramedSvg, FRAME_TEMPLATES, frameThumb } from '../core/frames'
 import { FRAME_GLYPHS } from '../ui/shapeGlyphs'
 import { Card, SectionHead } from '../ui/surfaces'
 import { ACCENT_GRAD, ColorRow, SectionLabel, SegGroup, ShapeMenu, Toggle } from '../ui/controls'
@@ -34,10 +34,9 @@ const TABS: { id: TabId; label: string; Icon: ComponentType<{ size?: number }> }
 const SHAPE_TABS: TabId[] = ['border', 'center', 'cells']
 const FRAME_CHOICES: { id: FrameStyle; label: string }[] = [
   { id: 'none', label: 'ไม่มี' },
-  { id: 'classic', label: FRAME_PRESETS.classic.label },
-  { id: 'bubble', label: FRAME_PRESETS.bubble.label },
-  { id: 'basic', label: FRAME_PRESETS.basic.label },
-  { id: 'banner', label: FRAME_PRESETS.banner.label },
+  { id: 'classic', label: FRAME_TEMPLATES.classic.label },
+  { id: 'coffee', label: FRAME_TEMPLATES.coffee.label },
+  { id: 'chef', label: FRAME_TEMPLATES.chef.label },
 ]
 const GRADIENTS: { id: GradientType; label: string; Icon: ComponentType<{ size?: number }> }[] = [
   { id: 'none', label: 'ไม่มี', Icon: GradNoneIcon },
@@ -140,7 +139,7 @@ function PopBody({ tab, style, patch }: { tab: TabId; style: StyleSettings; patc
     return (
       <div className="w-[286px]">
         <SectionLabel>กรอบ + ป้าย CTA</SectionLabel>
-        <div className="grid grid-cols-5 gap-1.5">
+        <div className="grid grid-cols-4 gap-1.5">
           {FRAME_CHOICES.map(({ id, label }) => {
             const on = style.frameStyle === id
             return (
@@ -153,7 +152,11 @@ function PopBody({ tab, style, patch }: { tab: TabId; style: StyleSettings; patc
                   (on ? 'border-[#7c3aed] bg-[#ede9fe] text-[#7c3aed]' : 'border-[#e6e7ee] bg-white text-[#9ca3af] hover:border-[#c4b5fd]')
                 }
               >
-                <span className="h-5 w-5" dangerouslySetInnerHTML={{ __html: FRAME_GLYPHS[id] }} />
+                {id === 'none' ? (
+                  <span className="grid h-9 w-9 place-items-center text-[#9ca3af]" dangerouslySetInnerHTML={{ __html: FRAME_GLYPHS.none }} />
+                ) : (
+                  <span className="block h-9 [&>svg]:mx-auto [&>svg]:h-full [&>svg]:w-auto" dangerouslySetInnerHTML={{ __html: frameThumb(id) }} />
+                )}
                 {label}
               </button>
             )

@@ -22,7 +22,9 @@ export type EyeFrameShape = 'square' | 'circle' | 'dots' | 'rounded' | 'squircle
 // Marker center (the eyeball inside each corner) — 6 choices.
 export type EyeballShape = 'square' | 'circle' | 'dots' | 'rounded' | 'squircle' | 'cornerflow'
 
-export type FrameStyle = 'none' | 'classic' | 'bubble' | 'basic' | 'banner'
+// Real-SVG frame templates (chrome lifted from qr-code-generator.com). Proof slice;
+// expands toward the full set. 'none' = no frame.
+export type FrameStyle = 'none' | 'classic' | 'coffee' | 'chef'
 
 export type GradientType = 'none' | 'linear' | 'radial' | 'diagonal'
 export type Ecc = 'L' | 'M' | 'Q' | 'H'

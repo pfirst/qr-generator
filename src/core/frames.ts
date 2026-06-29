@@ -1,57 +1,31 @@
 import type { FrameStyle, StyleSettings } from './types'
+// Real frame chrome pulled from th.qr-code-generator.com (per พี่เฟิส's request), with
+// the example QR and the outlined "SCAN ME" stripped out. We inject our own QR into the
+// QR slot and overlay our own editable label (LINE Seed). `?raw` gives the file as a string.
+import classicTpl from '../assets/frames/classic.svg?raw'
+import coffeeTpl from '../assets/frames/coffee.svg?raw'
+import chefTpl from '../assets/frames/chef.svg?raw'
 
-// All geometry is a ratio of Q = the QR image width (incl. its quiet zone),
-// measured from the qrcg reference SVGs via getBBox()+path parse. Tuned in the
-// measure-compare loop (plan Task 5).
-export type FramePreset = {
-  label: string // UI label (gallery button)
-  layout: 'border-banner' | 'tag-border' | 'outline-below' | 'banner-only'
-  border: number // ×Q — frame/QR margin; 0 = none
-  radiusOut: number // ×Q — outer corner radius
-  radiusIn: number // ×Q — QR window corner radius (rounded corners on the QR)
-  labelW: number // ×Q — max label width
-  labelH: number // ×Q — label cap height → font size
-  banner?: { height: number; pointer?: { w: number; h: number } } // ×Q (bottom banner)
-  tag?: { height: number; pointer: { w: number; h: number } } // ×Q (top tag, bubble)
-  gapBelow?: number // ×Q — gap between frame and below-label (basic)
+export type FrameTemplate = {
+  label: string // UI label
+  svg: string // frame chrome (QR + CallToAction removed); uses class="frame-color" for the themeable parts
+  vb: { w: number; h: number } // template viewBox
+  slot: { x: number; y: number; w: number } // where our (square) QR is injected, template coords
+  labelSlot: { x: number; y: number; w: number; h: number } // where the original SCAN ME sat → our text
+  labelOnFill: boolean // true: label drawn in frameColor on a light area (coffee); false: label is contrast-on-fill (classic/chef)
 }
 
-export const FRAME_PRESETS: Record<Exclude<FrameStyle, 'none'>, FramePreset> = {
-  classic: {
-    label: 'Classic', layout: 'border-banner',
-    border: 0.041, radiusOut: 0.053, radiusIn: 0.028,
-    labelW: 0.758, labelH: 0.105, banner: { height: 0.297 },
-  },
-  bubble: {
-    label: 'Bubble', layout: 'tag-border',
-    border: 0.037, radiusOut: 0.053, radiusIn: 0.028,
-    labelW: 0.758, labelH: 0.105, tag: { height: 0.34, pointer: { w: 0.12, h: 0.08 } },
-  },
-  basic: {
-    label: 'Basic', layout: 'outline-below',
-    border: 0.041, radiusOut: 0.053, radiusIn: 0.028,
-    labelW: 1.0, labelH: 0.15, gapBelow: 0.095,
-  },
-  banner: {
-    label: 'Banner', layout: 'banner-only',
-    border: 0.025, radiusOut: 0.046, radiusIn: 0,
-    labelW: 0.735, labelH: 0.1, banner: { height: 0.242, pointer: { w: 0.171, h: 0.064 } },
-  },
+// Metadata measured from the reference SVGs via getBBox() + nested-svg attributes.
+export const FRAME_TEMPLATES: Record<Exclude<FrameStyle, 'none'>, FrameTemplate> = {
+  classic: { label: 'Classic', svg: classicTpl, vb: { w: 279.1, h: 346.6 }, slot: { x: 9.7, y: 9.6, w: 259.9 }, labelSlot: { x: 41.1, y: 289.3, w: 196.9, h: 36.3 }, labelOnFill: false },
+  coffee: { label: 'Coffee', svg: coffeeTpl, vb: { w: 406.2, h: 514.3 }, slot: { x: 46.8, y: 108.6, w: 259.8 }, labelSlot: { x: 30.2, y: 461, w: 293.2, h: 54 }, labelOnFill: true },
+  chef: { label: 'Chef', svg: chefTpl, vb: { w: 279.1, h: 538.4 }, slot: { x: 9.7, y: 201.4, w: 259.9 }, labelSlot: { x: 41.1, y: 481.1, w: 196.9, h: 36.3 }, labelOnFill: false },
 }
 
-let uid = 0 // unique clip-path ids so multiple framed SVGs on one page never collide
+let uid = 0 // unique root id per render so each framed SVG's <style> stays scoped to itself
 
 function esc(s: string): string {
   return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
-}
-
-// Validate a user-supplied colour to a safe hex literal before it is interpolated
-// into SVG attributes. The framed SVG is injected via dangerouslySetInnerHTML, so an
-// unescaped value containing a quote could break out of the attribute and inject
-// markup/handlers (XSS). frameColor is the only user value used in an attribute;
-// frameText is text content and is escaped by esc(). Non-hex input falls back to black.
-function safeColor(c: string): string {
-  return /^#(?:[0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/.test(c) ? c : '#000000'
 }
 
 function relLuminance(hex: string): number {
@@ -63,113 +37,76 @@ function relLuminance(hex: string): number {
   return 0.2126 * r + 0.7152 * g + 0.0722 * b
 }
 
-// label colour when it sits on the frameColor fill (banner / tag)
-function onFill(frameColor: string): string {
-  return relLuminance(frameColor) > 0.6 ? '#111111' : '#ffffff'
+// Validate a user colour to a hex literal before it goes into SVG attributes / CSS
+// (the framed SVG is injected via dangerouslySetInnerHTML — blocks attribute/CSS breakout).
+function safeColor(c: string): string {
+  return /^#(?:[0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/.test(c) ? c : '#000000'
 }
 
-// Centred label. Shrinks the font (down to a floor) so long text never overflows maxW.
-function labelSvg(text: string, cx: number, cy: number, cap: number, maxW: number, color: string): string {
+function contrast(hex: string): string {
+  return relLuminance(hex) > 0.6 ? '#111111' : '#ffffff'
+}
+
+const LABEL_FONT = "'LINE Seed Sans TH','LINE Seed Sans',Arial,Helvetica,sans-serif"
+
+// Scope a template's <style> to a single root id so its class rules (frame-color, shadows,
+// hat-background, …) can't leak to the page or collide between two framed SVGs.
+function scopeStyle(svg: string, id: string): string {
+  return svg.replace(/<style>([\s\S]*?)<\/style>/i, (_m, css: string) => {
+    const scoped = css.replace(/(^|[},])\s*\.([a-zA-Z0-9_-]+)/g, (_x, pre: string, cls: string) => `${pre}#${id} .${cls}`)
+    return `<style>${scoped}</style>`
+  })
+}
+
+// Centred label that shrinks to fit the slot width.
+function labelText(text: string, slot: FrameTemplate['labelSlot'], color: string): string {
   const t = esc((text || 'SCAN ME').toUpperCase())
-  let fs = cap * 1.38 // cap height → font-size for a bold sans
-  const est = t.length * fs * 0.62 // rough advance for bold uppercase sans
-  if (est > maxW) fs = Math.max(fs * 0.45, (fs * maxW) / est)
-  const ls = (fs * 0.06).toFixed(2)
+  let fs = slot.h * 0.92
+  const est = t.length * fs * 0.62
+  if (est > slot.w) fs = Math.max(fs * 0.45, (fs * slot.w) / est)
+  const cx = slot.x + slot.w / 2
+  const cy = slot.y + slot.h / 2
   return (
-    `<text x="${cx.toFixed(1)}" y="${cy.toFixed(1)}" text-anchor="middle" ` +
-    `dominant-baseline="central" font-family="Arial, Helvetica, sans-serif" ` +
-    `font-weight="700" font-size="${fs.toFixed(1)}" letter-spacing="${ls}" fill="${color}">${t}</text>`
+    `<text x="${cx.toFixed(1)}" y="${cy.toFixed(1)}" text-anchor="middle" dominant-baseline="central" ` +
+    `font-family="${LABEL_FONT}" font-weight="800" font-size="${fs.toFixed(1)}" letter-spacing="${(fs * 0.04).toFixed(2)}" fill="${color}">${t}</text>`
   )
 }
 
-function rrect(x: number, y: number, w: number, h: number, r: number, attrs: string): string {
-  return `<rect x="${x.toFixed(1)}" y="${y.toFixed(1)}" width="${w.toFixed(1)}" height="${h.toFixed(1)}" rx="${r.toFixed(1)}" ${attrs}/>`
-}
-
-// Place the (already-rendered) QR SVG at (x,y), clipped to a rounded square so its
-// corners match the frame's inner window. Returns clipPath def + clipped group.
-function placeQr(innerSvg: string, x: number, y: number, q: number, ri: number): string {
-  const id = `qf-clip-${uid++}`
-  const placed = innerSvg.replace(/<svg\b/, `<svg x="${x.toFixed(1)}" y="${y.toFixed(1)}"`)
-  if (ri <= 0) return placed
-  return (
-    `<defs><clipPath id="${id}">${rrect(x, y, q, q, ri, '')}</clipPath></defs>` +
-    `<g clip-path="url(#${id})">${placed}</g>`
-  )
-}
-
-// solid bottom banner with rounded bottom corners + optional up-pointer (apex centred on top edge)
-function bottomBanner(W: number, top: number, h: number, r: number, fill: string, pointer?: { w: number; h: number }): string {
-  const bottom = top + h
-  const cx = W / 2
-  const point = pointer
-    ? `M${(cx - pointer.w / 2).toFixed(1)},${top.toFixed(1)} L${cx.toFixed(1)},${(top - pointer.h).toFixed(1)} L${(cx + pointer.w / 2).toFixed(1)},${top.toFixed(1)} Z`
-    : ''
-  const rectPath =
-    `M0,${top.toFixed(1)} H${W.toFixed(1)} V${(bottom - r).toFixed(1)} ` +
-    `Q${W.toFixed(1)},${bottom.toFixed(1)} ${(W - r).toFixed(1)},${bottom.toFixed(1)} ` +
-    `H${r.toFixed(1)} Q0,${bottom.toFixed(1)} 0,${(bottom - r).toFixed(1)} Z`
-  return `<path d="${rectPath}" fill="${fill}"/>` + (point ? `<path d="${point}" fill="${fill}"/>` : '')
-}
-
-export function composeFramedSvg(innerSvg: string, qrPx: number, style: StyleSettings): string {
+export function composeFramedSvg(innerSvg: string, _qrPx: number, style: StyleSettings): string {
   if (style.frameStyle === 'none') return innerSvg
-  const p = FRAME_PRESETS[style.frameStyle]
-  const Q = qrPx
-  const B = p.border * Q
-  const Ro = p.radiusOut * Q
-  const Ri = p.radiusIn * Q
+  const t = FRAME_TEMPLATES[style.frameStyle]
   const fc = safeColor(style.frameColor)
-  const cap = p.labelH * Q
-  const maxLabel = p.labelW * Q
-  const open = (W: number, H: number) =>
-    `<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="${W.toFixed(1)}" height="${H.toFixed(1)}" viewBox="0 0 ${W.toFixed(1)} ${H.toFixed(1)}">`
+  const id = `qf${uid++}`
 
-  if (p.layout === 'border-banner') {
-    const bannerH = p.banner!.height * Q
-    const W = Q + 2 * B
-    const H = B + Q + bannerH
-    const behind = rrect(0, 0, W, H, Ro, `fill="${fc}"`)
-    const qr = placeQr(innerSvg, B, B, Q, Ri)
-    const label = labelSvg(style.frameText, W / 2, B + Q + bannerH / 2, cap, maxLabel, onFill(fc))
-    return open(W, H) + behind + qr + label + '</svg>'
-  }
+  // 1) take the chrome, give the root a unique id + explicit pixel size (so raster export
+  //    can read naturalWidth/Height), inline the themeable colour, scope the rest.
+  let out = t.svg
+    .replace(/<svg\b/, `<svg id="${id}" width="${t.vb.w}" height="${t.vb.h}"`)
+    .replace(/\sclass="frame-color"/g, ` fill="${fc}"`)
+  out = scopeStyle(out, id)
 
-  if (p.layout === 'tag-border') {
-    const tagH = p.tag!.height * Q
-    const pt = p.tag!.pointer
-    const tagRegion = tagH + pt.h * Q
-    const W = Q + 2 * B
-    const H = tagRegion + B + Q + B
-    const borderRect = rrect(0, tagRegion, W, B + Q + B, Ro, `fill="${fc}"`)
-    const qr = placeQr(innerSvg, B, tagRegion + B, Q, Ri)
-    const tag = rrect(0, 0, W, tagH, Ro, `fill="${fc}"`)
-    const cx = W / 2
-    const pointer = `<path d="M${(cx - (pt.w * Q) / 2).toFixed(1)},${tagH.toFixed(1)} L${cx.toFixed(1)},${tagRegion.toFixed(1)} L${(cx + (pt.w * Q) / 2).toFixed(1)},${tagH.toFixed(1)} Z" fill="${fc}"/>`
-    const label = labelSvg(style.frameText, cx, tagH / 2, cap, maxLabel, onFill(fc))
-    return open(W, H) + borderRect + qr + tag + pointer + label + '</svg>'
-  }
+  // 2) inject our QR into the slot — strip the QR root's own width/height/x/y first so
+  //    ours win, then size it to the square slot (its viewBox scales the content in).
+  const qr = innerSvg.replace(/<svg\b[^>]*?>/, (m) =>
+    m.replace(/\s(?:width|height|x|y)="[^"]*"/g, '').replace(/^<svg/, `<svg x="${t.slot.x}" y="${t.slot.y}" width="${t.slot.w}" height="${t.slot.w}"`),
+  )
 
-  if (p.layout === 'outline-below') {
-    const gap = (p.gapBelow ?? 0.095) * Q
-    const ringBox = B + Q + B
-    const W = Q + 2 * B
-    const H = ringBox + gap + cap * 1.6
-    const ring = rrect(B / 2, B / 2, Q + B, Q + B, Ro, `fill="none" stroke="${fc}" stroke-width="${B.toFixed(1)}"`)
-    const qr = placeQr(innerSvg, B, B, Q, Ri)
-    const label = labelSvg(style.frameText, W / 2, ringBox + gap + cap * 0.8, cap, maxLabel, fc)
-    return open(W, H) + ring + qr + label + '</svg>'
-  }
+  // 3) overlay our editable label where the original SCAN ME sat
+  const label = labelText(style.frameText, t.labelSlot, t.labelOnFill ? fc : contrast(fc))
 
-  // banner-only
-  const m = B // tiny margin (quiet zone only)
-  const bannerH = p.banner!.height * Q
-  const pt = p.banner!.pointer!
-  const W = Q + 2 * m
-  const bannerTop = m + Q + pt.h * Q
-  const H = bannerTop + bannerH
-  const qr = placeQr(innerSvg, m, m, Q, Ri)
-  const banner = bottomBanner(W, bannerTop, bannerH, Ro, fc, { w: pt.w * Q, h: pt.h * Q })
-  const label = labelSvg(style.frameText, W / 2, bannerTop + bannerH / 2, cap, maxLabel * 1, onFill(fc))
-  return open(W, H) + qr + banner + label + '</svg>'
+  // QR + label go on top (end of the root), in the QR window / label slot
+  return out.replace(/<\/svg>\s*$/i, `${qr}${label}</svg>`)
+}
+
+// Small chrome-only preview for the gallery buttons (no QR data, neutral colour + a
+// placeholder square where the QR would sit).
+export function frameThumb(id: Exclude<FrameStyle, 'none'>): string {
+  const t = FRAME_TEMPLATES[id]
+  const rid = `qt${uid++}`
+  let out = t.svg
+    .replace(/<svg\b/, `<svg id="${rid}"`)
+    .replace(/\sclass="frame-color"/g, ` fill="#9ca3af"`)
+  out = scopeStyle(out, rid)
+  const ph = `<rect x="${t.slot.x}" y="${t.slot.y}" width="${t.slot.w}" height="${t.slot.w}" rx="14" fill="#e5e7eb"/>`
+  return out.replace(/<\/svg>\s*$/i, `${ph}</svg>`)
 }
