@@ -1,7 +1,8 @@
 import { useState, type ComponentType } from 'react'
 import { BODY_SHAPES, BG_PRESETS, ECC_LEVELS, EYE_FRAMES, EYEBALLS, FG_PRESETS } from '../constants'
-import type { GradientType, StyleSettings } from '../core/types'
-import { composeFramedSvg } from '../core/frames'
+import type { GradientType, FrameStyle, StyleSettings } from '../core/types'
+import { composeFramedSvg, FRAME_PRESETS } from '../core/frames'
+import { FRAME_GLYPHS } from '../ui/shapeGlyphs'
 import { Card, SectionHead } from '../ui/surfaces'
 import { ACCENT_GRAD, ColorRow, SectionLabel, SegGroup, ShapeMenu, Toggle } from '../ui/controls'
 import {
@@ -31,6 +32,13 @@ const TABS: { id: TabId; label: string; Icon: ComponentType<{ size?: number }> }
 ]
 // Shape pickers get Figma's anchored dropdown; the rest use a centred popup.
 const SHAPE_TABS: TabId[] = ['border', 'center', 'cells']
+const FRAME_CHOICES: { id: FrameStyle; label: string }[] = [
+  { id: 'none', label: 'ไม่มี' },
+  { id: 'classic', label: FRAME_PRESETS.classic.label },
+  { id: 'bubble', label: FRAME_PRESETS.bubble.label },
+  { id: 'basic', label: FRAME_PRESETS.basic.label },
+  { id: 'banner', label: FRAME_PRESETS.banner.label },
+]
 const GRADIENTS: { id: GradientType; label: string; Icon: ComponentType<{ size?: number }> }[] = [
   { id: 'none', label: 'ไม่มี', Icon: GradNoneIcon },
   { id: 'linear', label: 'เส้นตรง', Icon: GradLinearIcon },
@@ -131,10 +139,26 @@ function PopBody({ tab, style, patch }: { tab: TabId; style: StyleSettings; patc
   if (tab === 'cta') {
     return (
       <div className="w-[286px]">
-        <label className="flex cursor-pointer items-center justify-between">
-          <span className="text-[13px] font-bold text-[#374151]">เปิดกรอบ + ป้าย CTA</span>
-          <Toggle on={style.frameStyle !== 'none'} onChange={(v) => patch({ frameStyle: v ? 'classic' : 'none' })} />
-        </label>
+        <SectionLabel>กรอบ + ป้าย CTA</SectionLabel>
+        <div className="grid grid-cols-5 gap-1.5">
+          {FRAME_CHOICES.map(({ id, label }) => {
+            const on = style.frameStyle === id
+            return (
+              <button
+                key={id}
+                onClick={() => patch({ frameStyle: id })}
+                title={label}
+                className={
+                  'flex cursor-pointer flex-col items-center gap-1 rounded-[11px] border py-2 text-[10px] font-bold transition ' +
+                  (on ? 'border-[#7c3aed] bg-[#ede9fe] text-[#7c3aed]' : 'border-[#e6e7ee] bg-white text-[#9ca3af] hover:border-[#c4b5fd]')
+                }
+              >
+                <span className="h-5 w-5" dangerouslySetInnerHTML={{ __html: FRAME_GLYPHS[id] }} />
+                {label}
+              </button>
+            )
+          })}
+        </div>
         {style.frameStyle !== 'none' && (
           <div className="mt-3.5 flex items-center gap-3">
             <input

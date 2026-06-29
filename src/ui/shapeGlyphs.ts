@@ -29,3 +29,12 @@ export const SHAPE_GLYPHS: Record<GlyphKind, Record<string, string>> = {
     "cornerflow": "<path fill=\"currentColor\" d=\"M9 6a3 3 0 0 1 3-3v3zM9 6h3a3 3 0 0 1-3 3zM6 9a3 3 0 0 1 3-3v3zM6 12a3 3 0 0 1 3-3v3zM3 5a2 2 0 0 1 2-2h1v1a2 2 0 0 1-2 2H3zM15 20a2 2 0 0 1 2-2h1v1a2 2 0 0 1-2 2h-1zM18 17a2 2 0 0 1 2-2h1v1a2 2 0 0 1-2 2h-1zM9 18h3a3 3 0 0 1-3 3zM9 15h3v3H9zM6 18a3 3 0 0 1 3-3v3zM3 20a2 2 0 0 1 2-2h1v1a2 2 0 0 1-2 2H3zM3 14a2 2 0 0 1 2-2h1v1a2 2 0 0 1-2 2H3zM9 9h3v3H9zM12 9h3v3h-3zM15 9h3v3h-3zM15 12h3a3 3 0 0 1-3 3zM18 9h3a3 3 0 0 1-3 3zM12 3h3a3 3 0 0 1-3 3zM18 5a2 2 0 0 1 2-2h1v1a2 2 0 0 1-2 2h-1zM15 9a3 3 0 0 1 3-3v3z\"></path>"
   }
 }
+
+// Mini glyphs for the CTA frame gallery (none + 4 styles). Schematic, not exact.
+export const FRAME_GLYPHS: Record<string, string> = {
+  none: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="4" y="4" width="16" height="16" rx="3"/><path d="M8 8l8 8M16 8l-8 8"/></svg>',
+  classic: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="4" y="3" width="16" height="13" rx="2.5"/><rect x="4" y="17" width="16" height="4" rx="1.5" fill="currentColor" stroke="none"/></svg>',
+  bubble: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="5" y="2" width="14" height="5" rx="1.5" fill="currentColor" stroke="none"/><path d="M12 7l2 2h-4z" fill="currentColor" stroke="none"/><rect x="4" y="10" width="16" height="12" rx="2.5"/></svg>',
+  basic: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="4" y="3" width="16" height="13" rx="2.5"/><path d="M6 20h12" stroke-width="2.4"/></svg>',
+  banner: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="5" y="3" width="14" height="13" rx="2"/><path d="M12 16l2 2h-4z" fill="currentColor" stroke="none"/><rect x="4" y="18" width="16" height="4" rx="1.5" fill="currentColor" stroke="none"/></svg>',
+}
