@@ -45,6 +45,15 @@ function esc(s: string): string {
   return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
 }
 
+// Validate a user-supplied colour to a safe hex literal before it is interpolated
+// into SVG attributes. The framed SVG is injected via dangerouslySetInnerHTML, so an
+// unescaped value containing a quote could break out of the attribute and inject
+// markup/handlers (XSS). frameColor is the only user value used in an attribute;
+// frameText is text content and is escaped by esc(). Non-hex input falls back to black.
+function safeColor(c: string): string {
+  return /^#(?:[0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/.test(c) ? c : '#000000'
+}
+
 function relLuminance(hex: string): number {
   const h = hex.replace('#', '')
   const n = h.length === 3 ? h.split('').map((c) => c + c).join('') : h
@@ -110,7 +119,7 @@ export function composeFramedSvg(innerSvg: string, qrPx: number, style: StyleSet
   const B = p.border * Q
   const Ro = p.radiusOut * Q
   const Ri = p.radiusIn * Q
-  const fc = style.frameColor
+  const fc = safeColor(style.frameColor)
   const cap = p.labelH * Q
   const maxLabel = p.labelW * Q
   const open = (W: number, H: number) =>
