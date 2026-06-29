@@ -69,7 +69,7 @@ export function contrastScan(style: StyleSettings): ContrastResult {
 // Decode the actual rendered QR. Returns the decoded text, or null if unreadable.
 export async function decodeRendered(input: RenderInput, style: StyleSettings): Promise<string | null> {
   // render without the CTA frame so the decoder sees just the code
-  const canvas = await rasterCanvas(input, { ...style, frameOn: false }, 380)
+  const canvas = await rasterCanvas(input, { ...style, frameStyle: 'none' }, 380)
 
   if ('BarcodeDetector' in window) {
     try {

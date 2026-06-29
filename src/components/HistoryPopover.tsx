@@ -6,7 +6,7 @@ import { defaultStyle } from '../core/types'
 import type { RecentItem } from '../recent'
 import { HistoryIcon, TrashIcon } from '../ui/icons'
 
-const THUMB = { ...defaultStyle(), fg: '#111827', bg: '#ffffff', gradient: 'none' as const, bodyShape: 'square' as const, eyeFrameShape: 'square' as const, eyeballShape: 'square' as const, logo: null, frameOn: false, margin: 2 }
+const THUMB = { ...defaultStyle(), fg: '#111827', bg: '#ffffff', gradient: 'none' as const, bodyShape: 'square' as const, eyeFrameShape: 'square' as const, eyeballShape: 'square' as const, logo: null, frameStyle: 'none' as const, margin: 2 }
 
 async function thumbSvg(item: RecentItem): Promise<string | null> {
   try {

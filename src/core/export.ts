@@ -47,7 +47,7 @@ export async function rasterCanvas(
   let qy = 0
   let labelH = 0
   let pad = 0
-  if (style.frameOn) {
+  if (style.frameStyle !== 'none') {
     pad = Math.round(W * 0.05)
     labelH = Math.round(W * 0.15)
     cw = W + pad * 2
@@ -63,7 +63,7 @@ export async function rasterCanvas(
   ctx.fillStyle = style.bg
   ctx.fillRect(0, 0, cw, ch)
 
-  if (style.frameOn) {
+  if (style.frameStyle !== 'none') {
     const lw = Math.max(6, Math.round(W * 0.018))
     const radius = Math.round(W * 0.05)
     ctx.strokeStyle = style.frameColor
@@ -77,7 +77,7 @@ export async function rasterCanvas(
     ctx.textAlign = 'center'
     ctx.textBaseline = 'middle'
     ctx.font = `800 ${Math.round(labelH * 0.42)}px 'LINE Seed Sans TH', sans-serif`
-    ctx.fillText(style.frameText || 'สแกนเลย', cw / 2, W + pad * 2 + labelH / 2)
+    ctx.fillText(style.frameText || 'SCAN ME', cw / 2, W + pad * 2 + labelH / 2)
   }
 
   ctx.drawImage(img, qx, qy, W, W)

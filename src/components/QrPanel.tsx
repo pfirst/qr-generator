@@ -132,14 +132,14 @@ function PopBody({ tab, style, patch }: { tab: TabId; style: StyleSettings; patc
       <div className="w-[286px]">
         <label className="flex cursor-pointer items-center justify-between">
           <span className="text-[13px] font-bold text-[#374151]">เปิดกรอบ + ป้าย CTA</span>
-          <Toggle on={style.frameOn} onChange={(v) => patch({ frameOn: v })} />
+          <Toggle on={style.frameStyle !== 'none'} onChange={(v) => patch({ frameStyle: v ? 'classic' : 'none' })} />
         </label>
-        {style.frameOn && (
+        {style.frameStyle !== 'none' && (
           <div className="mt-3.5 flex items-center gap-3">
             <input
               value={style.frameText}
               onChange={(e) => patch({ frameText: e.target.value })}
-              placeholder="สแกนเลย"
+              placeholder="SCAN ME"
               className="flex-1 rounded-[11px] border border-[#e6e7ee] bg-white px-3 py-2.5 text-[14px] font-bold text-[#111827] outline-none focus:border-[#7c3aed]"
             />
             <input type="color" value={style.frameColor} onChange={(e) => patch({ frameColor: e.target.value })} className="h-[42px] w-11 cursor-pointer rounded-[10px] border border-[#e6e7ee] bg-white p-1" />
@@ -178,7 +178,7 @@ function PopBody({ tab, style, patch }: { tab: TabId; style: StyleSettings; patc
 export function QrPanel({ svg, hasData, style, patchStyle }: { svg: string | null; hasData: boolean; style: StyleSettings; patchStyle: (p: Partial<StyleSettings>) => void }) {
   const [open, setOpen] = useState<TabId | null>(null)
 
-  const frameWrap: CSSProperties = style.frameOn
+  const frameWrap: CSSProperties = style.frameStyle !== 'none'
     ? {
         display: 'inline-flex',
         flexDirection: 'column',
@@ -227,9 +227,9 @@ export function QrPanel({ svg, hasData, style, patchStyle }: { svg: string | nul
             <div className="relative rounded-[26px] border border-[#eef1f8] bg-white p-4" style={{ boxShadow: 'var(--shadow-qr)' }}>
               <div style={frameWrap}>
                 <div key={svg.length} className="overflow-hidden rounded-[10px] leading-[0]" style={{ animation: 'qrpop .26s cubic-bezier(.2,.9,.3,1.3)' }} dangerouslySetInnerHTML={{ __html: svg }} />
-                {style.frameOn && (
+                {style.frameStyle !== 'none' && (
                   <div className="rounded-[10px] px-5 py-1.5 text-[16px] font-extrabold tracking-[0.2px] text-white" style={{ background: style.frameColor }}>
-                    {style.frameText || 'สแกนเลย'}
+                    {style.frameText || 'SCAN ME'}
                   </div>
                 )}
               </div>

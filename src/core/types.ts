@@ -22,6 +22,8 @@ export type EyeFrameShape = 'square' | 'circle' | 'dots' | 'rounded' | 'squircle
 // Marker center (the eyeball inside each corner) — 6 choices.
 export type EyeballShape = 'square' | 'circle' | 'dots' | 'rounded' | 'squircle' | 'cornerflow'
 
+export type FrameStyle = 'none' | 'classic' | 'bubble' | 'basic' | 'banner'
+
 export type GradientType = 'none' | 'linear' | 'radial' | 'diagonal'
 export type Ecc = 'L' | 'M' | 'Q' | 'H'
 export type LogoBg = 'none' | 'square' | 'rounded' | 'circle'
@@ -64,7 +66,7 @@ export interface StyleSettings {
   logo: string | null // data URL of uploaded image
   logoSize: number // fraction of QR side, 0..1
   logoBg: LogoBg
-  frameOn: boolean
+  frameStyle: FrameStyle
   frameText: string
   frameColor: string
   ecc: Ecc
@@ -99,8 +101,8 @@ export const defaultStyle = (): StyleSettings => ({
   logo: null,
   logoSize: 0.24,
   logoBg: 'none',
-  frameOn: false,
-  frameText: 'สแกนเลย',
+  frameStyle: 'none',
+  frameText: 'SCAN ME',
   frameColor: '#7c3aed',
   ecc: 'M',
   size: 300,
