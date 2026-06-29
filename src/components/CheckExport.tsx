@@ -107,6 +107,9 @@ export function CheckExport({
           })}
         </div>
 
+        <div className="my-4 border-t border-[#eef0f5]" />
+
+        <div className="mb-2.5 text-[12.5px] font-bold text-[#6b7280]">ประเภทไฟล์</div>
         <div className="mb-3 grid grid-cols-5 gap-2">
           {FORMATS.map((f) => {
             const on = fmt === f.id
