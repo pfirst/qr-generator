@@ -73,6 +73,12 @@ function contrast(hex: string): string {
 
 const LABEL_FONT = "'LINE Seed Sans TH','LINE Seed Sans',Arial,Helvetica,sans-serif"
 
+// qrcg's letter/banner/arrow/ribbon/phone/script frames carry a thin #E6E6E6 card-border
+// path (class "outline"/"outline-white", plus an invisible "show_on_white" twin). On a
+// hi-DPI screen that border renders as a crisp grey hairline down each side of the white
+// card — reads as a stray dark line beside the QR. We don't want it, so drop those paths.
+const OUTLINE_RE = /<path\b[^>]*\bclass="[^"]*(?:outline|show_on_white)[^"]*"[^>]*\/>/g
+
 // Scope a template's <style> to a single root id so its class rules (frame-color, shadows,
 // hat-background, …) can't leak to the page or collide between two framed SVGs. The source
 // tag is `<style type="text/css">` — match the attributes too, or every frame's CSS stays
@@ -115,6 +121,7 @@ export function composeFramedSvg(innerSvg: string, _qrPx: number, style: StyleSe
   //    can read naturalWidth/Height), inline the themeable colour, scope the rest.
   let out = t.svg
     .replace(/<svg\b/, `<svg id="${id}" width="${t.vb.w}" height="${t.vb.h}"`)
+    .replace(OUTLINE_RE, '')
     .replace(/\sclass="frame-color"/g, ` fill="${fc}"`)
   out = scopeStyle(out, id)
 
@@ -146,6 +153,7 @@ export function frameThumb(id: Exclude<FrameStyle, 'none'>): string {
   const rid = `qt${uid++}`
   let out = t.svg
     .replace(/<svg\b/, `<svg id="${rid}"`)
+    .replace(OUTLINE_RE, '')
     .replace(/\sclass="frame-color"/g, ` fill="#9ca3af"`)
   out = scopeStyle(out, rid)
   const ph = `<rect x="${t.slot.x}" y="${t.slot.y}" width="${t.slot.w}" height="${t.slot.w}" rx="14" fill="#e5e7eb"/>`
