@@ -137,8 +137,13 @@ export async function downloadQR(
 }
 
 export async function copyQRToClipboard(input: RenderInput, style: StyleSettings, px: number): Promise<void> {
-  const canvas = await rasterCanvas(input, style, px)
-  const blob = await canvasToBlob(canvas, 'image/png')
+  // Safari only allows clipboard.write() while the click's user-activation is still
+  // live, so we must call it synchronously and hand it a Promise<Blob> — awaiting the
+  // raster before the write would expire the gesture and throw NotAllowedError.
+  const blob = (async () => {
+    const canvas = await rasterCanvas(input, style, px)
+    return canvasToBlob(canvas, 'image/png')
+  })()
   await navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })])
 }
 
