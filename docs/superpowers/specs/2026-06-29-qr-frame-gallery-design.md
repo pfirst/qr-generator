@@ -1,7 +1,15 @@
 # QR Frame Gallery — Design Spec
 
 **Date:** 2026-06-29
-**Status:** Approved (design) — pending spec review before implementation plan
+**Status:** IMPLEMENTED, but APPROACH PIVOTED mid-build (see addendum).
+
+> ## ⚠️ Addendum (pivot) — read this first
+> Sections 3–11 below describe the original **reconstruction** approach (redraw each frame's geometry from `FRAME_PRESETS`). That was built (Tasks 1–4) and worked, but the owner then asked to **use the real qrcg frame SVGs directly** (all of them) with **our own overlaid editable LINE Seed label**. The shipped implementation is therefore a **real-SVG template engine**, not reconstruction:
+> - `core/frames.ts` imports stripped frame SVGs from `src/assets/frames/*.svg` (`?raw`), defined in `FRAME_TEMPLATES` (per-frame QR slot + label slot + label colour).
+> - `composeFramedSvg(innerSvg, _qrPx, style)` injects our QR into the slot, overlays our LINE Seed `<text>`, recolors `class="frame-color"` → `frameColor` via an id-scoped `<style>`. Same composed SVG drives preview + SVG export + raster export.
+> - 14 frames shipped (classic, bubble, basic, banner, tooltip, letter, arrow, ribbon, bag, coffee, gift, chef, phone, script). 2 more from the gallery (scooter, torn-paper) weren't retrievable (API name unknown; site A/B-locked to a 9-frame variant).
+> - Editable text + frameColor preserved; the qrcg "SCAN ME" outline is stripped and replaced by ours. IP risk acknowledged by the owner for a public release.
+> - The data-model / UI-placement / "preview == export" decisions from §4–5 still hold; only the frame *rendering* mechanism changed. See `CLAUDE.md` "Non-obvious behaviours" for the current contract.
 **Owner:** พี่เฟิส / Aria
 
 ## 1. Summary
