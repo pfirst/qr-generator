@@ -118,11 +118,19 @@ export function composeFramedSvg(innerSvg: string, _qrPx: number, style: StyleSe
     .replace(/\sclass="frame-color"/g, ` fill="${fc}"`)
   out = scopeStyle(out, id)
 
-  // 2) inject our QR into the slot — strip the QR root's own width/height/x/y first so
-  //    ours win, then size it to the square slot (its viewBox scales the content in).
-  const qr = innerSvg.replace(/<svg\b[^>]*?>/, (m) =>
-    m.replace(/\s(?:width|height|x|y)="[^"]*"/g, '').replace(/^<svg/, `<svg x="${t.slot.x}" y="${t.slot.y}" width="${t.slot.w}" height="${t.slot.w}"`),
-  )
+  // 2) inject our QR into the slot. Unwrap the QR's outer <svg> (drop the xml prolog and
+  //    the <svg>/</svg> wrapper) and place its content with a <g transform>. A nested
+  //    <svg> would establish a viewport that clips at the fractional slot scale, and some
+  //    renderers/displays draw a hairline at that edge → stray black lines beside the QR.
+  //    The prolog also has to go: left mid-document it makes the SVG invalid XML, which
+  //    breaks raster export (Blob/Image load fails). A <g> has no viewport, so no seam.
+  const qrN = parseFloat((innerSvg.match(/viewBox="0 0 ([\d.]+)/) || [, '300'])[1]) || 300
+  const qrScale = t.slot.w / qrN
+  const qrBody = innerSvg
+    .replace(/<\?xml[\s\S]*?\?>/g, '')
+    .replace(/^\s*<svg\b[^>]*>/i, '')
+    .replace(/<\/svg>\s*$/i, '')
+  const qr = `<g transform="translate(${t.slot.x} ${t.slot.y}) scale(${qrScale.toFixed(5)})">${qrBody}</g>`
 
   // 3) overlay our editable label where the original SCAN ME sat, sized to that slot.
   const label = labelText(style.frameText, t.labelSlot, t.labelOnFill ? fc : contrast(fc))
