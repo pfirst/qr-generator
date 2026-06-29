@@ -74,22 +74,29 @@ function contrast(hex: string): string {
 const LABEL_FONT = "'LINE Seed Sans TH','LINE Seed Sans',Arial,Helvetica,sans-serif"
 
 // Scope a template's <style> to a single root id so its class rules (frame-color, shadows,
-// hat-background, …) can't leak to the page or collide between two framed SVGs.
+// hat-background, …) can't leak to the page or collide between two framed SVGs. The source
+// tag is `<style type="text/css">` — match the attributes too, or every frame's CSS stays
+// global and cross-contaminates (e.g. one frame's `.shadow-15{#000}` blackens another's
+// white highlight, depending on DOM order → stray dark smudges).
 function scopeStyle(svg: string, id: string): string {
-  return svg.replace(/<style>([\s\S]*?)<\/style>/i, (_m, css: string) => {
+  return svg.replace(/<style\b[^>]*>([\s\S]*?)<\/style>/i, (_m, css: string) => {
     const scoped = css.replace(/(^|[},])\s*\.([a-zA-Z0-9_-]+)/g, (_x, pre: string, cls: string) => `${pre}#${id} .${cls}`)
     return `<style>${scoped}</style>`
   })
 }
 
-// Centred label. Size = the original label height, but capped by `maxFs` (so frames whose
-// original SCAN ME was oversized — arrow, script — get a sane banner size) and shrunk to
-// fit the slot width.
-function labelText(text: string, slot: FrameTemplate['labelSlot'], color: string, maxFs: number): string {
+// Centred label. Size = the original label height (slot.h encodes how tall qrcg's own
+// SCAN ME sat — so text-forward frames like arrow/script stay big like the source), shrunk
+// only when it would overrun the slot width.
+function labelText(text: string, slot: FrameTemplate['labelSlot'], color: string): string {
   const t = esc((text || 'SCAN ME').toUpperCase())
-  let fs = Math.min(slot.h * 0.78, maxFs)
-  const est = t.length * fs * 0.6 // rough advance for a bold sans, Latin or Thai
-  if (est > slot.w) fs = Math.max(8, (fs * slot.w) / est)
+  let fs = slot.h * 0.78
+  // Measured advance for LINE Seed 800 + our letter-spacing ≈ 0.72·fs per char. Fit to 92%
+  // of the slot width so a wide label (arrow/script) shrinks to fill it without ever
+  // overrunning the frame edge.
+  const budget = slot.w * 0.92
+  const w = t.length * fs * 0.72
+  if (w > budget) fs = Math.max(8, (fs * budget) / w)
   const cx = slot.x + slot.w / 2
   const cy = slot.y + slot.h / 2
   return (
@@ -117,9 +124,8 @@ export function composeFramedSvg(innerSvg: string, _qrPx: number, style: StyleSe
     m.replace(/\s(?:width|height|x|y)="[^"]*"/g, '').replace(/^<svg/, `<svg x="${t.slot.x}" y="${t.slot.y}" width="${t.slot.w}" height="${t.slot.w}"`),
   )
 
-  // 3) overlay our editable label where the original SCAN ME sat — cap size to ~13.5% of
-  //    the QR width so oversized originals (arrow/script) become a tidy banner line.
-  const label = labelText(style.frameText, t.labelSlot, t.labelOnFill ? fc : contrast(fc), t.slot.w * 0.135)
+  // 3) overlay our editable label where the original SCAN ME sat, sized to that slot.
+  const label = labelText(style.frameText, t.labelSlot, t.labelOnFill ? fc : contrast(fc))
 
   // QR + label go on top (end of the root), in the QR window / label slot
   return out.replace(/<\/svg>\s*$/i, `${qr}${label}</svg>`)
