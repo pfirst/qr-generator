@@ -42,7 +42,7 @@ export const FRAME_TEMPLATES: Record<Exclude<FrameStyle, 'none'>, FrameTemplate>
   coffee: { label: 'กาแฟ', svg: coffeeTpl, vb: { w: 406.2, h: 514.3 }, slot: { x: 46.8, y: 108.6, w: 259.8 }, labelSlot: { x: 30.2, y: 461, w: 293.2, h: 54 }, labelOnFill: true },
   gift: { label: 'ของขวัญ', svg: giftTpl, vb: { w: 324.6, h: 467.9 }, slot: { x: 32.4, y: 198.5, w: 259.8 }, labelSlot: { x: 63.3, y: 117.2, w: 197.1, h: 36.3 }, labelOnFill: false },
   chef: { label: 'เชฟ', svg: chefTpl, vb: { w: 279.1, h: 538.4 }, slot: { x: 9.7, y: 201.4, w: 259.9 }, labelSlot: { x: 41.1, y: 481.1, w: 196.9, h: 36.3 }, labelOnFill: false },
-  phone: { label: 'มือถือ', svg: phoneTpl, vb: { w: 281.1, h: 475.8 }, slot: { x: 6.7, y: 74.3, w: 267.7 }, labelSlot: { x: 41.9, y: 357.9, w: 197.1, h: 36.3 }, labelOnFill: false },
+  phone: { label: 'มือถือ', svg: phoneTpl, vb: { w: 281.1, h: 475.8 }, slot: { x: 6.7, y: 74.3, w: 267.7 }, labelSlot: { x: 41.9, y: 357.9, w: 197.1, h: 36.3 }, labelOnFill: true },
   script: { label: 'ลายมือ', svg: scriptTpl, vb: { w: 344, h: 422.3 }, slot: { x: 38.2, y: 6.7, w: 267.7 }, labelSlot: { x: -0.2, y: 297.5, w: 344.1, h: 124.8 }, labelOnFill: true },
 }
 
@@ -82,17 +82,19 @@ function scopeStyle(svg: string, id: string): string {
   })
 }
 
-// Centred label that shrinks to fit the slot width.
-function labelText(text: string, slot: FrameTemplate['labelSlot'], color: string): string {
+// Centred label. Size = the original label height, but capped by `maxFs` (so frames whose
+// original SCAN ME was oversized — arrow, script — get a sane banner size) and shrunk to
+// fit the slot width.
+function labelText(text: string, slot: FrameTemplate['labelSlot'], color: string, maxFs: number): string {
   const t = esc((text || 'SCAN ME').toUpperCase())
-  let fs = slot.h * 0.92
-  const est = t.length * fs * 0.62
-  if (est > slot.w) fs = Math.max(fs * 0.45, (fs * slot.w) / est)
+  let fs = Math.min(slot.h * 0.78, maxFs)
+  const est = t.length * fs * 0.6 // rough advance for a bold sans, Latin or Thai
+  if (est > slot.w) fs = Math.max(8, (fs * slot.w) / est)
   const cx = slot.x + slot.w / 2
   const cy = slot.y + slot.h / 2
   return (
     `<text x="${cx.toFixed(1)}" y="${cy.toFixed(1)}" text-anchor="middle" dominant-baseline="central" ` +
-    `font-family="${LABEL_FONT}" font-weight="800" font-size="${fs.toFixed(1)}" letter-spacing="${(fs * 0.04).toFixed(2)}" fill="${color}">${t}</text>`
+    `font-family="${LABEL_FONT}" font-weight="800" font-size="${fs.toFixed(1)}" letter-spacing="${(fs * 0.03).toFixed(2)}" fill="${color}">${t}</text>`
   )
 }
 
@@ -115,8 +117,9 @@ export function composeFramedSvg(innerSvg: string, _qrPx: number, style: StyleSe
     m.replace(/\s(?:width|height|x|y)="[^"]*"/g, '').replace(/^<svg/, `<svg x="${t.slot.x}" y="${t.slot.y}" width="${t.slot.w}" height="${t.slot.w}"`),
   )
 
-  // 3) overlay our editable label where the original SCAN ME sat
-  const label = labelText(style.frameText, t.labelSlot, t.labelOnFill ? fc : contrast(fc))
+  // 3) overlay our editable label where the original SCAN ME sat — cap size to ~13.5% of
+  //    the QR width so oversized originals (arrow/script) become a tidy banner line.
+  const label = labelText(style.frameText, t.labelSlot, t.labelOnFill ? fc : contrast(fc), t.slot.w * 0.135)
 
   // QR + label go on top (end of the root), in the QR window / label slot
   return out.replace(/<\/svg>\s*$/i, `${qr}${label}</svg>`)
