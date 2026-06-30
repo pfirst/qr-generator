@@ -2,18 +2,19 @@ import { useEffect, useRef, useState } from 'react'
 import { createMatrix } from '../core/qr'
 import { buildPayload } from '../core/payloads'
 import { renderQrSvg } from '../core/render'
-import { defaultStyle } from '../core/types'
 import type { RecentItem } from '../recent'
 import { HistoryIcon, TrashIcon } from '../ui/icons'
-
-const THUMB = { ...defaultStyle(), fg: '#111827', bg: '#ffffff', gradient: 'none' as const, bodyShape: 'square' as const, eyeFrameShape: 'square' as const, eyeballShape: 'square' as const, logo: null, frameStyle: 'none' as const, margin: 2 }
 
 async function thumbSvg(item: RecentItem): Promise<string | null> {
   try {
     const payload = buildPayload(item.type, item.data)
     if (!payload) return null
-    const matrix = createMatrix(payload, 'M')
-    return await renderQrSvg(payload, 'M', THUMB, 116, matrix.size)
+    // Render the saved appearance, but drop the CTA frame (illegible at 46px) and
+    // tighten the quiet zone so the QR fills the thumbnail.
+    const ecc = item.style.logo ? 'H' : item.style.ecc
+    const st = { ...item.style, frameStyle: 'none' as const, size: 116, margin: 2 }
+    const matrix = createMatrix(payload, ecc)
+    return await renderQrSvg(payload, ecc, st, 116, matrix.size)
   } catch {
     return null
   }
@@ -130,6 +131,12 @@ export function HistoryPopover({ recent, onLoad, onClear }: { recent: RecentItem
               ))
             )}
           </div>
+
+          {recent.length > 0 && (
+            <div className="border-t border-[#eef0f5] px-3.5 py-2 text-center text-[11px] text-[#9ca3af]">
+              เก็บอัตโนมัติ 6 รายการล่าสุด
+            </div>
+          )}
         </div>
       )}
     </div>

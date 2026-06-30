@@ -114,7 +114,7 @@ export default function App() {
   }, [payload, matrix, decodeOk, contrast])
 
   // --- actions ---
-  const recordRecent = useCallback(() => setRecent((r) => pushRecent(r, type, data)), [type, data])
+  const recordRecent = useCallback(() => setRecent((r) => pushRecent(r, type, data, style)), [type, data, style])
 
   const runExport = useCallback(
     async (fmt: ExportFormat) => {
@@ -154,6 +154,7 @@ export default function App() {
     (r: RecentItem) => {
       setType(r.type)
       setData(r.data)
+      setStyle(r.style)
       showToast('โหลดค่าจากประวัติแล้ว')
     },
     [showToast],
