@@ -139,7 +139,7 @@ export function FormFields({ type, data, errors, setData, setIn }: Props) {
             <SegGroup options={PROXY} value={data.promptpay.proxyType} onChange={(v) => setIn('promptpay', { ...data.promptpay, proxyType: v })} />
           </div>
           <Field label={plabel} value={data.promptpay.proxyValue} onChange={(v) => setIn('promptpay', { ...data.promptpay, proxyValue: v })} placeholder={pplaceholder} error={errors.ppProxy} />
-          <Field label="จำนวนเงิน (บาท) — เว้นว่างได้ = จ่ายปลายเปิด" value={data.promptpay.amount} onChange={(v) => setIn('promptpay', { ...data.promptpay, amount: v })} placeholder="0.00" inputMode="decimal" error={errors.ppAmount} />
+          <Field label="จำนวนเงิน (บาท) — เว้นว่างได้" value={data.promptpay.amount} onChange={(v) => setIn('promptpay', { ...data.promptpay, amount: v })} placeholder="0.00" inputMode="decimal" error={errors.ppAmount} />
           <Field label="รหัสร้านค้า / อ้างอิง (ไม่บังคับ)" value={data.promptpay.storeLabel} onChange={(v) => setIn('promptpay', { ...data.promptpay, storeLabel: v })} placeholder="เช่น 8052931746" />
         </div>
       )
