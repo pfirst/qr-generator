@@ -95,6 +95,7 @@ export interface StyleSettings {
   logoSize: number // fraction of QR side, 0..1
   logoBg: LogoBg
   logoPadding: number // white plate padding around the logo, fraction of logo side
+  presetLogo: boolean // show the type's built-in preset logo (custom upload overrides it)
   frameStyle: FrameStyle
   frameText: string
   frameColor: string
@@ -133,6 +134,7 @@ export const defaultStyle = (): StyleSettings => ({
   logoSize: 0.24,
   logoBg: 'none',
   logoPadding: 0.12,
+  presetLogo: false,
   frameStyle: 'none',
   frameText: 'SCAN ME',
   frameColor: '#7c3aed',
