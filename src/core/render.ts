@@ -97,11 +97,26 @@ function buildOptions(data: string, ecc: Ecc, style: StyleSettings, sizePx: numb
   }
 }
 
+// qr-code-styling builds a SEPARATE gradient per section — one for the dots, plus one
+// for EACH corner eye — each scoped to that section's own bounding box. So the gradient
+// "restarts" inside every eye and the sweep looks chopped up ("แยกส่วน"). The dots
+// gradient already spans the full module area, so we point every eye fill at it →
+// one continuous sweep across the whole QR. Skipped when the eyes use their own solid
+// colour (useEyeColor) or there's no gradient at all.
+function unifyGradient(svg: string, style: StyleSettings): string {
+  if (style.gradient === 'none' || style.useEyeColor) return svg
+  const dotId = svg.match(/id="(dot-color-[^"]+)"/)?.[1]
+  if (!dotId) return svg
+  // Repoint eye fills (`url('#corners-square-color-…')` / `…corners-dot-color-…`) to the
+  // dots gradient. The leading `clip-path-…` ids are untouched (regex anchors on `#corners-`).
+  return svg.replace(/url\((['"]?)#corners-(?:square|dot)-color-[^'")]+\1\)/g, `url('#${dotId}')`)
+}
+
 // qr-code-styling emits the logo <image> with a bare `href`; Adobe Illustrator
 // and some tools only honour `xlink:href`. Add the namespace + xlink:href, and
 // draw the optional coloured logo background (which the library doesn't do).
 function postProcess(svg: string, style: StyleSettings): string {
-  let out = svg
+  let out = unifyGradient(svg, style)
 
   if (!/xmlns:xlink=/.test(out)) {
     out = out.replace('<svg ', '<svg xmlns:xlink="http://www.w3.org/1999/xlink" ')
