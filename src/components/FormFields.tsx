@@ -140,7 +140,7 @@ export function FormFields({ type, data, errors, setData, setIn }: Props) {
           </div>
           <Field label={plabel} value={data.promptpay.proxyValue} onChange={(v) => setIn('promptpay', { ...data.promptpay, proxyValue: v })} placeholder={pplaceholder} error={errors.ppProxy} />
           <Field label="จำนวนเงิน (บาท) — เว้นว่างได้ = จ่ายปลายเปิด" value={data.promptpay.amount} onChange={(v) => setIn('promptpay', { ...data.promptpay, amount: v })} placeholder="0.00" inputMode="decimal" error={errors.ppAmount} />
-          <Field label="รหัสร้านค้า / อ้างอิง (ไม่บังคับ)" value={data.promptpay.storeLabel} onChange={(v) => setIn('promptpay', { ...data.promptpay, storeLabel: v })} placeholder="เช่น 223620406Y0858478ZM" />
+          <Field label="รหัสร้านค้า / อ้างอิง (ไม่บังคับ)" value={data.promptpay.storeLabel} onChange={(v) => setIn('promptpay', { ...data.promptpay, storeLabel: v })} placeholder="เช่น 8052931746" />
         </div>
       )
     }
@@ -148,7 +148,7 @@ export function FormFields({ type, data, errors, setData, setIn }: Props) {
     case 'bill':
       return (
         <div className="flex flex-col gap-3.5">
-          <Field label="Biller ID (เลขประจำตัวผู้รับชำระ)" value={data.bill.billerId} onChange={(v) => setIn('bill', { ...data.bill, billerId: v })} placeholder="เช่น 010556012345601" error={errors.billId} />
+          <Field label="Biller ID (เลขประจำตัวผู้รับชำระ)" value={data.bill.billerId} onChange={(v) => setIn('bill', { ...data.bill, billerId: v })} placeholder="เช่น 099400016939574" error={errors.billId} />
           <div className="grid grid-cols-2 gap-3">
             <Field label="Ref 1" value={data.bill.ref1} onChange={(v) => setIn('bill', { ...data.bill, ref1: v })} />
             <Field label="Ref 2 (ออปชัน)" value={data.bill.ref2} onChange={(v) => setIn('bill', { ...data.bill, ref2: v })} />
