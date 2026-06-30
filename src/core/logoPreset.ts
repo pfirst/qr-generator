@@ -19,7 +19,9 @@ export function presetLogoUrl(type: QRType, _platform?: SocialPlatform): string 
   }
 }
 
-// Does this type expose a preset toggle at all? (Slice 1: promptpay/bill only.)
+// Does this type expose a preset toggle at all? Reserved for Slice 2 (social/
+// email/sms/tel/wifi): the uploader currently gates on presetLogoUrl() directly,
+// so in Slice 1 (promptpay/bill only) this has no caller yet.
 export const hasPreset = (type: QRType): boolean => presetLogoUrl(type) !== null
 
 // Toggle default when (re)entering a type.
