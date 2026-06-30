@@ -4,7 +4,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Task board — `TASK.md` (read first, keep updated)
 
-`TASK.md` at the repo root is the cross-session / cross-agent **work-item board**. **Read it first** when picking up the project to see what is in progress, queued, blocked, or recently done. It tracks the *status of work items*, **not** a function inventory — the code + git history stay truth for "does X exist". Keep entries grounded: cite the real file(s)/function(s) touched. Content is English; group by status (`🔵 In Progress` / `📋 To Do` / `⛔ Blocked` / `✅ Done`).
+`TASK.md` at the repo root is the cross-session / cross-agent **work-item board**. **Read it first** when picking up the project to see what is in progress, queued, blocked, or recently done. It tracks the *status of work items*, **not** a function inventory — the code + git history stay truth for "does X exist". Content is English; group by status (`🔵 In Progress` / `📋 To Do` / `⛔ Blocked` / `✅ Done`).
+
+**Entry format — one short line per item.** Just *what was done* + the main file(s) touched, e.g. `- [x] 2026-06-30 — Export-size labels (S/M/L/XL). \`constants.ts\`, \`components/CheckExport.tsx\`.` Keep it grounded by citing the real file(s)/function(s), but do **not** write a paragraph — leave out root-cause analysis, how-it-was-verified, regex/code detail, and step-by-step rationale (that's what the diff/git history is for). One clause for the *what*, then the file list.
 
 Update it at exactly **two** moments:
 
