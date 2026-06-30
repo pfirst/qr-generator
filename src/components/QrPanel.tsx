@@ -1,4 +1,5 @@
-import { useEffect, useState, type ComponentType } from 'react'
+import { useEffect, useRef, useState, type ComponentType, type CSSProperties } from 'react'
+import { createPortal } from 'react-dom'
 import { BODY_SHAPES, BG_PRESETS, ECC_LEVELS, EYE_FRAMES, EYEBALLS, FG_PRESETS } from '../constants'
 import { defaultStyle, type GradientType, type FrameStyle, type StyleSettings } from '../core/types'
 import { composeFramedSvg, FRAME_TEMPLATES, frameThumb } from '../core/frames'
@@ -30,7 +31,7 @@ const TABS: { id: TabId; label: string; Icon: ComponentType<{ size?: number }> }
   { id: 'border', label: 'กรอบตา', Icon: MarkerBorderIcon },
   { id: 'center', label: 'จุดตา', Icon: MarkerCenterIcon },
   { id: 'cells', label: 'จุด', Icon: CellsIcon },
-  { id: 'cta', label: 'เฟรม', Icon: FrameIcon },
+  { id: 'cta', label: 'กรอบ', Icon: FrameIcon },
   { id: 'adv', label: 'ขั้นสูง', Icon: SlidersIcon },
 ]
 // Shape pickers get Figma's anchored dropdown; the rest use a centred popup.
@@ -45,6 +46,120 @@ const GRADIENTS: { id: GradientType; label: string; Icon: ComponentType<{ size?:
   { id: 'diagonal', label: 'ทแยง', Icon: GradDiagonalIcon },
   { id: 'radial', label: 'รัศมี', Icon: GradRadialIcon },
 ]
+
+// CTA label font picker: a collapsed dropdown (trigger shows the current font in its own
+// face) that expands an in-flow list, each row previewed in its own face. In-flow (not
+// absolutely positioned) so the parent popup's overflow-y-auto scrolls it instead of clipping.
+function FontPicker({ value, onChange }: { value: string; onChange: (id: string) => void }) {
+  const [open, setOpen] = useState(false)
+  const [rect, setRect] = useState<DOMRect | null>(null)
+  const btnRef = useRef<HTMLButtonElement>(null)
+  const panelRef = useRef<HTMLDivElement>(null)
+  const cur = CTA_FONTS.find((f) => f.id === value) ?? CTA_FONTS[0]
+
+  const toggle = () => {
+    setRect(btnRef.current?.getBoundingClientRect() ?? null)
+    setOpen((o) => !o)
+  }
+
+  // While open: keep the floating panel pinned to the trigger (scroll/resize) and close on
+  // outside click / Escape. The list lives in a portal so the parent popup's overflow-y can't
+  // clip it — it floats above as a real popover instead of pushing the popup's content.
+  useEffect(() => {
+    if (!open) return
+    const reposition = () => setRect(btnRef.current?.getBoundingClientRect() ?? null)
+    const onDown = (e: MouseEvent) => {
+      const t = e.target as Node
+      if (btnRef.current?.contains(t) || panelRef.current?.contains(t)) return
+      setOpen(false)
+    }
+    const onKey = (e: KeyboardEvent) => e.key === 'Escape' && setOpen(false)
+    window.addEventListener('scroll', reposition, true)
+    window.addEventListener('resize', reposition)
+    document.addEventListener('mousedown', onDown)
+    document.addEventListener('keydown', onKey)
+    return () => {
+      window.removeEventListener('scroll', reposition, true)
+      window.removeEventListener('resize', reposition)
+      document.removeEventListener('mousedown', onDown)
+      document.removeEventListener('keydown', onKey)
+    }
+  }, [open])
+
+  let panelStyle: CSSProperties | null = null
+  if (rect) {
+    const gap = 6
+    const spaceBelow = window.innerHeight - rect.bottom
+    const spaceAbove = rect.top
+    const up = spaceBelow < 260 && spaceAbove > spaceBelow // flip above when the bottom is cramped
+    panelStyle = {
+      position: 'fixed',
+      left: rect.left,
+      width: rect.width,
+      maxHeight: Math.max(120, Math.min(260, (up ? spaceAbove : spaceBelow) - gap - 8)),
+      ...(up ? { bottom: window.innerHeight - rect.top + gap } : { top: rect.bottom + gap }),
+    }
+  }
+
+  return (
+    <div>
+      <button
+        ref={btnRef}
+        type="button"
+        onClick={toggle}
+        style={{ fontFamily: cur.family, fontWeight: cur.weight }}
+        className="flex w-full cursor-pointer items-center justify-between rounded-[11px] border border-[#e6e7ee] bg-white px-3 py-2.5 text-left text-[15px] text-[#111827] outline-none transition hover:border-[#c4b5fd]"
+      >
+        <span className="truncate">{cur.label}</span>
+        <svg
+          width={16}
+          height={16}
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="#9ca3af"
+          strokeWidth={2}
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          className={'ml-2 shrink-0 transition-transform ' + (open ? 'rotate-180' : '')}
+        >
+          <path d="m6 9 6 6 6-6" />
+        </svg>
+      </button>
+      {open &&
+        panelStyle &&
+        createPortal(
+          <div
+            ref={panelRef}
+            style={panelStyle}
+            className="z-[60] flex flex-col gap-1 overflow-y-auto rounded-[12px] border border-[#eef0f5] bg-white p-1.5 shadow-[0_16px_44px_rgba(17,24,39,0.20)]"
+          >
+            {CTA_FONTS.map((f) => {
+              const on = value === f.id
+              return (
+                <button
+                  key={f.id}
+                  type="button"
+                  onClick={() => {
+                    onChange(f.id)
+                    setOpen(false)
+                  }}
+                  style={{ fontFamily: f.family, fontWeight: f.weight }}
+                  className={
+                    'flex shrink-0 items-center justify-between rounded-[10px] border px-3 py-2 text-left text-[15px] transition ' +
+                    (on ? 'border-[#7c3aed] bg-[#ede9fe] text-[#7c3aed]' : 'border-transparent text-[#374151] hover:bg-[#f3f4f8]')
+                  }
+                >
+                  {f.label}
+                  {on && <CheckIcon size={15} />}
+                </button>
+              )
+            })}
+          </div>,
+          document.body,
+        )}
+    </div>
+  )
+}
 
 function Swatches({ colors, value, onChange }: { colors: readonly string[]; value: string; onChange: (c: string) => void }) {
   return (
@@ -138,9 +253,9 @@ function PopBody({ tab, style, patch }: { tab: TabId; style: StyleSettings; patc
 
   if (tab === 'cta') {
     return (
-      <div className="w-[286px]">
-        <SectionLabel>กรอบ + ป้าย CTA</SectionLabel>
-        <div className="grid grid-cols-4 gap-1.5">
+      <div className="w-[330px]">
+        <SectionLabel>กรอบ</SectionLabel>
+        <div className="grid grid-cols-5 gap-1.5">
           {FRAME_CHOICES.map(({ id, label }) => {
             const on = style.frameStyle === id
             return (
@@ -176,25 +291,7 @@ function PopBody({ tab, style, patch }: { tab: TabId; style: StyleSettings; patc
             </div>
             <div className="mt-3.5">
               <SectionLabel>ฟอนต์ป้าย</SectionLabel>
-              <div className="flex max-h-[184px] flex-col gap-1 overflow-y-auto pr-0.5">
-                {CTA_FONTS.map((f) => {
-                  const on = style.frameFont === f.id
-                  return (
-                    <button
-                      key={f.id}
-                      onClick={() => patch({ frameFont: f.id })}
-                      style={{ fontFamily: f.family, fontWeight: f.weight }}
-                      className={
-                        'flex items-center justify-between rounded-[10px] border px-3 py-2 text-left text-[15px] transition ' +
-                        (on ? 'border-[#7c3aed] bg-[#ede9fe] text-[#7c3aed]' : 'border-[#eef0f5] text-[#374151] hover:bg-[#f3f4f8]')
-                      }
-                    >
-                      {f.label}
-                      {on && <CheckIcon size={15} />}
-                    </button>
-                  )
-                })}
-              </div>
+              <FontPicker value={style.frameFont} onChange={(id) => patch({ frameFont: id })} />
             </div>
           </>
         )}
@@ -338,11 +435,11 @@ export function QrPanel({ svg, hasData, style, patchStyle }: { svg: string | nul
             })}
           </div>
 
-          {/* settings popups (สี / เฟรม / ขั้นสูง) — centred above the toolbar */}
+          {/* settings popups (สี / กรอบ / ขั้นสูง) — centred above the toolbar */}
           {open && !SHAPE_TABS.includes(open) && (
             <div className="absolute bottom-full left-0 right-0 z-50 mb-3 flex justify-center">
               <div
-                className="max-h-[64vh] w-max max-w-[340px] overflow-y-auto rounded-[22px] bg-white p-2.5 shadow-[0_20px_56px_rgba(17,24,39,0.22)]"
+                className="max-h-[64vh] w-max max-w-[356px] overflow-y-auto rounded-[22px] bg-white p-2.5 shadow-[0_20px_56px_rgba(17,24,39,0.22)]"
                 style={{ animation: 'popIn .18s cubic-bezier(.2,.9,.3,1.2)' }}
               >
                 <PopBody tab={open} style={style} patch={patchStyle} />
