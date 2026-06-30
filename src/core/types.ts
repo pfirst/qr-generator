@@ -9,8 +9,30 @@ export type QRType =
   | 'wifi'
   | 'vcard'
   | 'geo'
+  | 'social'
   | 'promptpay'
   | 'bill'
+
+// Social platforms for the 'social' type — order here = dropdown order.
+// Full metadata + URL builders live in core/social.ts.
+export type SocialPlatform =
+  | 'facebook'
+  | 'instagram'
+  | 'x'
+  | 'tiktok'
+  | 'youtube'
+  | 'linkedin'
+  | 'line'
+  | 'whatsapp'
+  | 'telegram'
+  | 'threads'
+  | 'pinterest'
+  | 'snapchat'
+  | 'discord'
+  | 'github'
+  | 'twitch'
+  | 'spotify'
+  | 'wechat'
 
 // Shape sets mirror Figma's QR generator (which renders via qr-code-styling).
 // Cells (body modules): no "dots" option — 5 choices.
@@ -53,6 +75,7 @@ export interface FieldData {
     address: string
   }
   geo: { lat: string; lng: string; maps: string }
+  social: { platform: SocialPlatform; value: string }
   promptpay: { proxyType: ProxyType; proxyValue: string; amount: string; storeLabel: string }
   bill: { billerId: string; ref1: string; ref2: string; amount: string }
 }
@@ -88,6 +111,7 @@ export const defaultFieldData = (): FieldData => ({
   wifi: { ssid: '', password: '', encryption: 'WPA', hidden: false },
   vcard: { first: '', last: '', phone: '', email: '', org: '', title: '', url: '', address: '' },
   geo: { lat: '', lng: '', maps: '' },
+  social: { platform: 'facebook', value: '' },
   promptpay: { proxyType: 'phone', proxyValue: '', amount: '', storeLabel: '' },
   bill: { billerId: '', ref1: '', ref2: '', amount: '' },
 })

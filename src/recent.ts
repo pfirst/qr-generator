@@ -1,5 +1,6 @@
 // Recent-history list, persisted in localStorage (stays on the user's device).
 import { TYPE_LABEL } from './constants'
+import { socialMeta } from './core/social'
 import type { FieldData, QRType } from './core/types'
 
 export interface RecentItem {
@@ -48,6 +49,8 @@ function previewFor(type: QRType, d: FieldData): string {
       return (d.vcard.first + ' ' + d.vcard.last).trim() || d.vcard.email
     case 'geo':
       return `${d.geo.lat}, ${d.geo.lng}`
+    case 'social':
+      return `${socialMeta(d.social.platform).label} · ${d.social.value}`
     case 'promptpay':
       return d.promptpay.proxyValue + (d.promptpay.amount ? ' · ฿' + d.promptpay.amount : '')
     case 'bill':

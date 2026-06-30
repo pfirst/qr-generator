@@ -1,7 +1,8 @@
 import { extractLatLng } from '../core/payloads'
+import { SOCIAL_PLATFORMS, socialMeta } from '../core/social'
 import type { FieldData, ProxyType, QRType, WifiEnc } from '../core/types'
 import type { FieldErrors } from '../core/validate'
-import { Field, Label, SegGroup, TextArea, Toggle } from '../ui/controls'
+import { Field, Label, SegGroup, Select, TextArea, Toggle } from '../ui/controls'
 
 const WIFI_ENC: { id: WifiEnc; label: string }[] = [
   { id: 'WPA', label: 'WPA/WPA2' },
@@ -108,6 +109,26 @@ export function FormFields({ type, data, errors, setData, setIn }: Props) {
           {errors.geo && <div className="text-[12px] text-[#ff8aae]">{errors.geo}</div>}
         </div>
       )
+
+    case 'social': {
+      const meta = socialMeta(data.social.platform)
+      return (
+        <div className="flex flex-col gap-3.5">
+          <Select
+            label="แพลตฟอร์ม"
+            value={data.social.platform}
+            onChange={(v) => setIn('social', { ...data.social, platform: v })}
+            options={SOCIAL_PLATFORMS}
+          />
+          <Field
+            label="ชื่อผู้ใช้ / โปรไฟล์"
+            value={data.social.value}
+            onChange={(v) => setIn('social', { ...data.social, value: v })}
+            placeholder={meta.placeholder}
+          />
+        </div>
+      )
+    }
 
     case 'promptpay': {
       const [plabel, pplaceholder] = PROXY_LABEL[data.promptpay.proxyType]

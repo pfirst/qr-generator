@@ -17,6 +17,7 @@ export const TYPES: TypeMeta[] = [
   { id: 'wifi', label: 'Wi-Fi', group: 'basic', title: 'Wi-Fi', desc: 'เชื่อมต่อเครือข่ายอัตโนมัติเมื่อสแกน' },
   { id: 'vcard', label: 'นามบัตร (vCard)', group: 'basic', title: 'นามบัตร (vCard)', desc: 'บันทึกข้อมูลติดต่อลงสมุดโทรศัพท์' },
   { id: 'geo', label: 'พิกัด', group: 'basic', title: 'พิกัดสถานที่', desc: 'เปิดแผนที่ไปยังพิกัดที่ระบุ' },
+  { id: 'social', label: 'Social', group: 'basic', title: 'โซเชียลมีเดีย', desc: 'เลือกแพลตฟอร์มแล้วกรอก username — ได้ QR พาไปโปรไฟล์' },
   { id: 'promptpay', label: 'PromptPay', group: 'pay', title: 'PromptPay', desc: 'รับเงินผ่าน QR มาตรฐาน EMVCo ของไทย' },
   { id: 'bill', label: 'ชำระบิล', group: 'pay', title: 'ชำระบิล (Bill Payment)', desc: 'QR สำหรับชำระบิลผ่านแอปธนาคาร' },
 ]

@@ -3,6 +3,7 @@
 // PromptPay / Bill follow the EMVCo (Thai) standard with a CRC16 checksum.
 
 import type { FieldData, QRType } from './types'
+import { socialUrl } from './social'
 
 // --- EMVCo helpers ---
 function crc16(str: string): string {
@@ -129,6 +130,8 @@ export function buildPayload(type: QRType, d: FieldData): string {
       if (lat === '' || lng === '' || isNaN(+lat) || isNaN(+lng)) return ''
       return `geo:${lat},${lng}`
     }
+    case 'social':
+      return socialUrl(d.social)
     case 'promptpay':
       return promptPay(d.promptpay)
     case 'bill':

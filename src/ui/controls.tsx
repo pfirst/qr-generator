@@ -47,6 +47,44 @@ export function Field({ label, value, onChange, placeholder, type, error, inputM
   )
 }
 
+// Native <select> styled to match the text inputs. Best fit for long option
+// lists (e.g. the social-platform picker) — scrollable + type-to-search for free.
+export function Select<T extends string>({
+  label,
+  value,
+  onChange,
+  options,
+}: {
+  label?: string
+  value: T
+  onChange: (v: T) => void
+  options: readonly { id: T; label: string }[]
+}) {
+  return (
+    <div>
+      {label && <Label>{label}</Label>}
+      <div className="relative">
+        <select
+          value={value}
+          onChange={(e) => onChange(e.target.value as T)}
+          className={inputCls + ' cursor-pointer appearance-none pr-10'}
+        >
+          {options.map((o) => (
+            <option key={o.id} value={o.id}>
+              {o.label}
+            </option>
+          ))}
+        </select>
+        <span className="pointer-events-none absolute right-3.5 top-1/2 -translate-y-1/2 text-[#9ca3af]">
+          <svg width={16} height={16} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+            <path d="m6 9 6 6 6-6" />
+          </svg>
+        </span>
+      </div>
+    </div>
+  )
+}
+
 export function TextArea({
   label,
   value,
