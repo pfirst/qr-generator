@@ -2,6 +2,17 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## Task board — `TASK.md` (read first, keep updated)
+
+`TASK.md` at the repo root is the cross-session / cross-agent **work-item board**. **Read it first** when picking up the project to see what is in progress, queued, blocked, or recently done. It tracks the *status of work items*, **not** a function inventory — the code + git history stay truth for "does X exist". Keep entries grounded: cite the real file(s)/function(s) touched. Content is English; group by status (`🔵 In Progress` / `📋 To Do` / `⛔ Blocked` / `✅ Done`).
+
+Update it at exactly **two** moments:
+
+1. **After a plan is approved / before starting work** — add the item under `🔵 In Progress` (or `📋 To Do` if deferred). Log *every* task that touches code, including small ones.
+2. **After the work finishes or stalls** — before ending the turn, move the item to `✅ Done` (prefix the line with `YYYY-MM-DD`) or `⛔ Blocked` (note the reason + what's needed).
+
+Do **not** auto-commit `TASK.md` — edit the file only; it rides along with normal commits (the "commit only when the user asks" rule still applies). When `✅ Done` grows long, move older entries to `TASK-archive.md`.
+
 ## Commands
 
 ```bash
