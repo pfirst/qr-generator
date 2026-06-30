@@ -111,16 +111,25 @@ function labelText(text: string, slot: FrameTemplate['labelSlot'], color: string
   )
 }
 
-export function composeFramedSvg(innerSvg: string, _qrPx: number, style: StyleSettings): string {
+export function composeFramedSvg(innerSvg: string, outPx: number, style: StyleSettings): string {
   if (style.frameStyle === 'none') return innerSvg
   const t = FRAME_TEMPLATES[style.frameStyle]
   const fc = safeColor(style.frameColor)
   const id = `qf${uid++}`
 
+  // The frame chrome is non-square. Scale it so its LONGEST side equals the requested px
+  // (export size, or the preview side) — the template's viewBox is left intact, so larger
+  // width/height just scale the raster up. Without this the framed output was pinned to the
+  // template's native ~280px regardless of the chosen export size (raster export reads these
+  // via naturalWidth/Height, so a framed PNG/JPG came out tiny no matter the size dropdown).
+  const outScale = outPx / Math.max(t.vb.w, t.vb.h)
+  const outW = (t.vb.w * outScale).toFixed(1)
+  const outH = (t.vb.h * outScale).toFixed(1)
+
   // 1) take the chrome, give the root a unique id + explicit pixel size (so raster export
   //    can read naturalWidth/Height), inline the themeable colour, scope the rest.
   let out = t.svg
-    .replace(/<svg\b/, `<svg id="${id}" width="${t.vb.w}" height="${t.vb.h}"`)
+    .replace(/<svg\b/, `<svg id="${id}" width="${outW}" height="${outH}"`)
     .replace(OUTLINE_RE, '')
     .replace(/\sclass="frame-color"/g, ` fill="${fc}"`)
   out = scopeStyle(out, id)
