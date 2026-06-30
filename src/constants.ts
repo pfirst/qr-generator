@@ -61,7 +61,13 @@ export const ECC_LEVELS = [
   { id: 'H', label: 'H · 30%' },
 ] as const
 
-export const EXPORT_SIZES = [512, 1024, 2048, 4096] as const
+// Export sizes with a t-shirt label (S/M/L/XL) shown alongside the px count.
+export const EXPORT_SIZES = [
+  { px: 512, label: 'S' },
+  { px: 1024, label: 'M' },
+  { px: 2048, label: 'L' },
+  { px: 4096, label: 'XL' },
+] as const
 
 // Preset colour swatches (foreground / background) carried over from the original.
 export const FG_PRESETS = ['#0a0a12', '#16213e', '#0f3460', '#533483', '#e94560', '#27ae60', '#2980b9', '#ffffff']

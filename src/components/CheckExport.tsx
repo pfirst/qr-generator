@@ -90,18 +90,19 @@ export function CheckExport({
       <div className="mt-5">
         <div className="mb-2.5 text-[12.5px] font-bold text-[#6b7280]">ขนาดไฟล์</div>
         <div className="mb-3 grid grid-cols-4 gap-2">
-          {EXPORT_SIZES.map((s) => {
-            const on = exportSize === s
+          {EXPORT_SIZES.map(({ px, label }) => {
+            const on = exportSize === px
             return (
               <button
-                key={s}
-                onClick={() => setExportSize(s)}
+                key={px}
+                onClick={() => setExportSize(px)}
                 className={
-                  'cursor-pointer rounded-[11px] border py-2.5 text-[12.5px] font-bold transition ' +
-                  (on ? 'border-[#7c3aed] bg-[#ede9fe] text-[#7c3aed]' : 'border-[#e6e7ee] bg-white text-[#6b7280] hover:border-[#c4b5fd]')
+                  'cursor-pointer rounded-[11px] border py-2 transition ' +
+                  (on ? 'border-[#7c3aed] bg-[#ede9fe]' : 'border-[#e6e7ee] bg-white hover:border-[#c4b5fd]')
                 }
               >
-                {s} px
+                <span className={'block text-[13px] font-extrabold leading-tight ' + (on ? 'text-[#7c3aed]' : 'text-[#374151]')}>{label}</span>
+                <span className={'mt-0.5 block font-mono text-[10.5px] font-bold leading-none ' + (on ? 'text-[#7c3aed]/70' : 'text-[#9ca3af]')}>{px} px</span>
               </button>
             )
           })}
