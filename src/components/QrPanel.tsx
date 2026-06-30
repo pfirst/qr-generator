@@ -1,6 +1,6 @@
 import { useState, type ComponentType } from 'react'
 import { BODY_SHAPES, BG_PRESETS, ECC_LEVELS, EYE_FRAMES, EYEBALLS, FG_PRESETS } from '../constants'
-import type { GradientType, FrameStyle, StyleSettings } from '../core/types'
+import { defaultStyle, type GradientType, type FrameStyle, type StyleSettings } from '../core/types'
 import { composeFramedSvg, FRAME_TEMPLATES, frameThumb } from '../core/frames'
 import { FRAME_GLYPHS } from '../ui/shapeGlyphs'
 import { Card, SectionHead } from '../ui/surfaces'
@@ -15,6 +15,7 @@ import {
   MarkerBorderIcon,
   MarkerCenterIcon,
   PaletteIcon,
+  ResetIcon,
   SlidersIcon,
   WarnIcon,
 } from '../ui/icons'
@@ -176,10 +177,24 @@ function PopBody({ tab, style, patch }: { tab: TabId; style: StyleSettings; patc
   }
 
   // adv
+  const d = defaultStyle()
+  // Reset advanced settings to defaults. With a logo present, ECC is locked at H,
+  // so only the preview size + quiet zone reset (leave ecc alone).
+  const resetAdv = () =>
+    patch(hasLogo ? { size: d.size, margin: d.margin } : { ecc: d.ecc, size: d.size, margin: d.margin })
   return (
     <div className="flex w-[286px] flex-col gap-4">
       <div>
-        <SectionLabel>ระดับการแก้ไขข้อผิดพลาด (ECC)</SectionLabel>
+        <div className="mb-2.5 flex items-center justify-between">
+          <span className="text-[12.5px] font-bold text-[#6b7280]">ระดับการแก้ไขข้อผิดพลาด (ECC)</span>
+          <button
+            onClick={resetAdv}
+            title="รีเซ็ตค่าขั้นสูงกลับค่าเริ่มต้น"
+            className="grid h-[26px] w-[26px] place-items-center rounded-[8px] text-[#9ca3af] transition hover:bg-[#f3f4f8] hover:text-[#7c3aed]"
+          >
+            <ResetIcon size={14} />
+          </button>
+        </div>
         <SegGroup options={ECC_LEVELS} value={hasLogo ? 'H' : style.ecc} onChange={(v) => !hasLogo && patch({ ecc: v })} />
         {hasLogo && <div className="mt-2 text-[11.5px] text-[#9ca3af]">ล็อกที่ระดับ H เพราะมีโลโก้</div>}
       </div>
