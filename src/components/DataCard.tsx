@@ -16,6 +16,7 @@ export function DataCard({
   style,
   patchStyle,
   onLogoFile,
+  onRemoveLogo,
 }: {
   type: QRType
   onPickType: (t: QRType) => void
@@ -26,6 +27,7 @@ export function DataCard({
   style: StyleSettings
   patchStyle: (p: Partial<StyleSettings>) => void
   onLogoFile: (f: File) => void
+  onRemoveLogo: () => void
 }) {
   return (
     <Card className="p-5 sm:p-6">
@@ -36,7 +38,7 @@ export function DataCard({
       <FormFields type={type} data={data} errors={errors} setData={setData} setIn={setIn} />
 
       <div className="my-5 h-px bg-[#eef0f5]" />
-      <LogoUploader style={style} patch={patchStyle} onLogoFile={onLogoFile} />
+      <LogoUploader style={style} patch={patchStyle} onLogoFile={onLogoFile} onRemoveLogo={onRemoveLogo} type={type} />
     </Card>
   )
 }

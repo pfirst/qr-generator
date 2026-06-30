@@ -5,6 +5,7 @@ import { renderQrSvg, type RenderInput } from './core/render'
 import { contrastScan, decodeRendered } from './core/verify'
 import { copyQRToClipboard, downloadQR, printQR, type ExportFormat } from './core/export'
 import { defaultFieldData, defaultStyle, type Ecc, type FieldData, type QRType } from './core/types'
+import { defaultPresetOn, defaultPresetBg, resolveLogo } from './core/logoPreset'
 import { fieldErrors } from './core/validate'
 import { clearRecent, loadRecent, pushRecent, type RecentItem } from './recent'
 import { Header } from './components/Header'
@@ -37,11 +38,30 @@ export default function App() {
   )
   const patchStyle = useCallback((p: Partial<typeof style>) => setStyle((prev) => ({ ...prev, ...p })), [])
 
+  // Switching type resets the preset toggle to that type's default — unless a
+  // custom upload is present (custom wins, preset stays off).
+  const pickType = useCallback(
+    (t: QRType) => {
+      setType(t)
+      if (!style.logo) {
+        const on = defaultPresetOn(t)
+        patchStyle({ presetLogo: on, ...(on ? { logoBg: defaultPresetBg(t) } : {}) })
+      }
+    },
+    [style.logo, patchStyle],
+  )
+
+  // Deleting the custom upload restores the type's default preset.
+  const onRemoveLogo = useCallback(() => {
+    const on = defaultPresetOn(type)
+    patchStyle({ logo: null, presetLogo: on, ...(on ? { logoBg: defaultPresetBg(type) } : {}) })
+  }, [type, patchStyle])
+
   const onLogoFile = useCallback(
     (f: File) => {
       const reader = new FileReader()
       reader.onload = () => {
-        patchStyle({ logo: String(reader.result), ecc: 'H' as Ecc })
+        patchStyle({ logo: String(reader.result), ecc: 'H' as Ecc, presetLogo: false })
         showToast('ฝังโลโก้แล้ว · ตั้ง EC เป็น H อัตโนมัติ')
       }
       reader.readAsDataURL(f)
@@ -52,7 +72,9 @@ export default function App() {
   // --- derived QR ---
   const payload = useMemo(() => buildPayload(type, data), [type, data])
   const errors = useMemo(() => fieldErrors(type, data), [type, data])
-  const effEcc: Ecc = style.logo ? 'H' : style.ecc
+  const effLogo = useMemo(() => resolveLogo(type, data, style), [type, data, style])
+  const renderStyle = useMemo(() => ({ ...style, logo: effLogo }), [style, effLogo])
+  const effEcc: Ecc = effLogo ? 'H' : style.ecc
 
   const matrix = useMemo(() => {
     if (!payload) return null
@@ -77,13 +99,13 @@ export default function App() {
       return
     }
     let cancelled = false
-    renderQrSvg(renderInput.data, renderInput.ecc, style, style.size, renderInput.count)
+    renderQrSvg(renderInput.data, renderInput.ecc, renderStyle, renderStyle.size, renderInput.count)
       .then((s) => !cancelled && setSvg(s))
       .catch(() => !cancelled && setSvg(null))
     return () => {
       cancelled = true
     }
-  }, [renderInput, style])
+  }, [renderInput, renderStyle])
 
   const contrast = useMemo(() => contrastScan(style), [style])
   const ready = !!renderInput
@@ -96,7 +118,7 @@ export default function App() {
     }
     let cancelled = false
     const t = window.setTimeout(() => {
-      decodeRendered(renderInput, style)
+      decodeRendered(renderInput, renderStyle)
         .then((res) => !cancelled && setDecodeOk(res !== null))
         .catch(() => !cancelled && setDecodeOk(null))
     }, 300)
@@ -104,7 +126,7 @@ export default function App() {
       cancelled = true
       clearTimeout(t)
     }
-  }, [renderInput, style])
+  }, [renderInput, renderStyle])
 
   // --- combined warning message for the check card ---
   const warn = useMemo<string | null>(() => {
@@ -120,35 +142,35 @@ export default function App() {
     async (fmt: ExportFormat) => {
       if (!renderInput) return showToast('กรุณากรอกข้อมูลให้ครบก่อน')
       try {
-        await downloadQR(renderInput, style, exportSize, fmt, type)
+        await downloadQR(renderInput, renderStyle, exportSize, fmt, type)
         recordRecent()
         showToast('ดาวน์โหลด ' + fmt.toUpperCase() + ' แล้ว')
       } catch {
         showToast('เกิดข้อผิดพลาดในการส่งออก')
       }
     },
-    [renderInput, style, exportSize, type, recordRecent, showToast],
+    [renderInput, renderStyle, exportSize, type, recordRecent, showToast],
   )
 
   const onCopy = useCallback(async () => {
     if (!renderInput) return showToast('กรุณากรอกข้อมูลให้ครบก่อน')
     try {
-      await copyQRToClipboard(renderInput, style, exportSize)
+      await copyQRToClipboard(renderInput, renderStyle, exportSize)
       recordRecent()
       showToast('คัดลอกรูปไปคลิปบอร์ดแล้ว')
     } catch {
       showToast('เบราว์เซอร์ไม่รองรับการคัดลอกรูป')
     }
-  }, [renderInput, style, exportSize, recordRecent, showToast])
+  }, [renderInput, renderStyle, exportSize, recordRecent, showToast])
 
   const onPrint = useCallback(async () => {
     if (!renderInput) return showToast('กรุณากรอกข้อมูลให้ครบก่อน')
     try {
-      await printQR(renderInput, style, exportSize)
+      await printQR(renderInput, renderStyle, exportSize)
     } catch {
       showToast('เปิดหน้าต่างพิมพ์ไม่ได้ (อาจถูกบล็อก popup)')
     }
-  }, [renderInput, style, exportSize, showToast])
+  }, [renderInput, renderStyle, exportSize, showToast])
 
   const onLoadRecent = useCallback(
     (r: RecentItem) => {
@@ -174,7 +196,7 @@ export default function App() {
           <div className="order-1">
             <DataCard
               type={type}
-              onPickType={setType}
+              onPickType={pickType}
               data={data}
               errors={errors}
               setData={patchData}
@@ -182,12 +204,13 @@ export default function App() {
               style={style}
               patchStyle={patchStyle}
               onLogoFile={onLogoFile}
+              onRemoveLogo={onRemoveLogo}
             />
           </div>
 
           <div className="order-2 flex flex-col gap-5 lg:sticky lg:top-6 lg:gap-6 lg:self-start">
             <div className="relative z-20">
-              <QrPanel svg={svg} hasData={ready} style={style} patchStyle={patchStyle} />
+              <QrPanel svg={svg} hasData={ready} style={renderStyle} patchStyle={patchStyle} />
             </div>
             <CheckExport
               ready={ready}
