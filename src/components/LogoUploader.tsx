@@ -1,6 +1,6 @@
-import { useRef, useState, type ReactNode } from 'react'
+import { useState, type ReactNode } from 'react'
 import type { LogoBg, QRType, StyleSettings } from '../core/types'
-import { hasPreset, presetLogoUrl } from '../core/logoPreset'
+import { presetLogoUrl } from '../core/logoPreset'
 import { SectionLabel, SegGroup, Toggle } from '../ui/controls'
 import { TrashIcon, UploadIcon } from '../ui/icons'
 
@@ -42,7 +42,6 @@ function LogoControls({ style, patch }: { style: StyleSettings; patch: (p: Parti
 // Drag-and-drop / click file picker.
 function Dropzone({ onLogoFile, label }: { onLogoFile: (f: File) => void; label?: ReactNode }) {
   const [drag, setDrag] = useState(false)
-  const inputRef = useRef<HTMLInputElement>(null)
   function pick(files: FileList | null) {
     const f = files?.[0]
     if (f && f.type.startsWith('image/')) onLogoFile(f)
@@ -76,7 +75,6 @@ function Dropzone({ onLogoFile, label }: { onLogoFile: (f: File) => void; label?
       </span>
       <span className="text-[11.5px] text-[#9ca3af]">PNG · JPG · SVG · WEBP</span>
       <input
-        ref={inputRef}
         type="file"
         accept="image/*"
         className="hidden"
@@ -130,7 +128,7 @@ export function LogoUploader({
   }
 
   // 2) No custom upload, but this type has a preset — show the toggle.
-  if (presetUrl && hasPreset(type)) {
+  if (presetUrl) {
     return (
       <div>
         <SectionLabel>โลโก้กลาง QR (ไม่บังคับ)</SectionLabel>
