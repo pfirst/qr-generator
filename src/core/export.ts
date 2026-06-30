@@ -27,6 +27,7 @@ export async function rasterCanvas(
   input: RenderInput,
   style: StyleSettings,
   px: number,
+  opts?: { transparent?: boolean },
 ): Promise<HTMLCanvasElement> {
   // Embed the CTA font before composing so the rasterised SVG carries its glyphs (an
   // <img>-loaded SVG can't fetch fonts → the label would otherwise fall back).
@@ -40,8 +41,14 @@ export async function rasterCanvas(
   c.width = w
   c.height = h
   const ctx = c.getContext('2d')!
-  ctx.fillStyle = style.bg // fill first so rounded-corner gaps aren't black on JPG
-  ctx.fillRect(0, 0, w, h)
+  // Fill first so rounded-corner / outside-the-card gaps aren't black on JPG. Skipped when
+  // the caller wants alpha (PNG/WebP copy + export of a framed QR) — then the area around the
+  // non-rectangular frame card stays transparent so it pastes cleanly onto any surface. The QR
+  // itself keeps its own background (qr-code-styling draws a style.bg rect in the slot).
+  if (!opts?.transparent) {
+    ctx.fillStyle = style.bg
+    ctx.fillRect(0, 0, w, h)
+  }
   ctx.drawImage(img, 0, 0, w, h)
   return c
 }
@@ -80,7 +87,10 @@ export async function downloadQR(
     saveBlob(new Blob([composeFramedSvg(inner, px, style)], { type: 'image/svg+xml;charset=utf-8' }), fname(typeLabel, 'svg'))
     return
   }
-  const canvas = await rasterCanvas(input, style, px)
+  // PNG/WebP carry alpha, so a framed QR exports with a clear area around the card (matches
+  // copy-to-clipboard). JPG/PDF have no alpha → keep the opaque style.bg fill.
+  const transparent = (format === 'png' || format === 'webp') && style.frameStyle !== 'none'
+  const canvas = await rasterCanvas(input, style, px, { transparent })
   if (format === 'pdf') {
     const dataUrl = canvas.toDataURL('image/png')
     const { jsPDF } = await import('jspdf') // lazy: keeps jspdf out of the initial bundle
@@ -105,7 +115,10 @@ export async function copyQRToClipboard(input: RenderInput, style: StyleSettings
   // Safari only allows clipboard.write() while the click's user-activation is still
   // live, so we must call it synchronously and hand it a Promise<Blob> — awaiting the
   // raster before the write would expire the gesture and throw NotAllowedError.
-  const blob = rasterCanvas(input, style, px).then((canvas) => canvasToBlob(canvas, 'image/png'))
+  // PNG carries alpha: with a frame, leave the area around the card transparent so it
+  // pastes cleanly onto any surface (no coloured box).
+  const transparent = style.frameStyle !== 'none'
+  const blob = rasterCanvas(input, style, px, { transparent }).then((canvas) => canvasToBlob(canvas, 'image/png'))
   await navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })])
 }
 
