@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { createMatrix } from '../core/qr'
 import { buildPayload } from '../core/payloads'
 import { renderQrSvg } from '../core/render'
+import { resolveLogo } from '../core/logoPreset'
 import type { RecentItem } from '../recent'
 import { HistoryIcon, TrashIcon } from '../ui/icons'
 
@@ -10,9 +11,11 @@ async function thumbSvg(item: RecentItem): Promise<string | null> {
     const payload = buildPayload(item.type, item.data)
     if (!payload) return null
     // Render the saved appearance, but drop the CTA frame (illegible at 46px) and
-    // tighten the quiet zone so the QR fills the thumbnail.
-    const ecc = item.style.logo ? 'H' : item.style.ecc
-    const st = { ...item.style, frameStyle: 'none' as const, size: 116, margin: 2 }
+    // tighten the quiet zone so the QR fills the thumbnail. Resolve the preset the
+    // same way the live preview does, so preset logos show in the thumbnail too.
+    const logo = resolveLogo(item.type, item.data, item.style)
+    const ecc = logo ? 'H' : item.style.ecc
+    const st = { ...item.style, logo, frameStyle: 'none' as const, size: 116, margin: 2 }
     const matrix = createMatrix(payload, ecc)
     return await renderQrSvg(payload, ecc, st, 116, matrix.size)
   } catch {
