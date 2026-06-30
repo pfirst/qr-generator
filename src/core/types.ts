@@ -98,6 +98,7 @@ export interface StyleSettings {
   frameStyle: FrameStyle
   frameText: string
   frameColor: string
+  frameFont: string // CtaFont id — the label typeface (see core/fonts.ts)
   ecc: Ecc
   size: number // preview side, px
   margin: number // quiet zone, in modules
@@ -135,6 +136,7 @@ export const defaultStyle = (): StyleSettings => ({
   frameStyle: 'none',
   frameText: 'SCAN ME',
   frameColor: '#7c3aed',
+  frameFont: 'lineseed',
   ecc: 'M',
   size: 300,
   margin: 4,

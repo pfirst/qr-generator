@@ -1,4 +1,5 @@
 import type { FrameStyle, StyleSettings } from './types'
+import { fontFamilyOf, fontWeightOf, getFontCss } from './fonts'
 // Real frame chrome pulled from th.qr-code-generator.com (per พี่เฟิส's request), with
 // the example QR and the outlined "SCAN ME" stripped out. We inject our own QR into the
 // QR slot and overlay our own editable label (LINE Seed). `?raw` gives the file as a string.
@@ -71,8 +72,6 @@ function contrast(hex: string): string {
   return relLuminance(hex) > 0.6 ? '#111111' : '#ffffff'
 }
 
-const LABEL_FONT = "'LINE Seed Sans TH','LINE Seed Sans',Arial,Helvetica,sans-serif"
-
 // qrcg's letter/banner/arrow/ribbon/phone/script frames carry a thin #E6E6E6 card-border
 // path (class "outline"/"outline-white", plus an invisible "show_on_white" twin). On a
 // hi-DPI screen that border renders as a crisp grey hairline down each side of the white
@@ -94,11 +93,17 @@ function scopeStyle(svg: string, id: string): string {
 // Centred label. Size = the original label height (slot.h encodes how tall qrcg's own
 // SCAN ME sat — so text-forward frames like arrow/script stay big like the source), shrunk
 // only when it would overrun the slot width.
-function labelText(text: string, slot: FrameTemplate['labelSlot'], color: string): string {
+function labelText(
+  text: string,
+  slot: FrameTemplate['labelSlot'],
+  color: string,
+  family: string,
+  weight: number,
+): string {
   const t = esc((text || 'SCAN ME').toUpperCase())
   let fs = slot.h * 0.78
-  // Measured advance for LINE Seed 800 + our letter-spacing ≈ 0.72·fs per char. Fit to 92%
-  // of the slot width so a wide label (arrow/script) shrinks to fill it without ever
+  // Approx advance for a bold display face + our letter-spacing ≈ 0.72·fs per char. Fit to
+  // 92% of the slot width so a wide label (arrow/script) shrinks to fill it without ever
   // overrunning the frame edge.
   const budget = slot.w * 0.92
   const w = t.length * fs * 0.72
@@ -107,7 +112,7 @@ function labelText(text: string, slot: FrameTemplate['labelSlot'], color: string
   const cy = slot.y + slot.h / 2
   return (
     `<text x="${cx.toFixed(1)}" y="${cy.toFixed(1)}" text-anchor="middle" dominant-baseline="central" ` +
-    `font-family="${LABEL_FONT}" font-weight="800" font-size="${fs.toFixed(1)}" letter-spacing="${(fs * 0.03).toFixed(2)}" fill="${color}">${t}</text>`
+    `font-family="${family}" font-weight="${weight}" font-size="${fs.toFixed(1)}" letter-spacing="${(fs * 0.03).toFixed(2)}" fill="${color}">${t}</text>`
   )
 }
 
@@ -146,6 +151,15 @@ export function composeFramedSvg(innerSvg: string, outPx: number, style: StyleSe
     )
     .replace(/(<(?:path|rect)\b[^>]*\bclass="background-color")/, `$1 filter="url(#${shId})"`)
 
+  // 1c) embed the chosen label font as a base64 @font-face so the raster/SVG export renders
+  //     it (an <img>-loaded SVG can't fetch external fonts → would fall back otherwise). null
+  //     for the bundled font or before it's fetched; the live preview uses the document
+  //     stylesheet either way. Injected AFTER scopeStyle so the @font-face stays global.
+  const fontCss = getFontCss(style.frameFont)
+  if (fontCss) {
+    out = out.replace(/(<svg\b[^>]*>)/, `$1<style type="text/css">${fontCss}</style>`)
+  }
+
   // 2) inject our QR into the slot. Unwrap the QR's outer <svg> (drop the xml prolog and
   //    the <svg>/</svg> wrapper) and place its content with a <g transform>. A nested
   //    <svg> would establish a viewport that clips at the fractional slot scale, and some
@@ -161,7 +175,13 @@ export function composeFramedSvg(innerSvg: string, outPx: number, style: StyleSe
   const qr = `<g transform="translate(${t.slot.x} ${t.slot.y}) scale(${qrScale.toFixed(5)})">${qrBody}</g>`
 
   // 3) overlay our editable label where the original SCAN ME sat, sized to that slot.
-  const label = labelText(style.frameText, t.labelSlot, t.labelOnFill ? fc : contrast(fc))
+  const label = labelText(
+    style.frameText,
+    t.labelSlot,
+    t.labelOnFill ? fc : contrast(fc),
+    fontFamilyOf(style.frameFont),
+    fontWeightOf(style.frameFont),
+  )
 
   // QR + label go on top (end of the root), in the QR window / label slot
   return out.replace(/<\/svg>\s*$/i, `${qr}${label}</svg>`)

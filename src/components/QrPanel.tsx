@@ -1,7 +1,8 @@
-import { useState, type ComponentType } from 'react'
+import { useEffect, useState, type ComponentType } from 'react'
 import { BODY_SHAPES, BG_PRESETS, ECC_LEVELS, EYE_FRAMES, EYEBALLS, FG_PRESETS } from '../constants'
 import { defaultStyle, type GradientType, type FrameStyle, type StyleSettings } from '../core/types'
 import { composeFramedSvg, FRAME_TEMPLATES, frameThumb } from '../core/frames'
+import { CTA_FONTS, loadPreviewFonts } from '../core/fonts'
 import { FRAME_GLYPHS } from '../ui/shapeGlyphs'
 import { Card, SectionHead } from '../ui/surfaces'
 import { ACCENT_GRAD, ColorRow, SectionLabel, SegGroup, ShapeMenu, Toggle } from '../ui/controls'
@@ -12,6 +13,7 @@ import {
   GradLinearIcon,
   GradNoneIcon,
   GradRadialIcon,
+  CheckIcon,
   MarkerBorderIcon,
   MarkerCenterIcon,
   PaletteIcon,
@@ -162,15 +164,39 @@ function PopBody({ tab, style, patch }: { tab: TabId; style: StyleSettings; patc
           })}
         </div>
         {style.frameStyle !== 'none' && (
-          <div className="mt-3.5 flex items-center gap-3">
-            <input
-              value={style.frameText}
-              onChange={(e) => patch({ frameText: e.target.value })}
-              placeholder="SCAN ME"
-              className="flex-1 rounded-[11px] border border-[#e6e7ee] bg-white px-3 py-2.5 text-[14px] font-bold text-[#111827] outline-none focus:border-[#7c3aed]"
-            />
-            <input type="color" value={style.frameColor} onChange={(e) => patch({ frameColor: e.target.value })} className="h-[42px] w-11 cursor-pointer rounded-[10px] border border-[#e6e7ee] bg-white p-1" />
-          </div>
+          <>
+            <div className="mt-3.5 flex items-center gap-3">
+              <input
+                value={style.frameText}
+                onChange={(e) => patch({ frameText: e.target.value })}
+                placeholder="SCAN ME"
+                className="flex-1 rounded-[11px] border border-[#e6e7ee] bg-white px-3 py-2.5 text-[14px] font-bold text-[#111827] outline-none focus:border-[#7c3aed]"
+              />
+              <input type="color" value={style.frameColor} onChange={(e) => patch({ frameColor: e.target.value })} className="h-[42px] w-11 cursor-pointer rounded-[10px] border border-[#e6e7ee] bg-white p-1" />
+            </div>
+            <div className="mt-3.5">
+              <SectionLabel>ฟอนต์ป้าย</SectionLabel>
+              <div className="flex max-h-[184px] flex-col gap-1 overflow-y-auto pr-0.5">
+                {CTA_FONTS.map((f) => {
+                  const on = style.frameFont === f.id
+                  return (
+                    <button
+                      key={f.id}
+                      onClick={() => patch({ frameFont: f.id })}
+                      style={{ fontFamily: f.family, fontWeight: f.weight }}
+                      className={
+                        'flex items-center justify-between rounded-[10px] border px-3 py-2 text-left text-[15px] transition ' +
+                        (on ? 'border-[#7c3aed] bg-[#ede9fe] text-[#7c3aed]' : 'border-[#eef0f5] text-[#374151] hover:bg-[#f3f4f8]')
+                      }
+                    >
+                      {f.label}
+                      {on && <CheckIcon size={15} />}
+                    </button>
+                  )
+                })}
+              </div>
+            </div>
+          </>
         )}
       </div>
     )
@@ -218,6 +244,12 @@ function PopBody({ tab, style, patch }: { tab: TabId; style: StyleSettings; patc
 
 export function QrPanel({ svg, hasData, style, patchStyle }: { svg: string | null; hasData: boolean; style: StyleSettings; patchStyle: (p: Partial<StyleSettings>) => void }) {
   const [open, setOpen] = useState<TabId | null>(null)
+
+  // Lazily fetch the Google preview fonts the first time the frame tab opens — keeps them
+  // off the initial page load and fires no network request until the user wants fonts.
+  useEffect(() => {
+    if (open === 'cta') loadPreviewFonts()
+  }, [open])
 
   return (
     <Card className="relative p-5 sm:p-6">

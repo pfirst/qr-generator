@@ -2,6 +2,7 @@
 import { renderQrSvg, type RenderInput } from './render'
 import type { StyleSettings } from './types'
 import { composeFramedSvg } from './frames'
+import { ensureFontCss } from './fonts'
 
 export type ExportFormat = 'png' | 'jpg' | 'webp' | 'svg' | 'pdf'
 
@@ -27,6 +28,9 @@ export async function rasterCanvas(
   style: StyleSettings,
   px: number,
 ): Promise<HTMLCanvasElement> {
+  // Embed the CTA font before composing so the rasterised SVG carries its glyphs (an
+  // <img>-loaded SVG can't fetch fonts → the label would otherwise fall back).
+  if (style.frameStyle !== 'none') await ensureFontCss(style.frameFont)
   const inner = await renderQrSvg(input.data, input.ecc, style, px, input.count)
   const framed = composeFramedSvg(inner, px, style)
   const img = await svgToImage(framed)
@@ -69,6 +73,9 @@ export async function downloadQR(
   typeLabel: string,
 ): Promise<void> {
   if (format === 'svg') {
+    // Embed the CTA font so the exported SVG is self-contained + portable (opens with the
+    // right label face anywhere, not just where the Google font happens to be installed).
+    if (style.frameStyle !== 'none') await ensureFontCss(style.frameFont)
     const inner = await renderQrSvg(input.data, input.ecc, style, px, input.count)
     saveBlob(new Blob([composeFramedSvg(inner, px, style)], { type: 'image/svg+xml;charset=utf-8' }), fname(typeLabel, 'svg'))
     return
