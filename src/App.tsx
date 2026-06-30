@@ -61,7 +61,9 @@ export default function App() {
     (f: File) => {
       const reader = new FileReader()
       reader.onload = () => {
-        patchStyle({ logo: String(reader.result), ecc: 'H' as Ecc, presetLogo: false })
+        // Custom upload keeps a white plate by default (logoBg) — the renderer no longer
+        // auto-clears a square behind the logo, so 'none' would otherwise overlay raw modules.
+        patchStyle({ logo: String(reader.result), ecc: 'H' as Ecc, presetLogo: false, logoBg: 'square' })
         showToast('ฝังโลโก้แล้ว · ตั้ง EC เป็น H อัตโนมัติ')
       }
       reader.readAsDataURL(f)

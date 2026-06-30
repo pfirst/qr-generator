@@ -89,10 +89,12 @@ function buildOptions(data: string, ecc: Ecc, style: StyleSettings, sizePx: numb
             crossOrigin: 'anonymous' as const,
             margin: 0,
             imageSize: style.logoSize,
-            // The lib only ever clears a SQUARE behind the logo, so a circle/rounded plate
-            // looked identical to a square. When we draw our own plate (logoBg !== 'none'),
-            // let the modules render and let OUR plate be the clear-zone — so its shape shows.
-            hideBackgroundDots: style.logoBg === 'none',
+            // Never let the library clear its default SQUARE behind the logo — it only ever
+            // clears a square, which reads as a hard white box around the mark. Modules always
+            // render; the backing is whatever WE draw: a circle/rounded/square plate (logoBg),
+            // or nothing for 'none' (the logo overlays the modules directly — the PromptPay
+            // preset SVG carries its own white halo so it still separates cleanly).
+            hideBackgroundDots: false,
             saveAsBlob: false,
           },
         }

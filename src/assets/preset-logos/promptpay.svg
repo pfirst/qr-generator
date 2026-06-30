@@ -1,11 +1,24 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- PromptPay / Thai QR mark — logo only, transparent background (white card removed). -->
+<!-- PromptPay / Thai QR mark — FULL logo with its own white speech-bubble backing (.st0).
+     The white bubble (rounded square + bottom-right tail) IS the logo's backing, so it
+     separates the mark from the QR modules without a hard white SQUARE. Do NOT strip the
+     bubble: cropping to the bare marks is what forced qr-code-styling's square clear and
+     made the "hard white box" the owner rejected. Render with logoBg='none'.
+     viewBox is widened to the LEFT so the inner mark SQUARE (navy 2x2 grid, centre
+     ~340.6,245.6) — NOT the whole bubble+tail — sits dead-centre; the green tail
+     still shows, off to the bottom-right. Don't reset it to the artwork's 0 0 740.4 492. -->
 <svg version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
-	 viewBox="146.46 53.93 453.84 383.41" xml:space="preserve">
+	 viewBox="-67 -8 815 508" xml:space="preserve">
 <style type="text/css">
+	.st0{fill:#FFFFFF;}
 	.st1{fill:#1A3763;}
 	.st2{fill:#53A69A;}
 </style>
+<path class="st0" d="M217.6,0.6c7.7-0.4,15.4-1,23.1-0.4c68.7,0.1,137.4,0,206.1,0c30.9,0.2,62.8,6.8,88.4,25
+	c21.5,15,36.7,38,44.7,62.8c4.9,15.2,7.6,31.1,8,47c-0.1,68,0,136,0,204c49.6,47.9,99.3,95.6,149,143.4c1.7,1.6,3.9,3.7,3.2,6.3
+	c-1.2,2.3-4.2,2.5-6.5,2.8c-164.3,0-328.5,0-492.8,0c-28.9,0.2-58.4-4.1-84.3-17.5c-15-7.8-28.5-18.7-38.8-32.2
+	c-17.3-22.4-25.9-50.4-27.8-78.4c-0.7-6.9-0.3-13.8-0.2-20.7c0-76.1,0-152.3,0-228.4c0.6-23.3,7.2-47.1,21.7-65.7
+	c14.4-18.8,35.7-31.4,58.1-38.7C185.1,4.7,201.3,1.9,217.6,0.6z"/>
 <path class="st1" d="M188.7,63.8c-10.9,3.5-20.9,10.4-27.2,20.1c-6.4,9.9-9.4,21.9-9,33.7c0,33.1,0,66.3,0,99.4
 	c28.9,0,57.8,0,86.8,0v-47.5c-0.1-7.8,3.4-15.8,9.8-20.4c6.5-4.7,14.8-5.9,22.7-5.7c13.2,0,26.4,0,39.5,0c0.1-27.7,0-55.4,0-83
 	c-29.9-0.1-59.9,0-89.8,0C210.5,59.2,199.2,60.3,188.7,63.8z"/>

@@ -19,7 +19,7 @@ function LogoControls({ style, patch }: { style: StyleSettings; patch: (p: Parti
         <span>ขนาดโลโก้</span>
         <span className="font-mono text-[#9ca3af]">{Math.round(style.logoSize * 100)}%</span>
       </div>
-      <input type="range" min={10} max={45} value={Math.round(style.logoSize * 100)} onChange={(e) => patch({ logoSize: +e.target.value / 100 })} className="w-full" />
+      <input type="range" min={5} max={60} value={Math.round(style.logoSize * 100)} onChange={(e) => patch({ logoSize: +e.target.value / 100 })} className="w-full" />
 
       <div className="mt-4">
         <SectionLabel>พื้นหลังโลโก้</SectionLabel>

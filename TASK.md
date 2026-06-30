@@ -16,6 +16,7 @@ _(none)_
 
 ## ✅ Done
 
+- [x] 2026-06-30 — Preset PromptPay logo now shows the full mark WITH its own white speech-bubble backing (no hard white square; matches owner reference), viewBox widened so the inner mark SQUARE — not the bubble+tail — is dead-centre. `assets/preset-logos/promptpay.svg` (restored `.st0` bubble from `QR_PP.svg` + `viewBox="-67 -8 815 508"`), `core/render.ts` (`hideBackgroundDots:false`), `App.tsx` (custom upload → `logoBg:'square'`), `components/LogoUploader.tsx` (logo size 5–60%).
 - [x] 2026-06-30 — **Preset (per-type) center logo — Slice 1.** Built-in PromptPay mark for `promptpay`/`bill`, default-on with a "ใช้โลโก้ประจำชนิด" toggle; custom upload overrides + auto-disables it. New `core/logoPreset.ts` (`resolveLogo`/`presetLogoUrl`/`defaultPresetOn`/`defaultPresetBg`) + `StyleSettings.presetLogo`; App feeds an effective `renderStyle` so the render/export/verify pipeline stays untouched. Asset `assets/preset-logos/promptpay.svg` (white card removed, viewBox cropped to the mark; `logoBg='none'`). Touches `App.tsx`, `components/{DataCard,LogoUploader,HistoryPopover}.tsx`. Verified DPR=2: preset renders, decode green, SVG-in-SVG raster export not tainted. social/email/sms/tel/wifi → Slice 2. Spec/plan in `docs/superpowers/`.
 - [x] 2026-06-30 — Trim promptpay amount label (drop the open-amount hint). `components/FormFields.tsx`.
 - [x] 2026-06-30 — Sample-number placeholders for payment fields (neutral example digits). `components/FormFields.tsx`.
