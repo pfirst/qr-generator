@@ -89,7 +89,10 @@ function buildOptions(data: string, ecc: Ecc, style: StyleSettings, sizePx: numb
             crossOrigin: 'anonymous' as const,
             margin: 0,
             imageSize: style.logoSize,
-            hideBackgroundDots: true,
+            // The lib only ever clears a SQUARE behind the logo, so a circle/rounded plate
+            // looked identical to a square. When we draw our own plate (logoBg !== 'none'),
+            // let the modules render and let OUR plate be the clear-zone — so its shape shows.
+            hideBackgroundDots: style.logoBg === 'none',
             saveAsBlob: false,
           },
         }
@@ -131,8 +134,11 @@ function postProcess(svg: string, style: StyleSettings): string {
     }
     // coloured background behind the logo (circle / rounded / square)
     if (style.logoBg !== 'none') {
+      // qr-code-styling emits the image width/height WITH a unit ("56px"), so a regex that
+      // demands a bare number before the closing quote matched nothing → iw/ih were 0 and
+      // the plate was never drawn. Accept an optional `px` suffix.
       const num = (a: string) => {
-        const m = img[0].match(new RegExp(a + '="([\\d.]+)"'))
+        const m = img[0].match(new RegExp(a + '="([\\d.]+)(?:px)?"'))
         return m ? parseFloat(m[1]) : 0
       }
       const ix = num('x')
@@ -140,7 +146,7 @@ function postProcess(svg: string, style: StyleSettings): string {
       const iw = num('width')
       const ih = num('height')
       if (iw && ih) {
-        const pad = Math.max(iw, ih) * 0.12
+        const pad = Math.max(iw, ih) * style.logoPadding
         const bx = ix - pad
         const by = iy - pad
         const bw = iw + pad * 2

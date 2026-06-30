@@ -94,6 +94,7 @@ export interface StyleSettings {
   logo: string | null // data URL of uploaded image
   logoSize: number // fraction of QR side, 0..1
   logoBg: LogoBg
+  logoPadding: number // white plate padding around the logo, fraction of logo side
   frameStyle: FrameStyle
   frameText: string
   frameColor: string
@@ -130,6 +131,7 @@ export const defaultStyle = (): StyleSettings => ({
   logo: null,
   logoSize: 0.24,
   logoBg: 'none',
+  logoPadding: 0.12,
   frameStyle: 'none',
   frameText: 'SCAN ME',
   frameColor: '#7c3aed',

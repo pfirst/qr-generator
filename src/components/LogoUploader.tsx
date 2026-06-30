@@ -98,6 +98,23 @@ export function LogoUploader({
         <SectionLabel>พื้นหลังโลโก้</SectionLabel>
         <SegGroup options={LOGO_BGS} value={style.logoBg} onChange={(v) => patch({ logoBg: v })} />
       </div>
+
+      {style.logoBg !== 'none' && (
+        <div className="mt-4">
+          <div className="mb-1.5 flex justify-between text-[12.5px] font-bold text-[#6b7280]">
+            <span>ระยะขอบแผ่นรอง</span>
+            <span className="font-mono text-[#9ca3af]">{Math.round(style.logoPadding * 100)}%</span>
+          </div>
+          <input
+            type="range"
+            min={0}
+            max={40}
+            value={Math.round(style.logoPadding * 100)}
+            onChange={(e) => patch({ logoPadding: +e.target.value / 100 })}
+            className="w-full"
+          />
+        </div>
+      )}
     </div>
   )
 }
