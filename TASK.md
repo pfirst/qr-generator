@@ -16,6 +16,7 @@ _(none)_
 
 ## ✅ Done
 
+- [x] 2026-07-01 — Custom uploaded logo now scales **continuously** (true linear %: logo side = `logoSize` × QR module-area side) instead of qr-code-styling's stepped whole-odd-module snapping (the "ปรับเป็นระดับ" report). `postProcess` overrides the `<image>` width/height/x/y, keeping aspect + centre; gated on `style.logo && !style.presetLogo` so preset center logos are untouched; `renderQrSvg` passes the module-area side. Safe because `hideBackgroundDots:false` (no cleared region to sync). `core/render.ts`. Verified against live `renderQrSvg` (DPR=2): widths proportional (0.40→94.4, 0.44→103.84, ratio 1.10), centred at size/2, preset path still snapped (72=72), no console errors, typecheck green.
 - [x] 2026-07-01 — Preset center logo for **vcard** (Heroicons `identification`) + **geo** (Heroicons `map-pin`): new `assets/preset-logos/category/{vcard,geo}.svg`, added to `CATEGORY_RAW` + `hasPreset` in `core/logoPreset.ts`, and to `STYLEABLE`/`CATEGORY_TYPES` in `components/LogoSettings.tsx` (full backing/shape/สีไอคอน controls). Default-off toggle like email/sms/tel/wifi. Verified DPR=2: both glyphs render centred, decode green, logo-tab controls present.
 - [x] 2026-07-01 — Shape-picker (กรอบตา/จุดตา/จุด) popover: unselected option text + glyph now use the app's standard label gray (`#374151`/`#15161c` → `#6b7280`), matching SegGroup. `ui/controls.tsx` (`ShapeMenu`).
 - [x] 2026-07-01 — Logo tab "สีไอคอน" now uses `ColorRow` (shows the `#HEX` under the label) instead of a bare color input. `components/LogoSettings.tsx`.

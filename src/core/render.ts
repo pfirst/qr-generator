@@ -120,7 +120,7 @@ function unifyGradient(svg: string, style: StyleSettings): string {
 // qr-code-styling emits the logo <image> with a bare `href`; Adobe Illustrator
 // and some tools only honour `xlink:href`. Add the namespace + xlink:href, and
 // draw the optional coloured logo background (which the library doesn't do).
-function postProcess(svg: string, style: StyleSettings): string {
+function postProcess(svg: string, style: StyleSettings, moduleAreaPx?: number): string {
   let out = unifyGradient(svg, style)
 
   if (!/xmlns:xlink=/.test(out)) {
@@ -134,35 +134,59 @@ function postProcess(svg: string, style: StyleSettings): string {
     if (!/xlink:href=/.test(tag)) {
       out = out.replace(tag, tag.replace(/\bhref="/, 'xlink:href="').replace('<image ', '<image href="' + img[1] + '" '))
     }
+
+    // Read qr-code-styling's logo placement. It emits width/height WITH a unit ("56px"),
+    // so a regex that demands a bare number before the closing quote would match nothing →
+    // iw/ih 0. Accept an optional `px` suffix.
+    const num = (a: string) => {
+      const m = img[0].match(new RegExp(a + '="([\\d.]+)(?:px)?"'))
+      return m ? parseFloat(m[1]) : 0
+    }
+    let ix = num('x')
+    let iy = num('y')
+    let iw = num('width')
+    let ih = num('height')
+
+    // Continuous logo sizing for a CUSTOM UPLOAD (logo set, NOT a preset). qr-code-styling
+    // maps imageSize → a whole ODD module count, so dragging the size slider only changes the
+    // logo when it crosses a module boundary — it moves in visible steps, not smoothly (the
+    // "ปรับเป็นระดับ" report). Instead we resize the <image> ourselves to EXACTLY
+    // logoSize × the QR module-area side (a true linear %), preserving the source aspect and
+    // the library's centre. Safe because hideBackgroundDots is false: nothing is cleared
+    // behind the logo, so there is no snapped region to keep in sync — the logo just overlays.
+    if (style.logo && !style.presetLogo && moduleAreaPx && iw && ih) {
+      const cx = ix + iw / 2
+      const cy = iy + ih / 2
+      const scale = (style.logoSize * moduleAreaPx) / Math.max(iw, ih)
+      iw *= scale
+      ih *= scale
+      ix = cx - iw / 2
+      iy = cy - ih / 2
+      const curTag = out.match(/<image\b[^>]*>/)![0]
+      const resized = curTag
+        .replace(/\bx="[\d.]+(?:px)?"/, `x="${ix}"`)
+        .replace(/\by="[\d.]+(?:px)?"/, `y="${iy}"`)
+        .replace(/\bwidth="[\d.]+(?:px)?"/, `width="${iw}px"`)
+        .replace(/\bheight="[\d.]+(?:px)?"/, `height="${ih}px"`)
+      out = out.replace(curTag, resized)
+    }
+
     // coloured background behind the logo (circle / rounded / square)
-    if (style.logoBg !== 'none') {
-      // qr-code-styling emits the image width/height WITH a unit ("56px"), so a regex that
-      // demands a bare number before the closing quote matched nothing → iw/ih were 0 and
-      // the plate was never drawn. Accept an optional `px` suffix.
-      const num = (a: string) => {
-        const m = img[0].match(new RegExp(a + '="([\\d.]+)(?:px)?"'))
-        return m ? parseFloat(m[1]) : 0
-      }
-      const ix = num('x')
-      const iy = num('y')
-      const iw = num('width')
-      const ih = num('height')
-      if (iw && ih) {
-        const pad = Math.max(iw, ih) * style.logoPadding
-        const bx = ix - pad
-        const by = iy - pad
-        const bw = iw + pad * 2
-        const bh = ih + pad * 2
-        const bg = safeColor(style.bg)
-        const shape =
-          style.logoBg === 'circle'
-            ? `<circle cx="${ix + iw / 2}" cy="${iy + ih / 2}" r="${Math.max(bw, bh) / 2}" fill="${bg}"/>`
-            : `<rect x="${bx}" y="${by}" width="${bw}" height="${bh}" rx="${
-                style.logoBg === 'rounded' ? bw * 0.22 : 0
-              }" fill="${bg}"/>`
-        const imgTag = out.match(/<image\b[^>]*>/)![0]
-        out = out.replace(imgTag, shape + imgTag)
-      }
+    if (style.logoBg !== 'none' && iw && ih) {
+      const pad = Math.max(iw, ih) * style.logoPadding
+      const bx = ix - pad
+      const by = iy - pad
+      const bw = iw + pad * 2
+      const bh = ih + pad * 2
+      const bg = safeColor(style.bg)
+      const shape =
+        style.logoBg === 'circle'
+          ? `<circle cx="${ix + iw / 2}" cy="${iy + ih / 2}" r="${Math.max(bw, bh) / 2}" fill="${bg}"/>`
+          : `<rect x="${bx}" y="${by}" width="${bw}" height="${bh}" rx="${
+              style.logoBg === 'rounded' ? bw * 0.22 : 0
+            }" fill="${bg}"/>`
+      const imgTag = out.match(/<image\b[^>]*>/)![0]
+      out = out.replace(imgTag, shape + imgTag)
     }
   }
 
@@ -182,5 +206,7 @@ export async function renderQrSvg(
   const raw = await qr.getRawData('svg')
   if (!raw) throw new Error('qr-code-styling produced no SVG')
   const svg = typeof raw === 'string' ? raw : 'text' in raw ? await raw.text() : new TextDecoder().decode(raw)
-  return postProcess(svg, style)
+  // Pass the QR module-area side (size minus quiet zone, both edges) so postProcess can size
+  // a custom logo to an exact linear % instead of qr-code-styling's stepped module snapping.
+  return postProcess(svg, style, sizePx - 2 * marginPx(style, sizePx, count))
 }
