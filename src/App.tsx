@@ -5,7 +5,7 @@ import { renderQrSvg, type RenderInput } from './core/render'
 import { contrastScan, decodeRendered } from './core/verify'
 import { copyQRToClipboard, downloadQR, printQR, type ExportFormat } from './core/export'
 import { defaultFieldData, defaultStyle, type Ecc, type FieldData, type QRType } from './core/types'
-import { defaultPresetOn, defaultPresetBg, resolveLogo } from './core/logoPreset'
+import { defaultPresetOn, presetLogoSize, resolveLogo } from './core/logoPreset'
 import { fieldErrors } from './core/validate'
 import { clearRecent, loadRecent, pushRecent, type RecentItem } from './recent'
 import { Header } from './components/Header'
@@ -43,18 +43,14 @@ export default function App() {
   const pickType = useCallback(
     (t: QRType) => {
       setType(t)
-      if (!style.logo) {
-        const on = defaultPresetOn(t)
-        patchStyle({ presetLogo: on, ...(on ? { logoBg: defaultPresetBg(t) } : {}) })
-      }
+      if (!style.logo) patchStyle({ presetLogo: defaultPresetOn(t) })
     },
     [style.logo, patchStyle],
   )
 
   // Deleting the custom upload restores the type's default preset.
   const onRemoveLogo = useCallback(() => {
-    const on = defaultPresetOn(type)
-    patchStyle({ logo: null, presetLogo: on, ...(on ? { logoBg: defaultPresetBg(type) } : {}) })
+    patchStyle({ logo: null, presetLogo: defaultPresetOn(type) })
   }, [type, patchStyle])
 
   const onLogoFile = useCallback(
@@ -75,7 +71,20 @@ export default function App() {
   const payload = useMemo(() => buildPayload(type, data), [type, data])
   const errors = useMemo(() => fieldErrors(type, data), [type, data])
   const effLogo = useMemo(() => resolveLogo(type, data, style), [type, data, style])
-  const renderStyle = useMemo(() => ({ ...style, logo: effLogo }), [style, effLogo])
+  // A preset composes its own backing; force logoBg='none' so postProcess draws no extra plate.
+  // A custom upload keeps the user's logoBg.
+  const presetActive = !!effLogo && !style.logo
+  // A preset composes its own frame that grows the viewBox; scale imageSize so the
+  // logo core stays a constant fraction of the QR (frame expands, logo doesn't shrink).
+  const renderStyle = useMemo(
+    () => ({
+      ...style,
+      logo: effLogo,
+      logoBg: presetActive ? ('none' as const) : style.logoBg,
+      logoSize: presetActive ? presetLogoSize(type, style) : style.logoSize,
+    }),
+    [style, effLogo, presetActive, type],
+  )
   const effEcc: Ecc = effLogo ? 'H' : style.ecc
 
   const matrix = useMemo(() => {
@@ -178,7 +187,7 @@ export default function App() {
     (r: RecentItem) => {
       setType(r.type)
       setData(r.data)
-      setStyle(r.style)
+      setStyle({ ...defaultStyle(), ...r.style })
       showToast('โหลดค่าจากประวัติแล้ว')
     },
     [showToast],

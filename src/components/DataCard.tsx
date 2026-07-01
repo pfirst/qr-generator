@@ -38,7 +38,7 @@ export function DataCard({
       <FormFields type={type} data={data} errors={errors} setData={setData} setIn={setIn} />
 
       <div className="my-5 h-px bg-[#eef0f5]" />
-      <LogoUploader style={style} patch={patchStyle} onLogoFile={onLogoFile} onRemoveLogo={onRemoveLogo} type={type} />
+      <LogoUploader style={style} patch={patchStyle} onLogoFile={onLogoFile} onRemoveLogo={onRemoveLogo} type={type} data={data} />
     </Card>
   )
 }

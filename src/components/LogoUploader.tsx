@@ -1,8 +1,75 @@
 import { useState, type ReactNode } from 'react'
-import type { LogoBg, QRType, StyleSettings } from '../core/types'
-import { presetLogoUrl } from '../core/logoPreset'
+import type { FieldData, LogoBg, QRType, StyleSettings } from '../core/types'
+import { hasPreset, presetLogoUrl } from '../core/logoPreset'
 import { SectionLabel, SegGroup, Toggle } from '../ui/controls'
 import { TrashIcon, UploadIcon } from '../ui/icons'
+
+const STYLEABLE: QRType[] = ['social', 'email', 'sms', 'tel', 'wifi']
+const CATEGORY_TYPES: QRType[] = ['email', 'sms', 'tel', 'wifi']
+
+const PLATES: { id: StyleSettings['presetPlate']; label: string }[] = [
+  { id: 'brand', label: 'สีแบรนด์' },
+  { id: 'halo', label: 'กรอบตามรูปโลโก้' },
+  { id: 'none', label: 'ไม่มี' },
+]
+const SHAPES: { id: StyleSettings['presetShape']; label: string }[] = [
+  { id: 'square', label: 'เหลี่ยม' },
+  { id: 'rounded', label: 'มน' },
+  { id: 'circle', label: 'วงกลม' },
+]
+
+// Logo-size slider — shared by styleable presets AND promptpay/bill (whose only
+// styling is size). Kept separate from LogoControls, which also renders the now-dead
+// logoBg/padding pickers (an active preset forces logoBg='none' at the App boundary).
+function SizeSlider({ style, patch }: { style: StyleSettings; patch: (p: Partial<StyleSettings>) => void }) {
+  return (
+    <div className="mt-4">
+      <div className="mb-1.5 flex justify-between text-[12.5px] font-bold text-[#6b7280]">
+        <span>ขนาดโลโก้</span>
+        <span className="font-mono text-[#9ca3af]">{Math.round(style.logoSize * 100)}%</span>
+      </div>
+      <input type="range" min={5} max={60} value={Math.round(style.logoSize * 100)} onChange={(e) => patch({ logoSize: +e.target.value / 100 })} className="w-full" />
+    </div>
+  )
+}
+
+// Backing controls for a styleable preset (social / email / sms / tel / wifi).
+function PresetControls({ style, patch, isCategory }: { style: StyleSettings; patch: (p: Partial<StyleSettings>) => void; isCategory: boolean }) {
+  return (
+    <>
+      <div className="mt-4">
+        <SectionLabel>แผ่นรอง</SectionLabel>
+        <SegGroup options={PLATES} value={style.presetPlate} onChange={(v) => patch({ presetPlate: v })} />
+      </div>
+
+      {style.presetPlate === 'brand' && (
+        <div className="mt-4">
+          <SectionLabel>รูปทรง</SectionLabel>
+          <SegGroup options={SHAPES} value={style.presetShape} onChange={(v) => patch({ presetShape: v })} />
+        </div>
+      )}
+
+      {style.presetPlate !== 'none' && (
+        <div className="mt-4">
+          <div className="mb-1.5 flex justify-between text-[12.5px] font-bold text-[#6b7280]">
+            <span>ความหนากรอบ</span>
+            <span className="font-mono text-[#9ca3af]">{style.presetHalo}</span>
+          </div>
+          <input type="range" min={6} max={24} step={1} value={style.presetHalo} onChange={(e) => patch({ presetHalo: +e.target.value })} className="w-full" />
+        </div>
+      )}
+
+      {isCategory && (
+        <div className="mt-4">
+          <div className="mb-2 text-[12.5px] font-bold text-[#6b7280]">สีไอคอน</div>
+          <input type="color" value={style.presetColor} onChange={(e) => patch({ presetColor: e.target.value })} className="h-9 w-16 cursor-pointer rounded-[8px] border border-[#e6e7ee] bg-white" />
+        </div>
+      )}
+
+      <SizeSlider style={style} patch={patch} />
+    </>
+  )
+}
 
 const LOGO_BGS: { id: LogoBg; label: string }[] = [
   { id: 'none', label: 'ไม่มี' },
@@ -93,15 +160,18 @@ export function LogoUploader({
   onLogoFile,
   onRemoveLogo,
   type,
+  data,
 }: {
   style: StyleSettings
   patch: (p: Partial<StyleSettings>) => void
   onLogoFile: (f: File) => void
   onRemoveLogo: () => void
   type: QRType
+  data: FieldData
 }) {
   const hasLogo = !!style.logo
-  const presetUrl = presetLogoUrl(type)
+  const styleable = STYLEABLE.includes(type)
+  const presetUrl = presetLogoUrl(type, data.social.platform, style) // promptpay/bill ignore the platform
 
   // 1) Custom upload present — overrides any preset.
   if (hasLogo) {
@@ -128,7 +198,7 @@ export function LogoUploader({
   }
 
   // 2) No custom upload, but this type has a preset — show the toggle.
-  if (presetUrl) {
+  if (hasPreset(type)) {
     return (
       <div>
         <SectionLabel>โลโก้กลาง QR (ไม่บังคับ)</SectionLabel>
@@ -140,10 +210,14 @@ export function LogoUploader({
         {style.presetLogo ? (
           <>
             <div className="mb-4 flex items-center gap-3">
-              <img src={presetUrl} alt="preset logo" className="h-14 w-14 rounded-[12px] border border-[#e6e7ee] bg-white object-contain p-1.5" />
+              <img src={presetUrl!} alt="preset logo" className="h-14 w-14 rounded-[12px] border border-[#e6e7ee] bg-white object-contain p-1.5" />
               <div className="min-w-0 flex-1 text-[11.5px] text-[#9ca3af]">โลโก้ประจำชนิดถูกฝังไว้ · อัปโหลดรูปเองด้านล่างเพื่อใช้แทน</div>
             </div>
-            <LogoControls style={style} patch={patch} />
+            {styleable ? (
+              <PresetControls style={style} patch={patch} isCategory={CATEGORY_TYPES.includes(type)} />
+            ) : (
+              <SizeSlider style={style} patch={patch} /> /* promptpay/bill: size only (spec §8) */
+            )}
             <div className="mt-4">
               <Dropzone onLogoFile={onLogoFile} label="อัปโหลดโลโก้เองแทน" />
             </div>

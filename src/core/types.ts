@@ -96,6 +96,10 @@ export interface StyleSettings {
   logoBg: LogoBg
   logoPadding: number // white plate padding around the logo, fraction of logo side
   presetLogo: boolean // show the type's built-in preset logo (custom upload overrides it)
+  presetPlate: 'brand' | 'halo' | 'none' // preset backing: brand-colour chip · white frame-follows-logo · none
+  presetShape: 'square' | 'rounded' | 'circle' // chip shape when presetPlate === 'brand'
+  presetHalo: number // white-frame thickness (viewBox units) — grows outward on 'brand' & 'halo'; floor 6
+  presetColor: string // category-glyph colour (email/sms/tel/wifi); social uses the fixed brand colour
   frameStyle: FrameStyle
   frameText: string
   frameColor: string
@@ -135,6 +139,10 @@ export const defaultStyle = (): StyleSettings => ({
   logoBg: 'none',
   logoPadding: 0.12,
   presetLogo: false,
+  presetPlate: 'brand',
+  presetShape: 'rounded',
+  presetHalo: 6,
+  presetColor: '#7c3aed',
   frameStyle: 'none',
   frameText: 'SCAN ME',
   frameColor: '#7c3aed',
