@@ -4,11 +4,11 @@
 // `patch` (real style). The upload/toggle/preview/delete affordances stay in LogoUploader.
 import type { ComponentType } from 'react'
 import type { LogoBg, QRType, StyleSettings } from '../core/types'
-import { SectionLabel, SegGroup } from '../ui/controls'
+import { ColorRow, SectionLabel, SegGroup } from '../ui/controls'
 import { PlateCircleIcon, PlateNoneIcon, PlateRoundedIcon, PlateSquareIcon } from '../ui/icons'
 
-const STYLEABLE: QRType[] = ['social', 'email', 'sms', 'tel', 'wifi']
-const CATEGORY_TYPES: QRType[] = ['email', 'sms', 'tel', 'wifi']
+const STYLEABLE: QRType[] = ['social', 'email', 'sms', 'tel', 'wifi', 'vcard', 'geo']
+const CATEGORY_TYPES: QRType[] = ['email', 'sms', 'tel', 'wifi', 'vcard', 'geo']
 
 type Ico = ComponentType<{ size?: number }>
 
@@ -71,8 +71,7 @@ function PresetControls({ style, patch, isCategory }: { style: StyleSettings; pa
 
       {isCategory && (
         <div className="mt-4">
-          <div className="mb-2 text-[12.5px] font-bold text-[#6b7280]">สีไอคอน</div>
-          <input type="color" value={style.presetColor} onChange={(e) => patch({ presetColor: e.target.value })} className="h-9 w-16 cursor-pointer rounded-[8px] border border-[#e6e7ee] bg-white" />
+          <ColorRow label="สีไอคอน" value={style.presetColor} onChange={(v) => patch({ presetColor: v })} />
         </div>
       )}
 

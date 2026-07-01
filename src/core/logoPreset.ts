@@ -23,6 +23,8 @@ import emailRaw from '../assets/preset-logos/category/email.svg?raw'
 import smsRaw from '../assets/preset-logos/category/sms.svg?raw'
 import telRaw from '../assets/preset-logos/category/tel.svg?raw'
 import wifiRaw from '../assets/preset-logos/category/wifi.svg?raw'
+import vcardRaw from '../assets/preset-logos/category/vcard.svg?raw'
+import geoRaw from '../assets/preset-logos/category/geo.svg?raw'
 
 // SVG string -> data URL. utf8-encode (not btoa) to avoid unicode pitfalls.
 const svgUrl = (raw: string): string => `data:image/svg+xml,${encodeURIComponent(raw)}`
@@ -48,7 +50,7 @@ const SOCIAL_BRAND: Record<SocialPlatform, string> = {
   spotify: '#1ED760', wechat: '#07C160',
 }
 
-const CATEGORY_RAW: Partial<Record<QRType, string>> = { email: emailRaw, sms: smsRaw, tel: telRaw, wifi: wifiRaw }
+const CATEGORY_RAW: Partial<Record<QRType, string>> = { email: emailRaw, sms: smsRaw, tel: telRaw, wifi: wifiRaw, vcard: vcardRaw, geo: geoRaw }
 
 // ---- Preset geometry -------------------------------------------------------
 // CRITICAL: the composed SVG uses a CONSTANT viewBox and draws the mark at a
@@ -126,7 +128,8 @@ export function presetLogoUrl(type: QRType, platform: SocialPlatform | undefined
 // Does this type expose a preset toggle at all?
 export const hasPreset = (type: QRType): boolean =>
   type === 'promptpay' || type === 'bill' || type === 'social' ||
-  type === 'email' || type === 'sms' || type === 'tel' || type === 'wifi'
+  type === 'email' || type === 'sms' || type === 'tel' || type === 'wifi' ||
+  type === 'vcard' || type === 'geo'
 
 // Toggle default when (re)entering a type.
 export const defaultPresetOn = (type: QRType): boolean =>

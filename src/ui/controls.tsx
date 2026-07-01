@@ -196,10 +196,10 @@ export function ShapeMenu(props: ShapeGridProps) {
             onClick={() => (props.onChange as (v: string) => void)(o.id)}
             className={
               'flex items-center gap-3 whitespace-nowrap rounded-[12px] border px-3.5 py-2.5 text-left text-[14.5px] font-bold transition ' +
-              (on ? 'border-[#7c3aed] bg-[#ede9fe] text-[#7c3aed]' : 'border-transparent text-[#374151] hover:bg-[#f3f4f8]')
+              (on ? 'border-[#7c3aed] bg-[#ede9fe] text-[#7c3aed]' : 'border-transparent text-[#6b7280] hover:bg-[#f3f4f8]')
             }
           >
-            <span className={'grid h-6 w-6 shrink-0 place-items-center ' + (on ? 'text-[#7c3aed]' : 'text-[#15161c]')}>
+            <span className={'grid h-6 w-6 shrink-0 place-items-center ' + (on ? 'text-[#7c3aed]' : 'text-[#6b7280]')}>
               <ShapeGlyph kind={kind} id={o.id} />
             </span>
             {o.label}
