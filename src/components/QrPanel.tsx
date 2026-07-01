@@ -1,12 +1,13 @@
 import { useEffect, useRef, useState, type ComponentType, type CSSProperties } from 'react'
 import { createPortal } from 'react-dom'
 import { BODY_SHAPES, BG_PRESETS, ECC_LEVELS, EYE_FRAMES, EYEBALLS, FG_PRESETS } from '../constants'
-import { defaultStyle, type GradientType, type FrameStyle, type StyleSettings } from '../core/types'
+import { defaultStyle, type GradientType, type FrameStyle, type QRType, type StyleSettings } from '../core/types'
 import { composeFramedSvg, FRAME_TEMPLATES, frameThumb } from '../core/frames'
 import { CTA_FONTS, loadPreviewFonts } from '../core/fonts'
 import { FRAME_GLYPHS } from '../ui/shapeGlyphs'
 import { Card, SectionHead } from '../ui/surfaces'
 import { ACCENT_GRAD, ColorRow, SectionLabel, SegGroup, ShapeMenu, Toggle } from '../ui/controls'
+import { LogoSettingsBody } from './LogoSettings'
 import {
   CellsIcon,
   FrameIcon,
@@ -15,6 +16,7 @@ import {
   GradNoneIcon,
   GradRadialIcon,
   CheckIcon,
+  LogoCenterIcon,
   MarkerBorderIcon,
   MarkerCenterIcon,
   PaletteIcon,
@@ -24,9 +26,12 @@ import {
 } from '../ui/icons'
 
 // Three separate shape pickers (กรอบตา / จุดตา / จุด) like Figma, plus colour,
-// the CTA frame, and advanced settings.
-type TabId = 'color' | 'border' | 'center' | 'cells' | 'cta' | 'adv'
-const TABS: { id: TabId; label: string; Icon: ComponentType<{ size?: number }> }[] = [
+// the logo, the CTA frame, and advanced settings.
+type TabId = 'color' | 'border' | 'center' | 'cells' | 'logo' | 'cta' | 'adv'
+type TabDef = { id: TabId; label: string; Icon: ComponentType<{ size?: number }> }
+// Fixed tabs (always present). The `logo` tab is injected separately so it can animate
+// in/out around the `cta` boundary — see the toolbar render below.
+const TABS: TabDef[] = [
   { id: 'color', label: 'สี', Icon: PaletteIcon },
   { id: 'border', label: 'กรอบตา', Icon: MarkerBorderIcon },
   { id: 'center', label: 'จุดตา', Icon: MarkerCenterIcon },
@@ -34,6 +39,11 @@ const TABS: { id: TabId; label: string; Icon: ComponentType<{ size?: number }> }
   { id: 'cta', label: 'กรอบ', Icon: FrameIcon },
   { id: 'adv', label: 'ขั้นสูง', Icon: SlidersIcon },
 ]
+// The logo tab lives before `cta`; the animated slot is rendered between these two groups.
+const CTA_INDEX = TABS.findIndex((t) => t.id === 'cta')
+const TABS_LEFT = TABS.slice(0, CTA_INDEX)
+const TABS_RIGHT = TABS.slice(CTA_INDEX)
+const LOGO_TAB: TabDef = { id: 'logo', label: 'โลโก้', Icon: LogoCenterIcon }
 // Shape pickers get Figma's anchored dropdown; the rest use a centred popup.
 const SHAPE_TABS: TabId[] = ['border', 'center', 'cells']
 const FRAME_CHOICES: { id: FrameStyle; label: string }[] = [
@@ -177,8 +187,24 @@ function Swatches({ colors, value, onChange }: { colors: readonly string[]; valu
   )
 }
 
-function PopBody({ tab, style, patch }: { tab: TabId; style: StyleSettings; patch: (p: Partial<StyleSettings>) => void }) {
+function PopBody({
+  tab,
+  style,
+  patch,
+  baseStyle,
+  type,
+}: {
+  tab: TabId
+  style: StyleSettings
+  patch: (p: Partial<StyleSettings>) => void
+  baseStyle: StyleSettings
+  type: QRType
+}) {
   const hasLogo = !!style.logo
+
+  // Logo styling reads the REAL style (baseStyle) — renderStyle overrides logoSize/logoBg
+  // for presets, so `style` here would show the wrong slider positions.
+  if (tab === 'logo') return <LogoSettingsBody style={baseStyle} patch={patch} type={type} />
 
   if (tab === 'color') {
     return (
@@ -339,14 +365,78 @@ function PopBody({ tab, style, patch }: { tab: TabId; style: StyleSettings; patc
   )
 }
 
-export function QrPanel({ svg, hasData, style, patchStyle }: { svg: string | null; hasData: boolean; style: StyleSettings; patchStyle: (p: Partial<StyleSettings>) => void }) {
+export function QrPanel({
+  svg,
+  hasData,
+  style,
+  baseStyle,
+  type,
+  patchStyle,
+}: {
+  svg: string | null
+  hasData: boolean
+  style: StyleSettings
+  baseStyle: StyleSettings
+  type: QRType
+  patchStyle: (p: Partial<StyleSettings>) => void
+}) {
   const [open, setOpen] = useState<TabId | null>(null)
+
+  // The logo tab shows only when an effective logo is present. `style` is renderStyle, so
+  // `style.logo` === effLogo (custom upload OR a toggled-on preset).
+  const logoOn = !!style.logo
+  const [logoMounted, setLogoMounted] = useState(logoOn)
+  const [logoClip, setLogoClip] = useState(true) // clip during the grow/collapse; drop it once open so the active glow isn't cut
+  useEffect(() => {
+    if (logoOn) {
+      setLogoMounted(true)
+      return
+    }
+    setLogoClip(true)
+    const t = window.setTimeout(() => setLogoMounted(false), 220) // keep mounted for the collapse animation
+    return () => clearTimeout(t)
+  }, [logoOn])
+  // If the logo disappears while its popup is open, close the popup.
+  useEffect(() => {
+    if (!logoOn && open === 'logo') setOpen(null)
+  }, [logoOn, open])
 
   // Lazily fetch the Google preview fonts the first time the frame tab opens — keeps them
   // off the initial page load and fires no network request until the user wants fonts.
   useEffect(() => {
     if (open === 'cta') loadPreviewFonts()
   }, [open])
+
+  // One tab button (+ its anchored shape dropdown). Shared by the fixed groups and the
+  // animated logo slot.
+  const renderTab = (t: TabDef) => {
+    const on = open === t.id
+    const isShape = SHAPE_TABS.includes(t.id)
+    return (
+      <div key={t.id} className="relative">
+        <button
+          title={t.label}
+          onClick={() => setOpen(on ? null : t.id)}
+          className={
+            'grid h-11 w-11 cursor-pointer place-items-center rounded-[13px] transition ' +
+            (on ? 'border border-transparent text-white shadow-[0_4px_14px_rgba(124,58,237,0.32)]' : 'text-[#6b7280] hover:bg-[#f3f4f8] hover:text-[#15161c]')
+          }
+          style={on ? { backgroundImage: ACCENT_GRAD } : undefined}
+        >
+          <t.Icon size={19} />
+        </button>
+        {/* shape pickers: dropdown anchored to the icon, Figma-style */}
+        {on && isShape && (
+          <div
+            className="absolute bottom-full left-1/2 z-50 mb-3 -translate-x-1/2 rounded-[18px] bg-white p-1.5 shadow-[0_20px_56px_rgba(17,24,39,0.22)]"
+            style={{ animation: 'popIn .18s cubic-bezier(.2,.9,.3,1.2)' }}
+          >
+            <PopBody tab={t.id} style={style} patch={patchStyle} baseStyle={baseStyle} type={type} />
+          </div>
+        )}
+      </div>
+    )
+  }
 
   return (
     <Card className="relative p-5 sm:p-6">
@@ -405,34 +495,18 @@ export function QrPanel({ svg, hasData, style, patchStyle }: { svg: string | nul
         {/* toolbar — floating icon pill */}
         <div className="relative mt-5 flex justify-center">
           <div className="relative z-50 inline-flex items-center gap-1.5 rounded-[18px] border border-[#eef0f5] bg-white p-1.5 shadow-[0_8px_24px_rgba(17,24,39,0.09)]">
-            {TABS.map((t) => {
-              const on = open === t.id
-              const isShape = SHAPE_TABS.includes(t.id)
-              return (
-                <div key={t.id} className="relative">
-                  <button
-                    title={t.label}
-                    onClick={() => setOpen(on ? null : t.id)}
-                    className={
-                      'grid h-11 w-11 cursor-pointer place-items-center rounded-[13px] transition ' +
-                      (on ? 'border border-transparent text-white shadow-[0_4px_14px_rgba(124,58,237,0.32)]' : 'text-[#6b7280] hover:bg-[#f3f4f8] hover:text-[#15161c]')
-                    }
-                    style={on ? { backgroundImage: ACCENT_GRAD } : undefined}
-                  >
-                    <t.Icon size={19} />
-                  </button>
-                  {/* shape pickers: dropdown anchored to the icon, Figma-style */}
-                  {on && isShape && (
-                    <div
-                      className="absolute bottom-full left-1/2 z-50 mb-3 -translate-x-1/2 rounded-[18px] bg-white p-1.5 shadow-[0_20px_56px_rgba(17,24,39,0.22)]"
-                      style={{ animation: 'popIn .18s cubic-bezier(.2,.9,.3,1.2)' }}
-                    >
-                      <PopBody tab={t.id} style={style} patch={patchStyle} />
-                    </div>
-                  )}
-                </div>
-              )
-            })}
+            {TABS_LEFT.map(renderTab)}
+            {/* logo slot — grows in / collapses out when an effective logo appears/disappears */}
+            {logoMounted && (
+              <div
+                className={'shrink-0 ' + (logoClip ? 'overflow-hidden' : '')}
+                onAnimationEnd={() => logoOn && setLogoClip(false)}
+                style={{ animation: `${logoOn ? 'logoTabIn' : 'logoTabOut'} .22s cubic-bezier(.2,.9,.3,1.2) both` }}
+              >
+                {renderTab(LOGO_TAB)}
+              </div>
+            )}
+            {TABS_RIGHT.map(renderTab)}
           </div>
 
           {/* settings popups (สี / กรอบ / ขั้นสูง) — centred above the toolbar */}
@@ -442,7 +516,7 @@ export function QrPanel({ svg, hasData, style, patchStyle }: { svg: string | nul
                 className="max-h-[64vh] w-max max-w-[356px] overflow-y-auto rounded-[22px] bg-white p-2.5 shadow-[0_20px_56px_rgba(17,24,39,0.22)]"
                 style={{ animation: 'popIn .18s cubic-bezier(.2,.9,.3,1.2)' }}
               >
-                <PopBody tab={open} style={style} patch={patchStyle} />
+                <PopBody tab={open} style={style} patch={patchStyle} baseStyle={baseStyle} type={type} />
               </div>
             </div>
           )}

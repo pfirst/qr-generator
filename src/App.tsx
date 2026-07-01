@@ -221,7 +221,7 @@ export default function App() {
 
           <div className="order-2 flex flex-col gap-5 lg:sticky lg:top-6 lg:gap-6 lg:self-start">
             <div className="relative z-20">
-              <QrPanel svg={svg} hasData={ready} style={renderStyle} patchStyle={patchStyle} />
+              <QrPanel svg={svg} hasData={ready} style={renderStyle} baseStyle={style} type={type} patchStyle={patchStyle} />
             </div>
             <CheckExport
               ready={ready}

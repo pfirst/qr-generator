@@ -185,6 +185,39 @@ export const FrameIcon = (p: IconProps) => (
     <rect x="8" y="15" width="8" height="3" rx="1" fill="currentColor" stroke="none" />
   </Svg>
 )
+// Logo-plate shape glyphs (พื้นหลังโลโก้ / รูปทรง pickers). A filled shape reads as a
+// solid backing plate of that shape; "none" is an outlined square with a slash. Filled
+// glyphs can't use the stroke-only Svg wrapper, so they're written out.
+export const PlateNoneIcon = ({ size = 20, className }: IconProps) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className={className}>
+    <rect x="4" y="4" width="16" height="16" rx="4" />
+    <path d="M6.5 17.5 17.5 6.5" />
+  </svg>
+)
+export const PlateSquareIcon = ({ size = 20, className }: IconProps) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" className={className}>
+    <rect x="4" y="4" width="16" height="16" rx="2" fill="currentColor" />
+  </svg>
+)
+export const PlateRoundedIcon = ({ size = 20, className }: IconProps) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" className={className}>
+    <rect x="4" y="4" width="16" height="16" rx="5" fill="currentColor" />
+  </svg>
+)
+export const PlateCircleIcon = ({ size = 20, className }: IconProps) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" className={className}>
+    <circle cx="12" cy="12" r="8" fill="currentColor" />
+  </svg>
+)
+// Center-logo tab (โลโก้): an "image in a frame" glyph — reads as a logo dropped
+// into the middle of the QR.
+export const LogoCenterIcon = (p: IconProps) => (
+  <Svg {...p}>
+    <rect x="3" y="3" width="18" height="18" rx="4" />
+    <circle cx="8.5" cy="9" r="1.6" />
+    <path d="M20 15l-4.5-4.5L7 19" />
+  </Svg>
+)
 // Marker-border (กรอบตา) and marker-center (จุดตา) keep the app's rounded
 // style. Only the cells icon (จุด) is lifted from Figma, per request.
 export const MarkerBorderIcon = (p: IconProps) => (

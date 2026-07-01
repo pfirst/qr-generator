@@ -132,6 +132,38 @@ body {
     transform: translateY(0);
   }
 }
+/* Logo toolbar tab — grow/collapse the pill slot when a logo appears/disappears.
+   44px = the w-11 toolbar button. The -6px margin-left cancels the pill's flex
+   gap-1.5 (6px) at full collapse so there's no reflow snap on mount/unmount;
+   `both` fill-mode holds the collapsed state through the delayed unmount. */
+@keyframes logoTabIn {
+  from {
+    width: 0;
+    margin-left: -6px;
+    opacity: 0;
+    transform: scale(0.6);
+  }
+  to {
+    width: 44px;
+    margin-left: 0;
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+@keyframes logoTabOut {
+  from {
+    width: 44px;
+    margin-left: 0;
+    opacity: 1;
+    transform: scale(1);
+  }
+  to {
+    width: 0;
+    margin-left: -6px;
+    opacity: 0;
+    transform: scale(0.6);
+  }
+}
 .rise {
   animation: rise 0.5s cubic-bezier(0.22, 0.9, 0.3, 1) both;
 }

@@ -1,4 +1,4 @@
-import type { ReactNode } from 'react'
+import type { ComponentType, ReactNode } from 'react'
 import type { BodyShape, EyeballShape, EyeFrameShape } from '../core/types'
 import { SHAPE_GLYPHS, type GlyphKind } from './shapeGlyphs'
 
@@ -115,6 +115,8 @@ export function TextArea({
 interface SegOption<T extends string> {
   id: T
   label: string
+  // When present, the button shows this icon only (label becomes the tooltip).
+  Icon?: ComponentType<{ size?: number }>
 }
 export function SegGroup<T extends string>({
   options,
@@ -133,15 +135,16 @@ export function SegGroup<T extends string>({
           <button
             key={o.id}
             onClick={() => onChange(o.id)}
+            title={o.Icon ? o.label : undefined}
             className={
-              'flex-1 cursor-pointer whitespace-nowrap rounded-[11px] px-1.5 py-2.5 text-center text-[13px] font-bold transition ' +
+              'flex flex-1 items-center justify-center whitespace-nowrap rounded-[11px] px-1.5 py-2.5 text-center text-[13px] font-bold transition ' +
               (on
                 ? 'border border-transparent text-white shadow-[0_4px_14px_rgba(124,58,237,0.32)]'
                 : 'border border-[#e6e7ee] bg-white text-[#6b7280] hover:border-[#c4b5fd] hover:text-[#111827]')
             }
             style={on ? { backgroundImage: ACCENT_GRAD } : undefined}
           >
-            {o.label}
+            {o.Icon ? <o.Icon size={20} /> : o.label}
           </button>
         )
       })}
