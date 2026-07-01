@@ -98,7 +98,7 @@ export interface StyleSettings {
   presetLogo: boolean // show the type's built-in preset logo (custom upload overrides it)
   presetPlate: 'brand' | 'halo' | 'none' // preset backing: brand-colour chip · white frame-follows-logo · none
   presetShape: 'square' | 'rounded' | 'circle' // chip shape when presetPlate === 'brand'
-  presetHalo: number // white-frame thickness (viewBox units) — grows outward on 'brand' & 'halo'; floor 6
+  presetHalo: number // white-frame thickness on 'brand' & 'halo' (6..24); only the frame grows, the logo stays a fixed size
   presetColor: string // category-glyph colour (email/sms/tel/wifi); social uses the fixed brand colour
   frameStyle: FrameStyle
   frameText: string
