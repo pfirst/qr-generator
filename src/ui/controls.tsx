@@ -122,25 +122,34 @@ export function SegGroup<T extends string>({
   options,
   value,
   onChange,
+  disabledIds,
 }: {
   options: readonly SegOption<T>[]
   value: T
   onChange: (v: T) => void
+  // Options rendered in a locked/disabled style (dimmed, not-clickable). The current
+  // `value` still shows as active even if listed here.
+  disabledIds?: readonly T[]
 }) {
   return (
     <div className="flex gap-2">
       {options.map((o) => {
         const on = o.id === value
+        const disabled = !on && !!disabledIds?.includes(o.id)
         return (
           <button
             key={o.id}
-            onClick={() => onChange(o.id)}
+            onClick={() => !disabled && onChange(o.id)}
+            disabled={disabled}
+            aria-disabled={disabled}
             title={o.Icon ? o.label : undefined}
             className={
               'flex flex-1 items-center justify-center whitespace-nowrap rounded-[11px] px-1.5 py-2.5 text-center text-[13px] font-bold transition ' +
               (on
                 ? 'border border-transparent text-white shadow-[0_4px_14px_rgba(124,58,237,0.32)]'
-                : 'border border-[#e6e7ee] bg-white text-[#6b7280] hover:border-[#c4b5fd] hover:text-[#111827]')
+                : disabled
+                  ? 'cursor-not-allowed border border-[#eef0f5] bg-[#f7f8fb] text-[#c7cbd6]'
+                  : 'border border-[#e6e7ee] bg-white text-[#6b7280] hover:border-[#c4b5fd] hover:text-[#111827]')
             }
             style={on ? { backgroundImage: ACCENT_GRAD } : undefined}
           >

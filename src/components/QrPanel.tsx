@@ -140,6 +140,7 @@ function FontPicker({ value, onChange }: { value: string; onChange: (id: string)
         createPortal(
           <div
             ref={panelRef}
+            data-qr-float
             style={panelStyle}
             className="z-[60] flex flex-col gap-1 overflow-y-auto rounded-[12px] border border-[#eef0f5] bg-white p-1.5 shadow-[0_16px_44px_rgba(17,24,39,0.20)]"
           >
@@ -279,9 +280,9 @@ function PopBody({
 
   if (tab === 'cta') {
     return (
-      <div className="w-[330px]">
+      <div className="w-[286px] sm:w-[330px]">
         <SectionLabel>กรอบ</SectionLabel>
-        <div className="grid grid-cols-5 gap-1.5">
+        <div className="grid grid-cols-4 gap-1.5 sm:grid-cols-5">
           {FRAME_CHOICES.map(({ id, label }) => {
             const on = style.frameStyle === id
             return (
@@ -344,7 +345,12 @@ function PopBody({
             <ResetIcon size={14} />
           </button>
         </div>
-        <SegGroup options={ECC_LEVELS} value={hasLogo ? 'H' : style.ecc} onChange={(v) => !hasLogo && patch({ ecc: v })} />
+        <SegGroup
+          options={ECC_LEVELS}
+          value={hasLogo ? 'H' : style.ecc}
+          onChange={(v) => !hasLogo && patch({ ecc: v })}
+          disabledIds={hasLogo ? (['L', 'M', 'Q'] as const) : undefined}
+        />
         {hasLogo && <div className="mt-2 text-[11.5px] text-[#9ca3af]">ล็อกที่ระดับ H เพราะมีโลโก้</div>}
       </div>
       <div>
@@ -381,6 +387,32 @@ export function QrPanel({
   patchStyle: (p: Partial<StyleSettings>) => void
 }) {
   const [open, setOpen] = useState<TabId | null>(null)
+  const barRef = useRef<HTMLDivElement>(null)
+
+  // Close any open popup/dropdown when the user clicks outside the toolbar (or presses Escape).
+  // A fixed full-screen backdrop can't be used here: the surrounding Card has `backdrop-blur`
+  // (a backdrop-filter), which makes `position:fixed` descendants resolve against the Card's box
+  // instead of the viewport — so a backdrop only covers the card and misses clicks elsewhere
+  // (the "closes only in some areas" bug). A document listener keyed off a ref sidesteps all
+  // stacking/containing-block issues.
+  useEffect(() => {
+    if (!open) return
+    const onDown = (e: MouseEvent) => {
+      const t = e.target as Element | null
+      if (barRef.current?.contains(t as Node | null)) return
+      // Floating panels rendered in a portal (e.g. the CTA font list) live outside the bar —
+      // clicking them must not close the popup that owns them.
+      if (t?.closest?.('[data-qr-float]')) return
+      setOpen(null)
+    }
+    const onKey = (e: KeyboardEvent) => e.key === 'Escape' && setOpen(null)
+    document.addEventListener('mousedown', onDown)
+    document.addEventListener('keydown', onKey)
+    return () => {
+      document.removeEventListener('mousedown', onDown)
+      document.removeEventListener('keydown', onKey)
+    }
+  }, [open])
 
   // The logo tab shows only when an effective logo is present. `style` is renderStyle, so
   // `style.logo` === effLogo (custom upload OR a toggled-on preset).
@@ -493,7 +525,7 @@ export function QrPanel({
         </div>
 
         {/* toolbar — floating icon pill */}
-        <div className="relative mt-5 flex justify-center">
+        <div ref={barRef} className="relative mt-5 flex justify-center">
           <div className="relative z-50 inline-flex items-center gap-1.5 rounded-[18px] border border-[#eef0f5] bg-white p-1.5 shadow-[0_8px_24px_rgba(17,24,39,0.09)]">
             {TABS_LEFT.map(renderTab)}
             {/* logo slot — grows in / collapses out when an effective logo appears/disappears */}
@@ -520,8 +552,6 @@ export function QrPanel({
               </div>
             </div>
           )}
-
-          {open && <div className="fixed inset-0 z-40" onClick={() => setOpen(null)} />}
         </div>
       </Card>
   )
