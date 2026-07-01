@@ -132,6 +132,29 @@ body {
     transform: translateY(0);
   }
 }
+/* Reveal that slides DOWN into place + fades — used when the CTA-frame text/font
+   controls mount after picking a frame. Starts a touch above its resting spot. */
+@keyframes slideDownFade {
+  from {
+    opacity: 0;
+    transform: translateY(-10px) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+/* Exit counterpart — slides UP + fades out when the frame is cleared to 'none'. */
+@keyframes slideUpFadeOut {
+  from {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(-10px) scale(0.97);
+  }
+}
 /* Logo toolbar tab — grow/collapse the pill slot when a logo appears/disappears.
    44px = the w-11 toolbar button. The -6px margin-left cancels the pill's flex
    gap-1.5 (6px) at full collapse so there's no reflow snap on mount/unmount;

@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type ComponentType, type CSSProperties } from 'react'
+import { useEffect, useRef, useState, type ComponentType, type CSSProperties, type ReactNode } from 'react'
 import { createPortal } from 'react-dom'
 import { BODY_SHAPES, BG_PRESETS, ECC_LEVELS, EYE_FRAMES, EYEBALLS, FG_PRESETS } from '../constants'
 import { defaultStyle, type GradientType, type FrameStyle, type QRType, type StyleSettings } from '../core/types'
@@ -188,6 +188,48 @@ function Swatches({ colors, value, onChange }: { colors: readonly string[]; valu
   )
 }
 
+// The CTA text/colour/font controls that appear once a frame is picked. They slide-down +
+// fade IN on every frame pick — including switching frame→frame — by keying the wrapper on
+// frameStyle so it remounts and replays. When the frame is cleared to 'none' they slide-up +
+// fade OUT, staying mounted through the exit animation (then unmount on animationend).
+function CtaControls({ frameStyle, children }: { frameStyle: FrameStyle; children: ReactNode }) {
+  const show = frameStyle !== 'none'
+  const [mounted, setMounted] = useState(show)
+  const [phase, setPhase] = useState<'in' | 'out'>('in')
+  const lastFrame = useRef(frameStyle) // remember the frame so exit keeps its content/key
+
+  useEffect(() => {
+    if (show) {
+      lastFrame.current = frameStyle
+      setMounted(true)
+      setPhase('in')
+    } else if (mounted) {
+      setPhase('out')
+    }
+  }, [show, frameStyle, mounted])
+
+  if (!mounted) return null
+  // Enter: key by the live frame (remount → replay on each change). Exit: keep the last frame's
+  // key so the fading-out content doesn't swap mid-animation.
+  const animKey = phase === 'out' ? lastFrame.current : frameStyle
+  return (
+    <div
+      key={animKey}
+      onAnimationEnd={(e) => {
+        if (e.target === e.currentTarget && phase === 'out') setMounted(false)
+      }}
+      style={{
+        animation:
+          phase === 'out'
+            ? 'slideUpFadeOut .15s cubic-bezier(.4,0,.9,.4) both' // exit is snappier than the enter
+            : 'slideDownFade .26s cubic-bezier(.2,.9,.3,1.2) both',
+      }}
+    >
+      {children}
+    </div>
+  )
+}
+
 function PopBody({
   tab,
   style,
@@ -305,23 +347,21 @@ function PopBody({
             )
           })}
         </div>
-        {style.frameStyle !== 'none' && (
-          <>
-            <div className="mt-3.5 flex items-center gap-3">
-              <input
-                value={style.frameText}
-                onChange={(e) => patch({ frameText: e.target.value })}
-                placeholder="SCAN ME"
-                className="flex-1 rounded-[11px] border border-[#e6e7ee] bg-white px-3 py-2.5 text-[14px] font-bold text-[#111827] outline-none focus:border-[#7c3aed]"
-              />
-              <input type="color" value={style.frameColor} onChange={(e) => patch({ frameColor: e.target.value })} className="h-[42px] w-11 cursor-pointer rounded-[10px] border border-[#e6e7ee] bg-white p-1" />
-            </div>
-            <div className="mt-3.5">
-              <SectionLabel>ฟอนต์ป้าย</SectionLabel>
-              <FontPicker value={style.frameFont} onChange={(id) => patch({ frameFont: id })} />
-            </div>
-          </>
-        )}
+        <CtaControls frameStyle={style.frameStyle}>
+          <div className="mt-3.5 flex items-center gap-3">
+            <input
+              value={style.frameText}
+              onChange={(e) => patch({ frameText: e.target.value })}
+              placeholder="SCAN ME"
+              className="flex-1 rounded-[11px] border border-[#e6e7ee] bg-white px-3 py-2.5 text-[14px] font-bold text-[#111827] outline-none focus:border-[#7c3aed]"
+            />
+            <input type="color" value={style.frameColor} onChange={(e) => patch({ frameColor: e.target.value })} className="h-[42px] w-11 cursor-pointer rounded-[10px] border border-[#e6e7ee] bg-white p-1" />
+          </div>
+          <div className="mt-3.5">
+            <SectionLabel>ฟอนต์ป้าย</SectionLabel>
+            <FontPicker value={style.frameFont} onChange={(id) => patch({ frameFont: id })} />
+          </div>
+        </CtaControls>
       </div>
     )
   }

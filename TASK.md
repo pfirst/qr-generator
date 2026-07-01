@@ -16,6 +16,7 @@ _(none)_
 
 ## ✅ Done
 
+- [x] 2026-07-01 — CTA-frame text/font controls (`frameText` + colour + `FontPicker`) now animate on **every** frame change: **slide-down+fade IN** (`slideDownFade` .26s, replays on each pick — new `CtaControls` wrapper keyed by `frameStyle` so it remounts) and a snappier **slide-up+fade OUT** (`slideUpFadeOut` .15s) when cleared to 'none' (stays mounted through exit, unmounts on `onAnimationEnd`). Verified in-browser: replay (element remounts, anim currentTime resets) + enter .26s / exit .15s. `index.css`, `components/QrPanel.tsx`.
 - [x] 2026-07-01 — Frame picker popover now uses **4 columns on mobile** (`grid-cols-4 sm:grid-cols-5`) with a fluid width (`w-[286px] sm:w-[330px]`) so it no longer overflows on narrow screens; desktop unchanged (5-col). Verified @500px viewport: 4 cols, container 286px, no horizontal overflow, 15 choices. `components/QrPanel.tsx`.
 - [x] 2026-07-01 — Block search engines: `<meta name="robots" content="noindex, nofollow">` in `index.html` + new `public/robots.txt` (Disallow all). Verified served + in `dist/` build. `index.html`, `public/robots.txt`.
 - [x] 2026-07-01 — ECC SegGroup shows a **disabled style** (dimmed + `cursor-not-allowed`, non-clickable) for L/M/Q when a logo locks ECC at H; H stays active. New optional `disabledIds` prop on `SegGroup`. `ui/controls.tsx`, `components/QrPanel.tsx`.
