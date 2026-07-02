@@ -4,16 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Task board — `TASK.md` (read first, keep updated)
 
-`TASK.md` at the repo root is the cross-session / cross-agent **work-item board**. **Read it first** when picking up the project to see what is in progress, queued, blocked, or recently done. It tracks the *status of work items*, **not** a function inventory — the code + git history stay truth for "does X exist". Content is English; group by status (`🔵 In Progress` / `📋 To Do` / `⛔ Blocked` / `✅ Done`).
-
-**Entry format — one short line per item.** Just *what was done* + the main file(s) touched, e.g. `- [x] 2026-06-30 — Export-size labels (S/M/L/XL). \`constants.ts\`, \`components/CheckExport.tsx\`.` Keep it grounded by citing the real file(s)/function(s), but do **not** write a paragraph — leave out root-cause analysis, how-it-was-verified, regex/code detail, and step-by-step rationale (that's what the diff/git history is for). One clause for the *what*, then the file list.
-
-Update it at exactly **two** moments:
-
-1. **After a plan is approved / before starting work** — add the item under `🔵 In Progress` (or `📋 To Do` if deferred). Log *every* task that touches code, including small ones.
-2. **After the work finishes or stalls** — before ending the turn, move the item to `✅ Done` (prefix the line with `YYYY-MM-DD`) or `⛔ Blocked` (note the reason + what's needed).
-
-Do **not** auto-commit `TASK.md` — edit the file only; it rides along with normal commits (the "commit only when the user asks" rule still applies). When `✅ Done` grows long, move older entries to `TASK-archive.md`.
+`TASK.md` at the repo root is the cross-session / cross-agent **work-item board** — read it first when picking up the project. **Exactly one short line per entry**: *what was done* + the main file(s) touched — no verification detail, root-cause, measured values, or code detail (the diff/git history carries that). Add the item under `🔵 In Progress` when work starts; move it to `✅ Done` (prefixed `YYYY-MM-DD`) or `⛔ Blocked` before ending the turn. Do **not** auto-commit it — it rides along with normal commits. Full rules live in the user-level (global) CLAUDE.md.
 
 ## Commands
 
