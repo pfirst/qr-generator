@@ -236,32 +236,3 @@ input::placeholder,
 textarea::placeholder {
   color: var(--color-ink-3);
 }
-
-/* ── Glass specular light (mouse-following) ─────────────────────────────
-   Elements with .glass-lit (baked into the GLASS_* recipes) get a soft white
-   highlight that tracks the cursor; ui/glassLight.ts feeds --mx / --my. The
-   ::before sits under the content so labels stay readable. */
-.glass-lit {
-  --mx: 50%;
-  --my: 50%;
-}
-.glass-lit::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  border-radius: inherit;
-  /* wide, soft spotlight — sized to match motion.page's viewport-wide glow proportionally
-     (their ~1600px radius on a 1470px viewport ≈ 400px on our ~330px popovers) */
-  background: radial-gradient(400px circle at var(--mx) var(--my), rgba(255, 255, 255, 0.55), transparent 75%);
-  opacity: 0;
-  transition: opacity 0.3s ease;
-  pointer-events: none;
-}
-.glass-lit:hover::before {
-  opacity: 1;
-}
-@media (prefers-reduced-motion: reduce) {
-  .glass-lit::before {
-    display: none;
-  }
-}

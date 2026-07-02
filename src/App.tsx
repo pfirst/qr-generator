@@ -8,7 +8,6 @@ import { defaultFieldData, defaultStyle, type Ecc, type FieldData, type QRType }
 import { defaultPresetOn, presetLogoSize, resolveLogo } from './core/logoPreset'
 import { fieldErrors } from './core/validate'
 import { clearRecent, loadRecent, pushRecent, type RecentItem } from './recent'
-import { initGlassLight } from './ui/glassLight'
 import { Header } from './components/Header'
 import { DataCard } from './components/DataCard'
 import { QrPanel } from './components/QrPanel'
@@ -16,9 +15,6 @@ import { CheckExport } from './components/CheckExport'
 import { Toast } from './components/Toast'
 
 export default function App() {
-  // mouse-following specular light on glass surfaces (buttons + popovers)
-  useEffect(() => initGlassLight(), [])
-
   const [type, setType] = useState<QRType>('url')
   const [data, setData] = useState<FieldData>(defaultFieldData)
   const [style, setStyle] = useState(defaultStyle)

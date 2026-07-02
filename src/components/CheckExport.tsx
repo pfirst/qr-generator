@@ -133,7 +133,7 @@ export function CheckExport({
         <button
           onClick={() => onDownload(fmt)}
           disabled={!ready}
-          className="glass-lit relative flex w-full items-center justify-center gap-2 rounded-[14px] py-3.5 text-[14.5px] font-extrabold text-white transition disabled:cursor-not-allowed disabled:opacity-50"
+          className="flex w-full items-center justify-center gap-2 rounded-[14px] py-3.5 text-[14.5px] font-extrabold text-white transition disabled:cursor-not-allowed disabled:opacity-50"
           style={{ backgroundImage: 'var(--grad-brand)', boxShadow: 'var(--shadow-accent), inset 0 1px 0 rgba(255,255,255,0.38)' }}
         >
           <DownloadIcon size={17} />

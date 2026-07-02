@@ -438,7 +438,7 @@ export function QrPanel({
   // Mouse parallax on the preview stage: the halftone clouds drift against the cursor
   // and the QR card leans with it (different magnitudes = depth). Feeds --px/--py
   // (-1..1) as CSS vars; the layers consume them via calc() transforms. Timestamp
-  // throttle, not rAF — rAF pauses in occluded tabs (see ui/glassLight.ts).
+  // throttle, not rAF — rAF pauses in occluded tabs.
   const stageRef = useRef<HTMLDivElement>(null)
   const stageT = useRef(0)
   const onStageMove = (e: { clientX: number; clientY: number }) => {
@@ -516,8 +516,8 @@ export function QrPanel({
           title={t.label}
           onClick={() => setOpen(on ? null : t.id)}
           className={
-            'relative grid h-11 w-11 cursor-pointer place-items-center rounded-[13px] transition ' +
-            (on ? `glass-lit border border-transparent text-white ${GLASS_ACTIVE_SHADOW}` : 'text-[#6b7280] hover:bg-[#f3f4f8] hover:text-[#15161c]')
+            'grid h-11 w-11 cursor-pointer place-items-center rounded-[13px] transition ' +
+            (on ? `border border-transparent text-white ${GLASS_ACTIVE_SHADOW}` : 'text-[#6b7280] hover:bg-[#f3f4f8] hover:text-[#15161c]')
           }
           style={on ? ACCENT_GRAD_SMALL : undefined}
         >
@@ -619,7 +619,7 @@ export function QrPanel({
           {open && !SHAPE_TABS.includes(open) && (
             <div className="absolute bottom-full left-0 right-0 z-50 mb-3 flex justify-center">
               <div
-                className={`relative max-h-[64vh] w-max max-w-[356px] overflow-y-auto rounded-[22px] ${GLASS_POPOVER} p-2.5 shadow-[0_20px_56px_rgba(17,24,39,0.22)]`}
+                className={`max-h-[64vh] w-max max-w-[356px] overflow-y-auto rounded-[22px] ${GLASS_POPOVER} p-2.5 shadow-[0_20px_56px_rgba(17,24,39,0.22)]`}
                 style={{ animation: 'popIn .18s cubic-bezier(.2,.9,.3,1.2)' }}
               >
                 <PopBody tab={open} style={style} patch={patchStyle} baseStyle={baseStyle} type={type} />
