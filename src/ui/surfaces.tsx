@@ -1,10 +1,13 @@
 import type { CSSProperties, ReactNode } from 'react'
 
 // Glass card — translucent white, hairline border, soft layered shadow.
+// No backdrop-blur on purpose: the page background behind the cards is an already-smooth
+// pastel gradient, so blurring it is visually a no-op — but it cost a huge GPU re-filter
+// (~350k CSS px² × DPR² per card) on every scroll frame and was the top scroll-jank source.
 export function Card({ children, className = '', style }: { children: ReactNode; className?: string; style?: CSSProperties }) {
   return (
     <div
-      className={'rounded-[24px] border border-[#eef0f5] bg-white/75 backdrop-blur-xl ' + className}
+      className={'rounded-[24px] border border-[#eef0f5] bg-white/75 ' + className}
       style={{ boxShadow: 'var(--shadow-card)', ...style }}
     >
       {children}

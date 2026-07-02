@@ -560,6 +560,7 @@ export function QrPanel({
               maskImage: 'radial-gradient(36% 64% at 18% 50%,#000 5%,transparent 74%)',
               WebkitMaskImage: 'radial-gradient(36% 64% at 18% 50%,#000 5%,transparent 74%)',
               transform: 'translate3d(calc(var(--px,0)*-10px),calc(var(--py,0)*-7px),0)',
+              willChange: 'transform',
             }}
           />
           {/* blue halftone cloud — right (deeper layer: larger counter-drift) */}
@@ -571,12 +572,13 @@ export function QrPanel({
               maskImage: 'radial-gradient(36% 66% at 82% 52%,#000 5%,transparent 74%)',
               WebkitMaskImage: 'radial-gradient(36% 66% at 82% 52%,#000 5%,transparent 74%)',
               transform: 'translate3d(calc(var(--px,0)*-15px),calc(var(--py,0)*-10px),0)',
+              willChange: 'transform',
             }}
           />
           {hasData && svg ? (
             <div
               className="relative rounded-[26px] border border-[#eef1f8] bg-white p-4 transition-transform duration-300 ease-out"
-              style={{ boxShadow: 'var(--shadow-qr)', transform: 'translate3d(calc(var(--px,0)*5px),calc(var(--py,0)*4px),0)' }}
+              style={{ boxShadow: 'var(--shadow-qr)', transform: 'translate3d(calc(var(--px,0)*5px),calc(var(--py,0)*4px),0)', willChange: 'transform' }}
             >
               <div
                 key={svg.length}

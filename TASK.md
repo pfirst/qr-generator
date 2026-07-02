@@ -16,6 +16,7 @@ _(none)_
 
 ## ✅ Done
 
+- [x] 2026-07-02 — Scroll/animation perf: drop visually-no-op backdrop-blur from buttons + cards (31→0 backdrop roots; popover frost kept), `will-change: transform` on parallax layers. `ui/{controls,surfaces}.tsx`, `components/QrPanel.tsx`.
 - [x] 2026-07-02 — Deploy to GitHub Pages via Actions instead of legacy Jekyll (build Vite → publish `dist/`); `base: '/qr-generator/'`. `.github/workflows/deploy.yml`, `vite.config.ts`.
 - [x] 2026-07-02 — Removed the mouse-following specular glow (deleted `ui/glassLight.ts` + `.glass-lit`); parallax kept. `index.css`, `ui/controls.tsx`, `components/{QrPanel,CheckExport}.tsx`, `App.tsx`.
 - [x] 2026-07-02 — Small brand-gradient actives sample `ACCENT_GRAD`'s middle band via new `ACCENT_GRAD_SMALL` (fixes the colour "cut" strip at tiny buttons' edges). `ui/controls.tsx`, `components/{QrPanel,HistoryPopover}.tsx`.

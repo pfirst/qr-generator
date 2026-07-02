@@ -24,11 +24,14 @@ export const GLASS_POPOVER = 'bg-white/60 backdrop-blur-[20px] backdrop-saturate
 // to blur, so the glass reads through styling instead: a translucent vertical-gradient fill,
 // an inset top highlight (the glass edge catching light — the key cue), a translucent border,
 // and a soft lift shadow. Single source of truth like GLASS_POPOVER.
+// NOTE: no backdrop-blur here on purpose — buttons sit on opaque white cards, so a blur has
+// no visible effect but forces the GPU to re-filter every scroll frame (was ~27 backdrop
+// roots = the main scroll-jank source). Real frost lives only on GLASS_POPOVER.
 export const GLASS_BTN =
-  'border border-white/70 bg-gradient-to-b from-white/85 to-[#eef0f8]/60 shadow-[0_2px_8px_rgba(17,24,39,0.07),inset_0_1px_0_rgba(255,255,255,0.95)] backdrop-blur-[8px]'
+  'border border-white/70 bg-gradient-to-b from-white/85 to-[#eef0f8]/60 shadow-[0_2px_8px_rgba(17,24,39,0.07),inset_0_1px_0_rgba(255,255,255,0.95)]'
 // selected state for light-purple (tinted) actives — same recipe, purple glass
 export const GLASS_BTN_ON =
-  'border border-[#7c3aed]/60 bg-gradient-to-b from-[#ede9fe]/85 to-[#e2d9fd]/60 shadow-[0_2px_10px_rgba(124,58,237,0.16),inset_0_1px_0_rgba(255,255,255,0.85)] backdrop-blur-[8px]'
+  'border border-[#7c3aed]/60 bg-gradient-to-b from-[#ede9fe]/85 to-[#e2d9fd]/60 shadow-[0_2px_10px_rgba(124,58,237,0.16),inset_0_1px_0_rgba(255,255,255,0.85)]'
 // brand-gradient actives keep ACCENT_GRAD; this shadow adds the inset top highlight so the
 // solid purple reads as tinted glass instead of flat plastic
 export const GLASS_ACTIVE_SHADOW = 'shadow-[0_4px_14px_rgba(124,58,237,0.32),inset_0_1px_0_rgba(255,255,255,0.38)]'
