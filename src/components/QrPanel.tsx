@@ -6,7 +6,7 @@ import { composeFramedSvg, FRAME_TEMPLATES, frameThumb } from '../core/frames'
 import { CTA_FONTS, loadPreviewFonts } from '../core/fonts'
 import { FRAME_GLYPHS } from '../ui/shapeGlyphs'
 import { Card, SectionHead } from '../ui/surfaces'
-import { ACCENT_GRAD, ColorRow, GLASS_POPOVER, SectionLabel, SegGroup, ShapeMenu, Toggle } from '../ui/controls'
+import { ACCENT_GRAD, ColorRow, GLASS_ACTIVE_SHADOW, GLASS_BTN, GLASS_BTN_ON, GLASS_POPOVER, SectionLabel, SegGroup, ShapeMenu, Toggle } from '../ui/controls'
 import { LogoSettingsBody } from './LogoSettings'
 import {
   CellsIcon,
@@ -118,7 +118,7 @@ function FontPicker({ value, onChange }: { value: string; onChange: (id: string)
         type="button"
         onClick={toggle}
         style={{ fontFamily: cur.family, fontWeight: cur.weight }}
-        className="flex w-full cursor-pointer items-center justify-between rounded-[11px] border border-[#e6e7ee] bg-white px-3 py-2.5 text-left text-[15px] text-[#111827] outline-none transition hover:border-[#c4b5fd]"
+        className={`flex w-full cursor-pointer items-center justify-between rounded-[11px] ${GLASS_BTN} px-3 py-2.5 text-left text-[15px] text-[#111827] outline-none transition hover:border-[#c4b5fd]`}
       >
         <span className="truncate">{cur.label}</span>
         <svg
@@ -156,8 +156,8 @@ function FontPicker({ value, onChange }: { value: string; onChange: (id: string)
                   }}
                   style={{ fontFamily: f.family, fontWeight: f.weight }}
                   className={
-                    'flex shrink-0 items-center justify-between rounded-[10px] border px-3 py-2 text-left text-[15px] transition ' +
-                    (on ? 'border-[#7c3aed] bg-[#ede9fe] text-[#7c3aed]' : 'border-transparent text-[#374151] hover:bg-[#f3f4f8]')
+                    'flex shrink-0 items-center justify-between rounded-[10px] px-3 py-2 text-left text-[15px] transition ' +
+                    (on ? `${GLASS_BTN_ON} text-[#7c3aed]` : 'border border-transparent text-[#374151] hover:bg-white/60')
                   }
                 >
                   {f.label}
@@ -333,8 +333,8 @@ function PopBody({
                 onClick={() => patch({ frameStyle: id })}
                 title={label}
                 className={
-                  'flex cursor-pointer flex-col items-center gap-1 rounded-[11px] border py-2 text-[10px] font-bold transition ' +
-                  (on ? 'border-[#7c3aed] bg-[#ede9fe] text-[#7c3aed]' : 'border-[#e6e7ee] bg-white text-[#9ca3af] hover:border-[#c4b5fd]')
+                  'flex cursor-pointer flex-col items-center gap-1 rounded-[11px] py-2 text-[10px] font-bold transition ' +
+                  (on ? `${GLASS_BTN_ON} text-[#7c3aed]` : `${GLASS_BTN} text-[#9ca3af] hover:border-[#c4b5fd]`)
                 }
               >
                 {id === 'none' ? (
@@ -490,8 +490,8 @@ export function QrPanel({
           title={t.label}
           onClick={() => setOpen(on ? null : t.id)}
           className={
-            'grid h-11 w-11 cursor-pointer place-items-center rounded-[13px] transition ' +
-            (on ? 'border border-transparent text-white shadow-[0_4px_14px_rgba(124,58,237,0.32)]' : 'text-[#6b7280] hover:bg-[#f3f4f8] hover:text-[#15161c]')
+            'relative grid h-11 w-11 cursor-pointer place-items-center rounded-[13px] transition ' +
+            (on ? `glass-lit border border-transparent text-white ${GLASS_ACTIVE_SHADOW}` : 'text-[#6b7280] hover:bg-[#f3f4f8] hover:text-[#15161c]')
           }
           style={on ? { backgroundImage: ACCENT_GRAD } : undefined}
         >
@@ -585,7 +585,7 @@ export function QrPanel({
           {open && !SHAPE_TABS.includes(open) && (
             <div className="absolute bottom-full left-0 right-0 z-50 mb-3 flex justify-center">
               <div
-                className={`max-h-[64vh] w-max max-w-[356px] overflow-y-auto rounded-[22px] ${GLASS_POPOVER} p-2.5 shadow-[0_20px_56px_rgba(17,24,39,0.22)]`}
+                className={`relative max-h-[64vh] w-max max-w-[356px] overflow-y-auto rounded-[22px] ${GLASS_POPOVER} p-2.5 shadow-[0_20px_56px_rgba(17,24,39,0.22)]`}
                 style={{ animation: 'popIn .18s cubic-bezier(.2,.9,.3,1.2)' }}
               >
                 <PopBody tab={open} style={style} patch={patchStyle} baseStyle={baseStyle} type={type} />

@@ -6,7 +6,7 @@ import { presetLogoSize, resolveLogo } from '../core/logoPreset'
 import { defaultStyle } from '../core/types'
 import type { RecentItem } from '../recent'
 import { HistoryIcon, TrashIcon } from '../ui/icons'
-import { GLASS_POPOVER } from '../ui/controls'
+import { GLASS_BTN, GLASS_BTN_ON, GLASS_POPOVER } from '../ui/controls'
 
 async function thumbSvg(item: RecentItem): Promise<string | null> {
   try {
@@ -83,8 +83,8 @@ export function HistoryPopover({ recent, onLoad, onClear }: { recent: RecentItem
         aria-haspopup="true"
         aria-expanded={open}
         className={
-          'inline-flex items-center gap-2 rounded-full border px-3 py-2 backdrop-blur transition ' +
-          (open ? 'border-[#7c3aed] bg-[#ede9fe]' : 'border-[#e6e7ee] bg-white/70 hover:border-[#c4b5fd]')
+          'inline-flex items-center gap-2 rounded-full px-3 py-2 transition ' +
+          (open ? GLASS_BTN_ON : `${GLASS_BTN} hover:border-[#c4b5fd]`)
         }
       >
         <span className="text-[#7c3aed]">
@@ -111,7 +111,7 @@ export function HistoryPopover({ recent, onLoad, onClear }: { recent: RecentItem
               <span className="text-[14px] font-extrabold tracking-[-0.01em] text-[#111827]">ประวัติ</span>
             </div>
             {recent.length > 0 && (
-              <button onClick={onClear} title="ล้างประวัติ" className="grid h-[30px] w-[30px] place-items-center rounded-[9px] text-[#9ca3af] transition hover:bg-[#fdecec] hover:text-[#ef4444]">
+              <button onClick={onClear} title="ล้างประวัติ" className="grid h-[30px] w-[30px] place-items-center rounded-[9px] text-[#9ca3af] transition hover:bg-[#fdecec]/80 hover:text-[#ef4444]">
                 <TrashIcon size={17} />
               </button>
             )}
@@ -130,7 +130,7 @@ export function HistoryPopover({ recent, onLoad, onClear }: { recent: RecentItem
                     onLoad(r)
                     setOpen(false)
                   }}
-                  className="flex w-full items-center gap-3 rounded-[14px] border border-transparent p-2 text-left transition hover:border-[#eef0f5] hover:bg-[#f7f7fb]"
+                  className="flex w-full items-center gap-3 rounded-[14px] border border-transparent p-2 text-left transition hover:border-white/70 hover:bg-white/60"
                 >
                   <div className="h-[46px] w-[46px] shrink-0 overflow-hidden rounded-[11px] border border-[#f0f1f6] bg-white p-[5px] leading-[0]">
                     {thumbs[i] ? (

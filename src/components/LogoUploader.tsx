@@ -87,7 +87,7 @@ export function LogoUploader({
           </div>
           <button
             onClick={onRemoveLogo}
-            className="flex items-center gap-1.5 rounded-[11px] border border-[#fbd5d5] bg-[#fef2f2] px-3 py-2 text-[12.5px] font-bold text-[#ef4444] transition hover:bg-[#fee2e2]"
+            className="flex items-center gap-1.5 rounded-[11px] border border-[#fbd5d5]/80 bg-gradient-to-b from-[#fef2f2]/90 to-[#fde4e4]/60 px-3 py-2 text-[12.5px] font-bold text-[#ef4444] shadow-[0_2px_8px_rgba(239,68,68,0.10),inset_0_1px_0_rgba(255,255,255,0.9)] transition hover:border-[#ef4444]/50"
           >
             <TrashIcon size={14} />
             ลบ

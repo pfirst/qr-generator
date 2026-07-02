@@ -4,6 +4,7 @@ import type { ExportFormat } from '../core/export'
 import type { ScanLevel } from '../core/verify'
 import { Card, SectionHead } from '../ui/surfaces'
 import { CheckIcon, CopyIcon, DownloadIcon, PrintIcon, ScanIcon, WarnIcon } from '../ui/icons'
+import { GLASS_BTN, GLASS_BTN_ON } from '../ui/controls'
 
 type Tone = ScanLevel | 'pending' | 'idle'
 const TONE: Record<Tone, { c: string; bg: string }> = {
@@ -97,8 +98,8 @@ export function CheckExport({
                 key={px}
                 onClick={() => setExportSize(px)}
                 className={
-                  'cursor-pointer rounded-[11px] border py-2 transition ' +
-                  (on ? 'border-[#7c3aed] bg-[#ede9fe]' : 'border-[#e6e7ee] bg-white hover:border-[#c4b5fd]')
+                  'cursor-pointer rounded-[11px] py-2 transition ' +
+                  (on ? GLASS_BTN_ON : `${GLASS_BTN} hover:border-[#c4b5fd]`)
                 }
               >
                 <span className={'block text-[13px] font-extrabold leading-tight ' + (on ? 'text-[#7c3aed]' : 'text-[#374151]')}>{label}</span>
@@ -119,8 +120,8 @@ export function CheckExport({
                 key={f.id}
                 onClick={() => setFmt(f.id)}
                 className={
-                  'cursor-pointer rounded-[11px] border py-2.5 text-[12.5px] font-bold transition ' +
-                  (on ? 'border-[#7c3aed] bg-[#ede9fe] text-[#7c3aed]' : 'border-[#e6e7ee] bg-white text-[#6b7280] hover:border-[#c4b5fd]')
+                  'cursor-pointer rounded-[11px] py-2.5 text-[12.5px] font-bold transition ' +
+                  (on ? `${GLASS_BTN_ON} text-[#7c3aed]` : `${GLASS_BTN} text-[#6b7280] hover:border-[#c4b5fd]`)
                 }
               >
                 {f.label}
@@ -132,8 +133,8 @@ export function CheckExport({
         <button
           onClick={() => onDownload(fmt)}
           disabled={!ready}
-          className="flex w-full items-center justify-center gap-2 rounded-[14px] py-3.5 text-[14.5px] font-extrabold text-white transition disabled:cursor-not-allowed disabled:opacity-50"
-          style={{ backgroundImage: 'var(--grad-brand)', boxShadow: 'var(--shadow-accent)' }}
+          className="glass-lit relative flex w-full items-center justify-center gap-2 rounded-[14px] py-3.5 text-[14.5px] font-extrabold text-white transition disabled:cursor-not-allowed disabled:opacity-50"
+          style={{ backgroundImage: 'var(--grad-brand)', boxShadow: 'var(--shadow-accent), inset 0 1px 0 rgba(255,255,255,0.38)' }}
         >
           <DownloadIcon size={17} />
           ดาวน์โหลด {fmt.toUpperCase()}
@@ -142,7 +143,7 @@ export function CheckExport({
           <button
             onClick={onCopy}
             disabled={!ready}
-            className="flex items-center justify-center gap-1.5 rounded-[13px] border border-[#e6e7ee] bg-white px-3 py-3 text-[13.5px] font-bold text-[#374151] transition enabled:hover:border-[#c4b5fd] enabled:hover:text-[#7c3aed] disabled:opacity-50"
+            className={`flex items-center justify-center gap-1.5 rounded-[13px] ${GLASS_BTN} px-3 py-3 text-[13.5px] font-bold text-[#374151] transition enabled:hover:border-[#c4b5fd] enabled:hover:text-[#7c3aed] disabled:opacity-50`}
           >
             <CopyIcon size={15} />
             คัดลอกไปคลิปบอร์ด
@@ -150,7 +151,7 @@ export function CheckExport({
           <button
             onClick={onPrint}
             disabled={!ready}
-            className="flex items-center justify-center gap-1.5 rounded-[13px] border border-[#e6e7ee] bg-white px-3 py-3 text-[13.5px] font-bold text-[#374151] transition enabled:hover:border-[#c4b5fd] enabled:hover:text-[#7c3aed] disabled:opacity-50"
+            className={`flex items-center justify-center gap-1.5 rounded-[13px] ${GLASS_BTN} px-3 py-3 text-[13.5px] font-bold text-[#374151] transition enabled:hover:border-[#c4b5fd] enabled:hover:text-[#7c3aed] disabled:opacity-50`}
           >
             <PrintIcon size={15} />
             พิมพ์

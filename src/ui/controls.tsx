@@ -8,7 +8,24 @@ export const ACCENT_GRAD = 'linear-gradient(100deg,#6c4af9 0%,#744ff8 15%,#8559f
 // iOS-material frosted glass for every floating surface (popovers + toast). Recipe
 // pixel-measured from an iMessage reference (white tint + heavy backdrop blur + saturation
 // boost). Single source of truth — tune the frost here and all glass surfaces follow.
-export const GLASS_POPOVER = 'bg-white/60 backdrop-blur-[20px] backdrop-saturate-[1.8]'
+// `glass-lit` = mouse-following specular highlight (ui/glassLight.ts + index.css). It needs
+// the element to be positioned: GLASS_BTN carries `relative` (all button consumers are
+// static); GLASS_POPOVER consumers are already absolute/fixed — except the settings panel,
+// which adds `relative` itself.
+export const GLASS_POPOVER = 'glass-lit bg-white/60 backdrop-blur-[20px] backdrop-saturate-[1.8]'
+
+// Glass-look buttons. Buttons mostly sit on white cards where backdrop-filter has nothing
+// to blur, so the glass reads through styling instead: a translucent vertical-gradient fill,
+// an inset top highlight (the glass edge catching light — the key cue), a translucent border,
+// and a soft lift shadow. Single source of truth like GLASS_POPOVER.
+export const GLASS_BTN =
+  'relative glass-lit border border-white/70 bg-gradient-to-b from-white/85 to-[#eef0f8]/60 shadow-[0_2px_8px_rgba(17,24,39,0.07),inset_0_1px_0_rgba(255,255,255,0.95)] backdrop-blur-[8px]'
+// selected state for light-purple (tinted) actives — same recipe, purple glass
+export const GLASS_BTN_ON =
+  'relative glass-lit border border-[#7c3aed]/60 bg-gradient-to-b from-[#ede9fe]/85 to-[#e2d9fd]/60 shadow-[0_2px_10px_rgba(124,58,237,0.16),inset_0_1px_0_rgba(255,255,255,0.85)] backdrop-blur-[8px]'
+// brand-gradient actives keep ACCENT_GRAD; this shadow adds the inset top highlight so the
+// solid purple reads as tinted glass instead of flat plastic
+export const GLASS_ACTIVE_SHADOW = 'shadow-[0_4px_14px_rgba(124,58,237,0.32),inset_0_1px_0_rgba(255,255,255,0.38)]'
 
 const inputCls =
   'w-full rounded-[13px] border border-[#e6e7ee] bg-white px-3.5 py-3 text-[14px] text-[#111827] outline-none transition placeholder:text-[#9ca3af] focus:border-[#7c3aed] focus:shadow-[0_0_0_3px_rgba(124,58,237,0.14)]'
@@ -149,12 +166,12 @@ export function SegGroup<T extends string>({
             aria-disabled={disabled}
             title={o.Icon ? o.label : undefined}
             className={
-              'flex flex-1 items-center justify-center whitespace-nowrap rounded-[11px] px-1.5 py-2.5 text-center text-[13px] font-bold transition ' +
+              'relative flex flex-1 items-center justify-center whitespace-nowrap rounded-[11px] px-1.5 py-2.5 text-center text-[13px] font-bold transition ' +
               (on
-                ? 'border border-transparent text-white shadow-[0_4px_14px_rgba(124,58,237,0.32)]'
+                ? `glass-lit border border-transparent text-white ${GLASS_ACTIVE_SHADOW}`
                 : disabled
-                  ? 'cursor-not-allowed border border-[#eef0f5] bg-[#f7f8fb] text-[#c7cbd6]'
-                  : 'border border-[#e6e7ee] bg-white text-[#6b7280] hover:border-[#c4b5fd] hover:text-[#111827]')
+                  ? 'cursor-not-allowed border border-[#eef0f5] bg-[#f7f8fb]/70 text-[#c7cbd6]'
+                  : `${GLASS_BTN} text-[#6b7280] hover:border-[#c4b5fd] hover:text-[#111827]`)
             }
             style={on ? { backgroundImage: ACCENT_GRAD } : undefined}
           >
@@ -209,8 +226,8 @@ export function ShapeMenu(props: ShapeGridProps) {
             key={o.id}
             onClick={() => (props.onChange as (v: string) => void)(o.id)}
             className={
-              'flex items-center gap-3 whitespace-nowrap rounded-[12px] border px-3.5 py-2.5 text-left text-[14.5px] font-bold transition ' +
-              (on ? 'border-[#7c3aed] bg-[#ede9fe] text-[#7c3aed]' : 'border-transparent text-[#6b7280] hover:bg-[#f3f4f8]')
+              'flex items-center gap-3 whitespace-nowrap rounded-[12px] px-3.5 py-2.5 text-left text-[14.5px] font-bold transition ' +
+              (on ? `${GLASS_BTN_ON} text-[#7c3aed]` : 'border border-transparent text-[#6b7280] hover:bg-white/60')
             }
           >
             <span className={'grid h-6 w-6 shrink-0 place-items-center ' + (on ? 'text-[#7c3aed]' : 'text-[#6b7280]')}>
