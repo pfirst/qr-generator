@@ -6,6 +6,7 @@ import { presetLogoSize, resolveLogo } from '../core/logoPreset'
 import { defaultStyle } from '../core/types'
 import type { RecentItem } from '../recent'
 import { HistoryIcon, TrashIcon } from '../ui/icons'
+import { GLASS_POPOVER } from '../ui/controls'
 
 async function thumbSvg(item: RecentItem): Promise<string | null> {
   try {
@@ -99,7 +100,7 @@ export function HistoryPopover({ recent, onLoad, onClear }: { recent: RecentItem
       {open && (
         <div
           role="menu"
-          className="absolute right-0 top-[calc(100%+10px)] z-50 w-[328px] max-w-[calc(100vw-2rem)] overflow-hidden rounded-[20px] border border-[#eef0f5] bg-white"
+          className={`absolute right-0 top-[calc(100%+10px)] z-50 w-[328px] max-w-[calc(100vw-2rem)] overflow-hidden rounded-[20px] border border-[#eef0f5] ${GLASS_POPOVER}`}
           style={{ boxShadow: 'var(--shadow-pop)', transformOrigin: 'top right', animation: 'popIn .16s cubic-bezier(.22,.9,.3,1) both' }}
         >
           <div className="flex items-center justify-between border-b border-[#eef0f5] px-3.5 py-3">

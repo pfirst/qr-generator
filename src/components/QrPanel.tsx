@@ -6,7 +6,7 @@ import { composeFramedSvg, FRAME_TEMPLATES, frameThumb } from '../core/frames'
 import { CTA_FONTS, loadPreviewFonts } from '../core/fonts'
 import { FRAME_GLYPHS } from '../ui/shapeGlyphs'
 import { Card, SectionHead } from '../ui/surfaces'
-import { ACCENT_GRAD, ColorRow, SectionLabel, SegGroup, ShapeMenu, Toggle } from '../ui/controls'
+import { ACCENT_GRAD, ColorRow, GLASS_POPOVER, SectionLabel, SegGroup, ShapeMenu, Toggle } from '../ui/controls'
 import { LogoSettingsBody } from './LogoSettings'
 import {
   CellsIcon,
@@ -142,7 +142,7 @@ function FontPicker({ value, onChange }: { value: string; onChange: (id: string)
             ref={panelRef}
             data-qr-float
             style={panelStyle}
-            className="z-[60] flex flex-col gap-1 overflow-y-auto rounded-[12px] border border-[#eef0f5] bg-white p-1.5 shadow-[0_16px_44px_rgba(17,24,39,0.20)]"
+            className={`z-[60] flex flex-col gap-1 overflow-y-auto rounded-[12px] border border-[#eef0f5] ${GLASS_POPOVER} p-1.5 shadow-[0_16px_44px_rgba(17,24,39,0.20)]`}
           >
             {CTA_FONTS.map((f) => {
               const on = value === f.id
@@ -500,7 +500,7 @@ export function QrPanel({
         {/* shape pickers: dropdown anchored to the icon, Figma-style */}
         {on && isShape && (
           <div
-            className="absolute bottom-full left-1/2 z-50 mb-3 -translate-x-1/2 rounded-[18px] bg-white p-1.5 shadow-[0_20px_56px_rgba(17,24,39,0.22)]"
+            className={`absolute bottom-full left-1/2 z-50 mb-3 -translate-x-1/2 rounded-[18px] ${GLASS_POPOVER} p-1.5 shadow-[0_20px_56px_rgba(17,24,39,0.22)]`}
             style={{ animation: 'popIn .18s cubic-bezier(.2,.9,.3,1.2)' }}
           >
             <PopBody tab={t.id} style={style} patch={patchStyle} baseStyle={baseStyle} type={type} />
@@ -585,7 +585,7 @@ export function QrPanel({
           {open && !SHAPE_TABS.includes(open) && (
             <div className="absolute bottom-full left-0 right-0 z-50 mb-3 flex justify-center">
               <div
-                className="max-h-[64vh] w-max max-w-[356px] overflow-y-auto rounded-[22px] bg-white p-2.5 shadow-[0_20px_56px_rgba(17,24,39,0.22)]"
+                className={`max-h-[64vh] w-max max-w-[356px] overflow-y-auto rounded-[22px] ${GLASS_POPOVER} p-2.5 shadow-[0_20px_56px_rgba(17,24,39,0.22)]`}
                 style={{ animation: 'popIn .18s cubic-bezier(.2,.9,.3,1.2)' }}
               >
                 <PopBody tab={open} style={style} patch={patchStyle} baseStyle={baseStyle} type={type} />

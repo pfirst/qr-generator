@@ -5,6 +5,11 @@ import { SHAPE_GLYPHS, type GlyphKind } from './shapeGlyphs'
 // Blue-violet → purple → lavender → light blue (pixel-matched to reference button #11).
 export const ACCENT_GRAD = 'linear-gradient(100deg,#6c4af9 0%,#744ff8 15%,#8559f8 30%,#9d65fc 50%,#ae71fc 70%,#a089fc 85%,#8ea0fc 96%,#7eaefd 100%)'
 
+// iOS-material frosted glass for every floating surface (popovers + toast). Recipe
+// pixel-measured from an iMessage reference (white tint + heavy backdrop blur + saturation
+// boost). Single source of truth — tune the frost here and all glass surfaces follow.
+export const GLASS_POPOVER = 'bg-white/60 backdrop-blur-[20px] backdrop-saturate-[1.8]'
+
 const inputCls =
   'w-full rounded-[13px] border border-[#e6e7ee] bg-white px-3.5 py-3 text-[14px] text-[#111827] outline-none transition placeholder:text-[#9ca3af] focus:border-[#7c3aed] focus:shadow-[0_0_0_3px_rgba(124,58,237,0.14)]'
 
