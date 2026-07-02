@@ -6,7 +6,7 @@ import { composeFramedSvg, FRAME_TEMPLATES, frameThumb } from '../core/frames'
 import { CTA_FONTS, loadPreviewFonts } from '../core/fonts'
 import { FRAME_GLYPHS } from '../ui/shapeGlyphs'
 import { Card, SectionHead } from '../ui/surfaces'
-import { ACCENT_GRAD, ColorRow, GLASS_ACTIVE_SHADOW, GLASS_BTN, GLASS_BTN_ON, GLASS_POPOVER, SectionLabel, SegGroup, ShapeMenu, Toggle } from '../ui/controls'
+import { ACCENT_GRAD_SMALL, ColorRow, GLASS_ACTIVE_SHADOW, GLASS_BTN, GLASS_BTN_ON, GLASS_POPOVER, SectionLabel, SegGroup, ShapeMenu, Toggle } from '../ui/controls'
 import { LogoSettingsBody } from './LogoSettings'
 import {
   CellsIcon,
@@ -24,6 +24,9 @@ import {
   SlidersIcon,
   WarnIcon,
 } from '../ui/icons'
+
+// Client-only app — safe to read at module scope. Gates the preview-stage parallax.
+const REDUCED_MOTION = window.matchMedia('(prefers-reduced-motion: reduce)').matches
 
 // Three separate shape pickers (กรอบตา / จุดตา / จุด) like Figma, plus colour,
 // the logo, the CTA frame, and advanced settings.
@@ -188,30 +191,35 @@ function Swatches({ colors, value, onChange }: { colors: readonly string[]; valu
   )
 }
 
-// The CTA text/colour/font controls that appear once a frame is picked. They slide-down +
-// fade IN on every frame pick — including switching frame→frame — by keying the wrapper on
-// frameStyle so it remounts and replays. When the frame is cleared to 'none' they slide-up +
-// fade OUT, staying mounted through the exit animation (then unmount on animationend).
-function CtaControls({ frameStyle, children }: { frameStyle: FrameStyle; children: ReactNode }) {
-  const show = frameStyle !== 'none'
+// Controls that appear once a non-'none' value is picked (CTA frame, QR gradient, …).
+// They slide-down + fade IN on every pick — including switching value→value — by keying
+// the wrapper on the value so it remounts and replays. When cleared to 'none' they
+// slide-up + fade OUT, staying mounted through the exit animation (then unmount on
+// animationend).
+function SlideReveal({ value, children }: { value: string; children: ReactNode }) {
+  const show = value !== 'none'
   const [mounted, setMounted] = useState(show)
   const [phase, setPhase] = useState<'in' | 'out'>('in')
-  const lastFrame = useRef(frameStyle) // remember the frame so exit keeps its content/key
+  const lastValue = useRef(value) // remember the value so exit keeps its content/key
 
   useEffect(() => {
     if (show) {
-      lastFrame.current = frameStyle
+      lastValue.current = value
       setMounted(true)
       setPhase('in')
     } else if (mounted) {
       setPhase('out')
+      // Fallback unmount: in occluded/background tabs the browser defers animationend,
+      // which would leave the invisible (fill-mode both) exit content holding its space.
+      const t = window.setTimeout(() => setMounted(false), 400)
+      return () => clearTimeout(t)
     }
-  }, [show, frameStyle, mounted])
+  }, [show, value, mounted])
 
   if (!mounted) return null
-  // Enter: key by the live frame (remount → replay on each change). Exit: keep the last frame's
-  // key so the fading-out content doesn't swap mid-animation.
-  const animKey = phase === 'out' ? lastFrame.current : frameStyle
+  // Enter: key by the live value (remount → replay on each change). Exit: keep the last
+  // value's key so the fading-out content doesn't swap mid-animation.
+  const animKey = phase === 'out' ? lastValue.current : value
   return (
     <div
       key={animKey}
@@ -253,7 +261,7 @@ function PopBody({
     return (
       <div className="flex w-[286px] flex-col gap-4">
         <div>
-          <ColorRow label="สีจุด (Foreground)" value={style.fg} onChange={(v) => patch({ fg: v })} />
+          <ColorRow label="สีจุด" value={style.fg} onChange={(v) => patch({ fg: v })} />
           <Swatches colors={FG_PRESETS} value={style.fg} onChange={(v) => patch({ fg: v })} />
         </div>
         <div>
@@ -262,7 +270,7 @@ function PopBody({
         </div>
         <div className="border-t border-[#eef0f5] pt-3.5">
           <label className="flex cursor-pointer items-center justify-between">
-            <span className="text-[13px] font-bold text-[#374151]">กำหนดสีดวงตาแยก</span>
+            <span className="text-[13px] font-bold text-[#6b7280]">กำหนดสีดวงตาแยก</span>
             <Toggle on={style.useEyeColor} onChange={(v) => patch({ useEyeColor: v })} />
           </label>
           {style.useEyeColor && (
@@ -281,8 +289,8 @@ function PopBody({
                   key={id}
                   onClick={() => patch({ gradient: id })}
                   className={
-                    'flex cursor-pointer flex-col items-center gap-1.5 rounded-[11px] border py-2.5 text-[11px] font-bold transition ' +
-                    (on ? 'border-[#7c3aed] bg-[#ede9fe] text-[#7c3aed]' : 'border-[#e6e7ee] bg-white text-[#9ca3af] hover:border-[#c4b5fd]')
+                    'flex cursor-pointer flex-col items-center gap-1.5 rounded-[11px] py-2.5 text-[11px] font-bold transition ' +
+                    (on ? `${GLASS_BTN_ON} text-[#7c3aed]` : `${GLASS_BTN} text-[#9ca3af] hover:border-[#c4b5fd]`)
                   }
                 >
                   <Icon size={18} />
@@ -291,18 +299,16 @@ function PopBody({
               )
             })}
           </div>
-          {style.gradient !== 'none' && (
-            <>
-              <div className="mt-3.5 flex items-center gap-5">
-                <ColorRow label="เริ่ม" value={style.gradFrom} onChange={(v) => patch({ gradFrom: v })} />
-                <ColorRow label="จบ" value={style.gradTo} onChange={(v) => patch({ gradTo: v })} />
-              </div>
-              <div className="mt-3 flex items-start gap-2 rounded-[11px] border border-[#fdebc8] bg-[#fffaf0] px-3 py-2.5">
-                <WarnIcon size={14} className="mt-px shrink-0 text-[#f59e0b]" />
-                <span className="text-[11.5px] leading-[1.5] text-[#92733a]">ไล่เฉดอาจลดความคมชัด แนะนำทดสอบสแกนก่อนใช้จริง</span>
-              </div>
-            </>
-          )}
+          <SlideReveal value={style.gradient}>
+            <div className="mt-3.5 flex items-center gap-5">
+              <ColorRow label="เริ่ม" value={style.gradFrom} onChange={(v) => patch({ gradFrom: v })} />
+              <ColorRow label="จบ" value={style.gradTo} onChange={(v) => patch({ gradTo: v })} />
+            </div>
+            <div className="mt-3 flex items-start gap-2 rounded-[11px] border border-[#fdebc8] bg-[#fffaf0] px-3 py-2.5">
+              <WarnIcon size={14} className="mt-px shrink-0 text-[#f59e0b]" />
+              <span className="text-[11.5px] leading-[1.5] text-[#92733a]">ไล่เฉดอาจลดความคมชัด แนะนำทดสอบสแกนก่อนใช้จริง</span>
+            </div>
+          </SlideReveal>
         </div>
       </div>
     )
@@ -347,7 +353,7 @@ function PopBody({
             )
           })}
         </div>
-        <CtaControls frameStyle={style.frameStyle}>
+        <SlideReveal value={style.frameStyle}>
           <div className="mt-3.5 flex items-center gap-3">
             <input
               value={style.frameText}
@@ -361,7 +367,7 @@ function PopBody({
             <SectionLabel>ฟอนต์ป้าย</SectionLabel>
             <FontPicker value={style.frameFont} onChange={(id) => patch({ frameFont: id })} />
           </div>
-        </CtaControls>
+        </SlideReveal>
       </div>
     )
   }
@@ -429,6 +435,26 @@ export function QrPanel({
   const [open, setOpen] = useState<TabId | null>(null)
   const barRef = useRef<HTMLDivElement>(null)
 
+  // Mouse parallax on the preview stage: the halftone clouds drift against the cursor
+  // and the QR card leans with it (different magnitudes = depth). Feeds --px/--py
+  // (-1..1) as CSS vars; the layers consume them via calc() transforms. Timestamp
+  // throttle, not rAF — rAF pauses in occluded tabs (see ui/glassLight.ts).
+  const stageRef = useRef<HTMLDivElement>(null)
+  const stageT = useRef(0)
+  const onStageMove = (e: { clientX: number; clientY: number }) => {
+    const el = stageRef.current
+    const now = performance.now()
+    if (!el || REDUCED_MOTION || now - stageT.current < 16) return
+    stageT.current = now
+    const r = el.getBoundingClientRect()
+    el.style.setProperty('--px', (((e.clientX - r.left) / r.width) * 2 - 1).toFixed(3))
+    el.style.setProperty('--py', (((e.clientY - r.top) / r.height) * 2 - 1).toFixed(3))
+  }
+  const onStageLeave = () => {
+    stageRef.current?.style.setProperty('--px', '0')
+    stageRef.current?.style.setProperty('--py', '0')
+  }
+
   // Close any open popup/dropdown when the user clicks outside the toolbar (or presses Escape).
   // A fixed full-screen backdrop can't be used here: the surrounding Card has `backdrop-blur`
   // (a backdrop-filter), which makes `position:fixed` descendants resolve against the Card's box
@@ -493,7 +519,7 @@ export function QrPanel({
             'relative grid h-11 w-11 cursor-pointer place-items-center rounded-[13px] transition ' +
             (on ? `glass-lit border border-transparent text-white ${GLASS_ACTIVE_SHADOW}` : 'text-[#6b7280] hover:bg-[#f3f4f8] hover:text-[#15161c]')
           }
-          style={on ? { backgroundImage: ACCENT_GRAD } : undefined}
+          style={on ? ACCENT_GRAD_SMALL : undefined}
         >
           <t.Icon size={19} />
         </button>
@@ -516,34 +542,42 @@ export function QrPanel({
 
         {/* preview stage */}
         <div
+          ref={stageRef}
+          onMouseMove={onStageMove}
+          onMouseLeave={onStageLeave}
           className="relative flex min-h-[300px] items-center justify-center overflow-hidden rounded-[20px] border border-[#eceef6] p-6"
           style={{
             background:
               'radial-gradient(30% 60% at 18% 50%,rgba(150,106,235,0.16),transparent 72%),radial-gradient(30% 62% at 82% 52%,rgba(106,148,246,0.17),transparent 72%),radial-gradient(20% 34% at 88% 14%,rgba(244,168,208,0.10),transparent 70%),#f8f9fe',
           }}
         >
-          {/* purple halftone cloud — left */}
+          {/* purple halftone cloud — left (parallax: drifts against the cursor) */}
           <div
-            className="pointer-events-none absolute inset-0"
+            className="pointer-events-none absolute inset-0 transition-transform duration-300 ease-out"
             style={{
               backgroundImage: 'radial-gradient(rgba(140,100,222,0.26) 1px,transparent 1.6px)',
               backgroundSize: '13px 13px',
               maskImage: 'radial-gradient(36% 64% at 18% 50%,#000 5%,transparent 74%)',
               WebkitMaskImage: 'radial-gradient(36% 64% at 18% 50%,#000 5%,transparent 74%)',
+              transform: 'translate3d(calc(var(--px,0)*-10px),calc(var(--py,0)*-7px),0)',
             }}
           />
-          {/* blue halftone cloud — right */}
+          {/* blue halftone cloud — right (deeper layer: larger counter-drift) */}
           <div
-            className="pointer-events-none absolute inset-0"
+            className="pointer-events-none absolute inset-0 transition-transform duration-300 ease-out"
             style={{
               backgroundImage: 'radial-gradient(rgba(96,150,246,0.28) 1px,transparent 1.6px)',
               backgroundSize: '13px 13px',
               maskImage: 'radial-gradient(36% 66% at 82% 52%,#000 5%,transparent 74%)',
               WebkitMaskImage: 'radial-gradient(36% 66% at 82% 52%,#000 5%,transparent 74%)',
+              transform: 'translate3d(calc(var(--px,0)*-15px),calc(var(--py,0)*-10px),0)',
             }}
           />
           {hasData && svg ? (
-            <div className="relative rounded-[26px] border border-[#eef1f8] bg-white p-4" style={{ boxShadow: 'var(--shadow-qr)' }}>
+            <div
+              className="relative rounded-[26px] border border-[#eef1f8] bg-white p-4 transition-transform duration-300 ease-out"
+              style={{ boxShadow: 'var(--shadow-qr)', transform: 'translate3d(calc(var(--px,0)*5px),calc(var(--py,0)*4px),0)' }}
+            >
               <div
                 key={svg.length}
                 className="overflow-hidden rounded-[10px] leading-[0]"

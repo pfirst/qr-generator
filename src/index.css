@@ -250,7 +250,9 @@ textarea::placeholder {
   position: absolute;
   inset: 0;
   border-radius: inherit;
-  background: radial-gradient(140px circle at var(--mx) var(--my), rgba(255, 255, 255, 0.65), transparent 62%);
+  /* wide, soft spotlight — sized to match motion.page's viewport-wide glow proportionally
+     (their ~1600px radius on a 1470px viewport ≈ 400px on our ~330px popovers) */
+  background: radial-gradient(400px circle at var(--mx) var(--my), rgba(255, 255, 255, 0.55), transparent 75%);
   opacity: 0;
   transition: opacity 0.3s ease;
   pointer-events: none;

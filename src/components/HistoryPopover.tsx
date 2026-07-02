@@ -6,7 +6,7 @@ import { presetLogoSize, resolveLogo } from '../core/logoPreset'
 import { defaultStyle } from '../core/types'
 import type { RecentItem } from '../recent'
 import { HistoryIcon, TrashIcon } from '../ui/icons'
-import { GLASS_BTN, GLASS_BTN_ON, GLASS_POPOVER } from '../ui/controls'
+import { ACCENT_GRAD_SMALL, GLASS_BTN, GLASS_BTN_ON, GLASS_POPOVER } from '../ui/controls'
 
 async function thumbSvg(item: RecentItem): Promise<string | null> {
   try {
@@ -91,7 +91,7 @@ export function HistoryPopover({ recent, onLoad, onClear }: { recent: RecentItem
           <HistoryIcon size={18} />
         </span>
         {recent.length > 0 && (
-          <span className="grid h-5 min-w-[20px] place-items-center rounded-full px-1.5 text-[11px] font-extrabold leading-none text-white" style={{ backgroundImage: 'var(--grad-brand)' }}>
+          <span className="grid h-5 min-w-[20px] place-items-center rounded-full px-1.5 text-[11px] font-extrabold leading-none text-white" style={ACCENT_GRAD_SMALL}>
             {recent.length}
           </span>
         )}
@@ -140,7 +140,7 @@ export function HistoryPopover({ recent, onLoad, onClear }: { recent: RecentItem
                     )}
                   </div>
                   <div className="min-w-0 flex-1">
-                    <span className="inline-block rounded-[6px] px-1.5 py-0.5 text-[9.5px] font-extrabold text-white" style={{ backgroundImage: 'var(--grad-brand)' }}>
+                    <span className="inline-block rounded-[6px] px-1.5 py-0.5 text-[9.5px] font-extrabold text-white" style={ACCENT_GRAD_SMALL}>
                       {r.typeLabel}
                     </span>
                     <div className="mt-1 truncate text-[12.5px] font-bold text-[#374151]">{r.preview}</div>

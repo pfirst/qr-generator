@@ -1,9 +1,19 @@
-import type { ComponentType, ReactNode } from 'react'
+import type { ComponentType, CSSProperties, ReactNode } from 'react'
 import type { BodyShape, EyeballShape, EyeFrameShape } from '../core/types'
 import { SHAPE_GLYPHS, type GlyphKind } from './shapeGlyphs'
 
 // Blue-violet → purple → lavender → light blue (pixel-matched to reference button #11).
 export const ACCENT_GRAD = 'linear-gradient(100deg,#6c4af9 0%,#744ff8 15%,#8559f8 30%,#9d65fc 50%,#ae71fc 70%,#a089fc 85%,#8ea0fc 96%,#7eaefd 100%)'
+
+// ACCENT_GRAD for SMALL squares (toolbar tabs, SegGroup, toggle, badges): on tiny elements
+// the gradient's blue tail (96–100%) compresses into a ~2px strip that reads as a colour
+// "cut" at the right edge. Enlarging the background and centring it samples the smooth
+// middle band instead; wide elements (download button, header) keep the full sweep.
+export const ACCENT_GRAD_SMALL: CSSProperties = {
+  backgroundImage: ACCENT_GRAD,
+  backgroundSize: '280% 100%',
+  backgroundPosition: 'center',
+}
 
 // iOS-material frosted glass for every floating surface (popovers + toast). Recipe
 // pixel-measured from an iMessage reference (white tint + heavy backdrop blur + saturation
@@ -173,7 +183,7 @@ export function SegGroup<T extends string>({
                   ? 'cursor-not-allowed border border-[#eef0f5] bg-[#f7f8fb]/70 text-[#c7cbd6]'
                   : `${GLASS_BTN} text-[#6b7280] hover:border-[#c4b5fd] hover:text-[#111827]`)
             }
-            style={on ? { backgroundImage: ACCENT_GRAD } : undefined}
+            style={on ? ACCENT_GRAD_SMALL : undefined}
           >
             {o.Icon ? <o.Icon size={20} /> : o.label}
           </button>
@@ -188,7 +198,7 @@ export function Toggle({ on, onChange }: { on: boolean; onChange: (v: boolean) =
     <button
       onClick={() => onChange(!on)}
       className="relative h-[25px] w-11 shrink-0 cursor-pointer rounded-[20px] border-none p-0 transition"
-      style={on ? { backgroundImage: ACCENT_GRAD, boxShadow: '0 3px 10px rgba(124,58,237,0.4)' } : { background: '#d8dae2' }}
+      style={on ? { ...ACCENT_GRAD_SMALL, boxShadow: '0 3px 10px rgba(124,58,237,0.4)' } : { background: '#d8dae2' }}
       role="switch"
       aria-checked={on}
     >
@@ -259,7 +269,7 @@ export function ColorRow({
         className="h-[38px] w-11 cursor-pointer rounded-[10px] border border-[#e6e7ee] bg-white p-1"
       />
       <div>
-        <div className="text-[13px] font-bold text-[#111827]">{label}</div>
+        <div className="text-[13px] font-bold text-[#6b7280]">{label}</div>
         <div className="font-mono text-[11px] uppercase text-[#9ca3af]">{value}</div>
       </div>
     </div>

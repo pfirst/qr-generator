@@ -4,7 +4,7 @@
 
 ## 🔵 In Progress
 
-- [ ] Mouse-following specular light on glass surfaces + parallax on the preview stage. New `ui/glassLight.ts`; `index.css`, `ui/controls.tsx`, `components/QrPanel.tsx`, `App.tsx`.
+_(none)_
 
 ## 📋 To Do
 
@@ -16,6 +16,11 @@ _(none)_
 
 ## ✅ Done
 
+- [x] 2026-07-02 — Glass specular glow widened to a soft 400px spotlight (proportional to motion.page's viewport-wide reference). `index.css`.
+- [x] 2026-07-02 — Small brand-gradient actives sample `ACCENT_GRAD`'s middle band via new `ACCENT_GRAD_SMALL` (fixes the colour "cut" strip at tiny buttons' edges). `ui/controls.tsx`, `components/{QrPanel,HistoryPopover}.tsx`.
+- [x] 2026-07-02 — Colour-popup labels use the standard gray (`#6b7280`); "สีจุด (Foreground)" → "สีจุด". `ui/controls.tsx` (`ColorRow`), `components/QrPanel.tsx`.
+- [x] 2026-07-02 — Gradient-controls reveal animates like the CTA frame (`CtaControls` generalized to `SlideReveal`, + background-tab unmount fallback); GRADIENTS picker glassified. `components/QrPanel.tsx`.
+- [x] 2026-07-02 — Mouse-following specular light on glass surfaces (`glass-lit`) + mouse parallax on the preview stage. New `ui/glassLight.ts`; `index.css`, `ui/controls.tsx`, `components/{QrPanel,CheckExport}.tsx`, `App.tsx`.
 - [x] 2026-07-02 — Glass-look styling on all buttons (shared `GLASS_BTN`/`GLASS_BTN_ON`/`GLASS_ACTIVE_SHADOW`). `ui/controls.tsx`, `components/{TypeChips,CheckExport,QrPanel,HistoryPopover,LogoUploader}.tsx`.
 - [x] 2026-07-02 — Frosted-glass (glassmorphism) on all floating popovers + toast via shared `GLASS_POPOVER`. `ui/controls.tsx`, `components/{QrPanel,HistoryPopover,Toast}.tsx`.
 - [x] 2026-07-01 — CTA-frame controls animate in/out on every frame change. `index.css`, `components/QrPanel.tsx`.
