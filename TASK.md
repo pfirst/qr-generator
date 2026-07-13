@@ -16,6 +16,7 @@ _(none)_
 
 ## ✅ Done
 
+- [x] 2026-07-13 — Import QR from a photo (header button → decode in-browser → route to social/url/text). `core/scan.ts`, `components/DataCard.tsx`, `App.tsx`.
 - [x] 2026-07-02 — Scroll/animation perf: drop visually-no-op backdrop-blur from buttons + cards (31→0 backdrop roots; popover frost kept), `will-change: transform` on parallax layers. `ui/{controls,surfaces}.tsx`, `components/QrPanel.tsx`.
 - [x] 2026-07-02 — Deploy to GitHub Pages via Actions instead of legacy Jekyll (build Vite → publish `dist/`); `base: '/qr-generator/'`. `.github/workflows/deploy.yml`, `vite.config.ts`.
 - [x] 2026-07-02 — Removed the mouse-following specular glow (deleted `ui/glassLight.ts` + `.glass-lit`); parallax kept. `index.css`, `ui/controls.tsx`, `components/{QrPanel,CheckExport}.tsx`, `App.tsx`.

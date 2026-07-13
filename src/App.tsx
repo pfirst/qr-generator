@@ -6,6 +6,8 @@ import { contrastScan, decodeRendered } from './core/verify'
 import { copyQRToClipboard, downloadQR, printQR, type ExportFormat } from './core/export'
 import { defaultFieldData, defaultStyle, type Ecc, type FieldData, type QRType } from './core/types'
 import { defaultPresetOn, presetLogoSize, resolveLogo } from './core/logoPreset'
+import { decodeImageFile, detectImport } from './core/scan'
+import { socialMeta } from './core/social'
 import { fieldErrors } from './core/validate'
 import { clearRecent, loadRecent, pushRecent, type RecentItem } from './recent'
 import { Header } from './components/Header'
@@ -65,6 +67,30 @@ export default function App() {
       reader.readAsDataURL(f)
     },
     [patchStyle, showToast],
+  )
+
+  // "อ่านจากรูป QR เดิม": decode an uploaded photo of an existing QR, then jump
+  // to the matching type with the exact decoded payload filled in.
+  const onImportQr = useCallback(
+    async (f: File) => {
+      const decoded = await decodeImageFile(f).catch(() => null)
+      if (!decoded) {
+        return showToast('อ่าน QR จากรูปไม่สำเร็จ — ลองครอปเฉพาะตัว QR หรือใช้รูปที่คมชัดขึ้น')
+      }
+      const route = detectImport(decoded)
+      if (route.type === 'social') {
+        setIn('social', { platform: route.platform, value: route.value })
+        showToast('อ่าน QR สำเร็จ — ลิงก์ ' + socialMeta(route.platform).label)
+      } else if (route.type === 'url') {
+        setIn('url', route.url)
+        showToast('อ่าน QR สำเร็จ — ได้ลิงก์เว็บไซต์')
+      } else {
+        setIn('text', route.text)
+        showToast('อ่าน QR สำเร็จ — เก็บเนื้อหาเดิมไว้เป็นข้อความ')
+      }
+      pickType(route.type)
+    },
+    [pickType, setIn, showToast],
   )
 
   // --- derived QR ---
@@ -216,6 +242,7 @@ export default function App() {
               patchStyle={patchStyle}
               onLogoFile={onLogoFile}
               onRemoveLogo={onRemoveLogo}
+              onImportFile={onImportQr}
             />
           </div>
 

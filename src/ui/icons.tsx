@@ -110,6 +110,12 @@ export const UploadIcon = (p: IconProps) => (
     <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12" />
   </Svg>
 )
+export const ScanQrIcon = (p: IconProps) => (
+  <Svg {...p}>
+    <path d="M3 7V5a2 2 0 0 1 2-2h2M17 3h2a2 2 0 0 1 2 2v2M21 17v2a2 2 0 0 1-2 2h-2M7 21H5a2 2 0 0 1-2-2v-2" />
+    <path d="M7 12h10" />
+  </Svg>
+)
 export const SettingsIcon = (p: IconProps) => (
   <Svg {...p}>
     <path d="M12 20a8 8 0 1 0 0-16 8 8 0 0 0 0 16Z" />
