@@ -149,5 +149,5 @@ export const defaultStyle = (): StyleSettings => ({
   frameFont: 'lineseed',
   ecc: 'M',
   size: 300,
-  margin: 4,
+  margin: 1,
 })
